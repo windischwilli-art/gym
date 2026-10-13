@@ -222,12 +222,39 @@ const FOODS = [ // pro 100 g: kcal, Protein, KH, Fett, Ballaststoffe, Zucker
  ["Tomaten",18,0.9,3.9,0.2,1.2,2.6],["Hüttenkäse",98,11,3.4,4.3,0,2.7],["Süßkartoffel, gekocht",76,1.4,17.7,0.1,2.5,5.7]
 ].map(([name,kcal,p,c,f,fib,sug])=>({name,kcal,p,c,f,fib,sug}));
 const MEALS=["Frühstück","Mittagessen","Abendessen","Snacks"];
-const TEMPLATES={
- "Push":["Bankdrücken","Schulterdrücken","Dips","Trizepsdrücken am Kabel"],
- "Pull":["Klimmzüge","Langhantelrudern","Bizepscurls","Face Pulls"],
- "Beine":["Kniebeugen","Rumänisches Kreuzheben","Ausfallschritte","Wadenheben"],
- "Ganzkörper":["Kniebeugen","Bankdrücken","Langhantelrudern","Plank (Sek.)"]
+// Equipment: gym = Fitnessstudio (alles), bb = Langhantel + Ständer, db = Kurzhanteln, kb = Kettlebell,
+// bench = Hantelbank, bar = Klimmzugstange, band = Widerstandsbänder. Körpergewicht geht immer.
+const EQUIP=[["gym","Fitnessstudio","Alle Geräte und Maschinen"],["db","Kurzhanteln",""],["bb","Langhantel + Ständer",""],["bench","Hantelbank",""],["kb","Kettlebell",""],["bar","Klimmzugstange",""],["band","Widerstandsbänder",""],["none","Nur Körpergewicht","Kein Equipment"]];
+// Je Übungsplatz: Kandidaten in Reihenfolge der Eignung, jeweils [Name, benötigtes Equipment]
+const SLOTS={
+ hpress:[["Bankdrücken",["bb","bench"]],["Kurzhantel-Bankdrücken",["db","bench"]],["Kurzhantel-Bodendrücken",["db"]],["Liegestütze",[]]],
+ vpress:[["Schulterdrücken",["bb"]],["Kurzhantel-Schulterdrücken",["db"]],["Kettlebell-Schulterdrücken",["kb"]],["Schulterdrücken mit Band",["band"]],["Pike-Liegestütze",[]]],
+ dips:[["Dips",["gym"]],["Dips am Stuhl",[]]],
+ tri:[["Trizepsdrücken am Kabel",["gym"]],["Kurzhantel-French-Press",["db"]],["Trizepsdrücken mit Band",["band"]],["Enge Liegestütze",[]]],
+ vpull:[["Klimmzüge",["bar"]],["Latzug mit Band",["band"]],["Rudern unter dem Tisch",[]]],
+ hpull:[["Langhantelrudern",["bb"]],["Kurzhantelrudern einarmig",["db"]],["Kettlebell-Rudern",["kb"]],["Rudern mit Band",["band"]],["Superman (Rückenstrecker)",[]]],
+ curl:[["Bizepscurls",["db"]],["Bizepscurls",["bb"]],["Kettlebell-Curls",["kb"]],["Bizepscurls mit Band",["band"]],["Chin-ups (enger Griff)",["bar"]],["Handtuch-Curls (isometrisch, Sek.)",[]]],
+ rear:[["Face Pulls",["gym"]],["Face Pulls mit Band",["band"]],["Kurzhantel-Reverse-Flys",["db"]],["Y-T-W-Heben am Boden",[]]],
+ squat:[["Kniebeugen",["bb"]],["Goblet Squats",["db"]],["Goblet Squats",["kb"]],["Kniebeugen mit Band",["band"]],["Kniebeugen (Körpergewicht)",[]]],
+ hinge:[["Rumänisches Kreuzheben",["bb"]],["Kurzhantel-Kreuzheben",["db"]],["Kettlebell Swings",["kb"]],["Good Mornings mit Band",["band"]],["Einbeiniges Kreuzheben",[]]],
+ lunge:[["Ausfallschritte",["db"]],["Bulgarian Split Squats",["bench"]],["Ausfallschritte",[]]],
+ calf:[["Wadenheben",[]]],
+ core:[["Plank (Sek.)",[]]],
+ glute:[["Hip Thrusts",["bb","bench"]],["Glute Bridges",[]]]
 };
+const PLANS={"Push":["hpress","vpress","dips","tri"],"Pull":["vpull","hpull","curl","rear"],"Beine":["squat","hinge","lunge","calf"],"Ganzkörper":["squat","hpress","hpull","core"]};
+const PLANS_HOME={"Oberkörper":["hpress","hpull","vpress","vpull","tri"],"Unterkörper":["squat","hinge","lunge","glute","calf"],"Ganzkörper":["squat","hpress","hpull","hinge","core"]};
+function hasEq(req,eq){return eq.includes("gym")||req.every(r=>eq.includes(r))}
+function pickEx(slot,eq){const c=SLOTS[slot].find(([n,req])=>hasEq(req,eq));return c?c[0]:SLOTS[slot][SLOTS[slot].length-1][0]}
+function buildTemplates(eq){
+ eq=eq&&eq.length?eq:["gym"];
+ const full=eq.includes("gym")||(eq.includes("bb")&&eq.includes("bench"));
+ const src=full?PLANS:PLANS_HOME,out={};
+ for(const[k,slots]of Object.entries(src)){const names=[];slots.forEach(s=>{const n=pickEx(s,eq);if(!names.includes(n))names.push(n)});out[k]=names}
+ return out;
+}
+const equipLabel=eq=>(eq&&eq.length?eq:["gym"]).map(k=>(EQUIP.find(e=>e[0]===k)||[k,k])[1]).join(", ");
+let TEMPLATES=buildTemplates(["gym"]);
 const RUNTYPES=["Locker","Tempo","Intervalle","Langer Lauf"];
 
 const iso=d=>{const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
@@ -599,7 +626,7 @@ function viewKraft(){
    ${x.sets.map((s,si)=>`<div class="setrow"><span class="setno">${si+1}</span><input inputmode="decimal" aria-label="${x.e} Satz ${si+1} kg" data-set="${xi}-${si}-kg" value="${s.kg}"><input inputmode="numeric" aria-label="${x.e} Satz ${si+1} Wiederholungen" data-set="${xi}-${si}-reps" value="${s.reps}"><button class="check" aria-pressed="${s.done}" aria-label="Satz erledigt" data-a="doneSet" data-x="${xi}" data-s="${si}">${I.ok}</button></div>`).join("")}</div>`).join("")}
   <div class="row between" style="background:var(--surface2);border-radius:12px;padding:10px 12px"><span>Satzpause <span class="num" style="font-size:22px;font-weight:700" id="rest">${REST.left?fmtTime(REST.left):"1:30"}</span></span><button class="btn sm ghost" style="background:var(--surface)" data-a="rest">${REST.left?"Stopp":"Start"}</button></div>
   <button class="btn block" data-a="saveWk">Training speichern</button></section>`
- :`<section class="card"><h2>Training starten</h2><p class="small muted" style="margin:0">Wähle eine Vorlage. Gewichte und Wiederholungen vom letzten Mal werden übernommen.</p>
+ :`<section class="card"><h2>Training starten</h2><p class="small muted" style="margin:0">Wähle eine Vorlage. Gewichte und Wiederholungen vom letzten Mal werden übernommen.</p><div class="row between" style="gap:8px"><span class="small"><span class="muted">Passend zu:</span> ${esc(equipLabel(S.profile.equip))}</span><button class="link small" data-go="coach">Ändern</button></div>
   <div class="grid2">${Object.keys(TEMPLATES).map(n=>`<button class="card tile lift" data-a="startWk" data-n="${n}"><span class="num" style="font-size:22px;font-weight:700">${n}</span><span class="small muted">${TEMPLATES[n].slice(0,2).join(", ")} …</span></button>`).join("")}</div></section>`;
  return header("Krafttraining","Kraft-Tracker")+`<div class="stack">${cur}
  <section class="card"><h2>Bestleistungen</h2><p class="small muted" style="margin:0">Geschätztes Maximalgewicht für 1 Wiederholung (Epley-Formel).</p>
@@ -617,7 +644,7 @@ function tips(){
  if(pMiss>25&&h>=12)out.push({k:"warn",t:`Dir fehlen noch ${r0(pMiss)} g Protein`,d:`Zum Beispiel ${r0(Math.min(500,pMiss/12*100)/50)*50} g Magerquark oder eine Portion Hähnchen mit Linsen.`});
  if(s.kcal>t.kcal+burnedOn(TODAY()))out.push({k:"warn",t:"Tagesziel überschritten",d:"Kein Problem für einen Tag. Über die Woche zählt der Durchschnitt."});
  if(lkm&&wkm>lkm*1.1)out.push({k:"warn",t:"Umfang steigt schnell",d:`Du bist ${r0((wkm/lkm-1)*100)} % über der Vorwoche. Mehr als 10 % Steigerung erhöht das Verletzungsrisiko.`});
- if(trains("strength")&&daysSince>=3&&daysSince<99)out.push({k:"",t:`Letztes Krafttraining vor ${daysSince} Tagen`,d:`Heute passt ${lastWk.name==="Push"?"Pull":lastWk.name==="Pull"?"Beine":"Push"} gut in den Rhythmus.`});
+ if(trains("strength")&&daysSince>=3&&daysSince<99)out.push({k:"",t:`Letztes Krafttraining vor ${daysSince} Tagen`,d:`Heute passt ${(()=>{const k=Object.keys(TEMPLATES),i=k.indexOf(lastWk.name);return k[(i+1)%k.length]})()} gut in den Rhythmus.`});
  const tdp=planDays()[(new Date().getDay()+6)%7];
  if(tdp.opt&&tdp.t==="Kräftigung")out.push({k:"",t:"Heute optional: 15 Minuten Kräftigung",d:"Rumpf, Hüfte und Waden stärken macht dich schneller und schützt Knie und Achillessehne. Zum Beispiel Planks, Glute Bridges, Wadenheben."});
  else if(tdp.opt)out.push({k:"",t:"Heute optional: "+tdp.t,d:tdp.d});
@@ -644,7 +671,9 @@ function planDays(){
   :[["Kraft","Push"],["Kraft","Pull"],["Bewegung","Spaziergang 30 Min.",1],["Kraft","Beine"],["Ruhetag","Regeneration"],["Kraft","Ganzkörper"],["Ruhetag","Regeneration"]];
  const NONE=[["Bewegung","Spaziergang 30 Min."],["Mobility","15 Min. Dehnen und Beweglichkeit",1],["Bewegung","Spaziergang 30 Min., Treppe statt Aufzug"],["Ruhetag","Erholung"],["Bewegung","Rad fahren oder Schwimmen",1],["Bewegung","Ausflug oder Wanderung"],["Ruhetag","Erholung"]];
  const src={both:P,run:RUN,strength:STR,none:NONE}[tr];
- return src.map(x=>({t:x[0],d:x[1],opt:!!x[2]}));
+ const home=!TEMPLATES.Push,MAP={Push:"Oberkörper",Pull:"Ganzkörper",Beine:"Unterkörper"};
+ const fix=t=>home?t.replace(/\b(Push|Pull|Beine)\b/g,m=>MAP[m]):t;
+ return src.map(x=>({t:x[0],d:fix(x[1]),opt:!!x[2]}));
 }
 function plan(){
  const P=planDays().map(x=>[x.t,x.d,x.opt]),today=(new Date().getDay()+6)%7;
@@ -669,6 +698,7 @@ function viewCoach(){
   <label class="f">Alltag & Training${sel("activity",[[1.2,"Sitzend, kaum Bewegung"],[1.375,"Leicht aktiv, 1–2 × Sport"],[1.55,"Aktiv, 3–5 × Sport"],[1.725,"Sehr aktiv, 6–7 × Sport"]],p.activity)}</label>
   <div class="grid2"><label class="f">Ziel${sel("goal",[["lose","Abnehmen"],["keep","Gewicht halten"],["gain","Muskelaufbau"]],p.goal)}</label><label class="f">Training${sel("train",[["both","Laufen + Kraft"],["run","Nur Laufen"],["strength","Nur Kraft"],["none","Kein festes Training"]],p.train||"both")}</label></div>
   ${trains("run")?`<label class="f">Lauf-Level${sel("level",[["easy","Einsteiger"],["mid","Fortgeschritten"],["pro","Ambitioniert"]],p.level||"easy")}</label>`:""}
+  ${trains("strength")?`<div class="f" style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.03em">Equipment<div class="row wrap" style="gap:6px">${EQUIP.map(([k,t])=>`<button class="chip" data-a="equip" data-v="${k}" aria-pressed="${(p.equip||["gym"]).includes(k)}">${t}</button>`).join("")}</div></div>`:""}
   <p class="small muted" style="margin:0">Die Werte sind Richtwerte. Bei Vorerkrankungen sprich Ziele mit Ärztin oder Arzt ab.</p>
   ${RESETARM?`<div class="small" style="font-weight:600">Profil und alle Einträge werden gelöscht. Danach startet die Einrichtung neu.</div><div class="grid2"><button class="btn ghost" data-a="resetNo">Abbrechen</button><button class="btn" style="background:var(--bad);color:var(--bg)" data-a="resetYes">Ja, neu starten</button></div>`:`<button class="link" style="text-align:left;color:var(--bad)" data-a="resetArm">Profil neu einrichten</button>`}</section></div>`;
 }
@@ -686,16 +716,16 @@ function weightCard(){
 
 // ---------- Einrichtung (erster Start) ----------
 let OB=null;
-const newOB=()=>({step:0,err:"",p:{name:"",sex:"",age:"",height:"",weight:"",targetWeight:"",activity:"",goal:"",level:"",train:""}});
+const newOB=()=>({step:0,err:"",p:{name:"",sex:"",age:"",height:"",weight:"",targetWeight:"",activity:"",goal:"",level:"",train:"",equip:[]}});
 const TRAINS=[["both","Laufen und Kraft","Die beste Kombination für Ausdauer und Verletzungsschutz"],["run","Nur Laufen","Mit optionaler Kräftigung im Plan"],["strength","Nur Krafttraining","Dazu Bewegung im Alltag statt Laufen"],["none","Kein festes Training","Fokus auf Ernährung und Alltagsbewegung"]];
 const ACTS=[[1.2,"Sitzend","Bürojob, kaum Bewegung"],[1.375,"Leicht aktiv","1–2 × Sport pro Woche"],[1.55,"Aktiv","3–5 × Sport pro Woche"],[1.725,"Sehr aktiv","6–7 × Sport oder körperliche Arbeit"]];
 const GOALS=[["lose","Abnehmen","Moderates Defizit, Kraft halten"],["keep","Gewicht halten","Fitter werden, Form halten"],["gain","Muskelaufbau","Leichter Überschuss, viel Protein"]];
 const LEVELS=[["easy","Einsteiger","Bis 15 km pro Woche"],["mid","Fortgeschritten","15–30 km pro Woche"],["pro","Ambitioniert","Über 30 km pro Woche"]];
 function choice(k,v,t,d){return`<button class="choice" data-a="obPick" data-k="${k}" data-v="${v}" aria-pressed="${String(OB.p[k])===String(v)}"><span style="font-weight:700">${t}</span>${d?`<span class="small muted">${d}</span>`:""}</button>`}
 function obField(k,label,unit,ph,mode="decimal"){return`<label class="f">${label}<div class="unit"><input id="ob-${k}" data-ob="${k}" inputmode="${mode}" placeholder="${ph}" value="${esc(OB.p[k])}" autocomplete="off">${unit?`<span>${unit}</span>`:""}</div></label>`}
-function obProfile(){const p=OB.p;return{name:p.name.trim(),sex:p.sex,age:num(p.age),height:num(p.height),weight:num(p.weight),targetWeight:p.targetWeight===""?"":num(p.targetWeight),activity:num(p.activity),goal:p.goal,level:p.level||"easy",train:p.train}}
+function obProfile(){const p=OB.p;return{name:p.name.trim(),sex:p.sex,age:num(p.age),height:num(p.height),weight:num(p.weight),targetWeight:p.targetWeight===""?"":num(p.targetWeight),activity:num(p.activity),goal:p.goal,level:p.level||"easy",train:p.train,equip:(p.train==="both"||p.train==="strength")?(p.equip.length?p.equip:["gym"]):(p.equip.length?p.equip:["none"])}}
 function viewOnboarding(){
- const s=OB.step,N=7;let h="",title="";
+ const s=OB.step,N=8;let h="",title="";
  if(s===0){title="Lass uns dich kennenlernen";h=`${CLOUD.status==="loading"?'<p class="small muted" style="margin:0">Ich suche nach deinem gespeicherten Fortschritt …</p>':""}<p class="muted" style="margin:0">Mit deinen Angaben berechne ich deinen Kalorienbedarf, deine Nährwert-Ziele und deinen Trainingsplan. Alles bleibt auf deinem iPhone.</p>${obField("name","Wie heißt du?","","Vorname","text")}<button class="link" style="text-align:left" data-a="restore">Du hast schon eine Sicherung? Wiederherstellen</button>`}
  else if(s===1){title="Geschlecht und Alter";h=`<div class="grid2">${choice("sex","m","Männlich")}${choice("sex","w","Weiblich")}</div>${obField("age","Alter","Jahre","z. B. 30","numeric")}<p class="small muted" style="margin:0">Beides brauche ich für deinen Grundumsatz.</p>`}
  else if(s===2){title="Größe und Gewicht";h=`${obField("height","Größe","cm","z. B. 178","numeric")}${obField("weight","Aktuelles Gewicht","kg","z. B. 82,5")}${obField("targetWeight","Zielgewicht (optional)","kg","z. B. 76")}`}
@@ -705,12 +735,16 @@ function viewOnboarding(){
   h=`<div class="stack" style="gap:10px">${TRAINS.map(x=>choice("train",x[0],x[1],x[2])).join("")}</div>
   ${tr==="run"?`<div class="tip"><i></i><div class="small">Kräftigung macht dich als Läufer schneller und schützt Knie, Hüfte und Achillessehne. Ich plane 2 × 15 Minuten pro Woche als optionale Einheit ein.</div></div>`:""}
   ${run?`<h2 style="margin-top:6px">Wie viel läufst du?</h2><div class="stack" style="gap:10px">${LEVELS.map(l=>choice("level",l[0],l[1],l[2])).join("")}</div>`:""}`}
+ else if(s===6){title="Welches Equipment hast du?";
+  h=`<p class="muted" style="margin:0">Ich stelle dein Krafttraining passend dazu zusammen. Mehrfachauswahl möglich.</p>
+  <div class="grid2">${EQUIP.map(([k,t,d])=>`<button class="choice" data-a="obEquip" data-v="${k}" aria-pressed="${OB.p.equip.includes(k)}" style="${k==="gym"||k==="none"?"grid-column:1/-1":""}"><span style="font-weight:700">${t}</span>${d?`<span class="small muted">${d}</span>`:""}</button>`).join("")}</div>
+  ${OB.p.equip.length&&!OB.p.equip.includes("gym")?`<div class="tip"><i></i><div class="small"><b>Deine Übungen:</b> ${Object.entries(buildTemplates(OB.p.equip)).map(([k,v])=>k+": "+v.slice(0,3).join(", ")).join(" · ")} …</div></div>`:""}`}
  else{const pr=obProfile(),t=targets(pr),bmi=pr.weight/((pr.height/100)**2);let eta="";
   if(pr.targetWeight){const d=pr.weight-pr.targetWeight;if(pr.goal==="lose"&&d>0)eta=`Mit etwa 0,5 kg pro Woche erreichst du ${de(pr.targetWeight)} kg in rund ${Math.ceil(d/0.5)} Wochen.`;else if(pr.goal==="gain"&&d<0)eta=`Mit etwa 0,25 kg pro Woche erreichst du ${de(pr.targetWeight)} kg in rund ${Math.ceil(-d/0.25)} Wochen.`}
   title=esc(pr.name)+", dein Plan steht";
   h=`<section class="card"><div><div class="eyebrow">Kalorien pro Tag</div><div class="num" style="font-size:48px;font-weight:700;line-height:1">${de(t.kcal)}</div></div>
    <div class="grid3"><div><div class="eyebrow" style="color:var(--prot)">Protein</div><div class="num" style="font-size:22px;font-weight:700">${t.prot} g</div></div><div><div class="eyebrow" style="color:var(--carb)">KH</div><div class="num" style="font-size:22px;font-weight:700">${t.carb} g</div></div><div><div class="eyebrow" style="color:var(--fat)">Fett</div><div class="num" style="font-size:22px;font-weight:700">${t.fat} g</div></div></div>
-   <div class="list"><div class="li"><div class="grow">Training</div><span class="num" style="font-size:18px">${TRAINLBL[pr.train]}</span></div>${t.km?`<div class="li"><div class="grow">Laufziel pro Woche</div><span class="num" style="font-size:18px">${t.km} km</span></div>`:""}<div class="li"><div class="grow">Grundumsatz</div><span class="num" style="font-size:18px">${de(t.bmr)} kcal</span></div><div class="li"><div class="grow">Gesamtumsatz</div><span class="num" style="font-size:18px">${de(t.tdee)} kcal</span></div><div class="li"><div class="grow">BMI</div><span class="num" style="font-size:18px">${de(r1(bmi))}</span></div></div>
+   <div class="list"><div class="li"><div class="grow">Training</div><span class="num" style="font-size:18px">${TRAINLBL[pr.train]}</span></div>${pr.train==="both"||pr.train==="strength"?`<div class="li" style="align-items:flex-start"><div style="flex:none">Equipment</div><span class="small grow" style="text-align:right">${esc(equipLabel(pr.equip))}</span></div>`:""}${t.km?`<div class="li"><div class="grow">Laufziel pro Woche</div><span class="num" style="font-size:18px">${t.km} km</span></div>`:""}<div class="li"><div class="grow">Grundumsatz</div><span class="num" style="font-size:18px">${de(t.bmr)} kcal</span></div><div class="li"><div class="grow">Gesamtumsatz</div><span class="num" style="font-size:18px">${de(t.tdee)} kcal</span></div><div class="li"><div class="grow">BMI</div><span class="num" style="font-size:18px">${de(r1(bmi))}</span></div></div>
    ${eta?`<p class="small" style="margin:0;font-weight:600">${eta}</p>`:""}</section>
    <p class="small muted" style="margin:0">${pr.height} cm · ${de(pr.weight)} kg · ${pr.age} Jahre · ${ACTS.find(a=>a[0]===pr.activity)[1]}. Du kannst alles später im Coach ändern.</p>`}
  return`<div class="obwrap"><div class="bar" aria-hidden="true"><i style="width:${(s+1)/N*100}%;background:var(--accent)"></i></div>
@@ -728,10 +762,13 @@ function obValidate(){const p=OB.p,n=k=>num(p[k]);
   case 3:return p.activity?"":"Bitte wähle aus, wie aktiv du bist.";
   case 4:return p.goal?"":"Bitte wähle dein Ziel.";
   case 5:if(!p.train)return"Bitte wähle, was du trainieren willst.";return(p.train==="both"||p.train==="run")&&!p.level?"Bitte wähle dein Lauf-Level.":"";
+  case 6:return p.equip.length?"":"Bitte wähle dein Equipment, oder „Nur Körpergewicht“.";
  }return""}
 function obNext(){const e=obValidate();OB.err=e;if(e){render(true);return}
  if(OB.step===2&&!OB.p.goal&&OB.p.targetWeight!==""){const w=num(OB.p.weight),t=num(OB.p.targetWeight);OB.p.goal=t<w-1?"lose":t>w+1?"gain":"keep"}
- OB.step++;render();window.scrollTo(0,0)}
+ OB.step++;if(OB.step===6&&!obStrength())OB.step++;render();window.scrollTo(0,0)}
+const obStrength=()=>OB.p.train==="both"||OB.p.train==="strength";
+function toggleEquip(list,v){if(v==="gym"||v==="none")return list.includes(v)?[]:[v];list=list.filter(x=>x!=="gym"&&x!=="none");return list.includes(v)?list.filter(x=>x!==v):[...list,v]}
 function obFinish(){const pr=obProfile();S={v:2,example:false,profile:pr,foods:[],runs:[],workouts:[],weights:[{date:TODAY(),kg:pr.weight}]};OB=null;save();tab="heute";render();window.scrollTo(0,0);toast("Willkommen, "+pr.name+"!")}
 
 // ---------- Rendern ----------
@@ -741,6 +778,7 @@ function render(keepScroll){
  if(HANDOFF){document.getElementById("app").innerHTML=viewHandoff();nav.hidden=true;return}
  if(!S){if(!OB)OB=newOB();document.getElementById("app").innerHTML=viewOnboarding();nav.hidden=true;if(keepScroll)window.scrollTo(0,y);return}
  nav.hidden=false;
+ TEMPLATES=buildTemplates(S.profile.equip);
  if(!tabOn(tab))tab="heute";
  document.getElementById("app").innerHTML=VIEWS[tab]();
  document.getElementById("tabs").innerHTML=TABS.filter(x=>tabOn(x[0])).map(([k,l,ic])=>`<button data-go="${k}" ${k===tab?'aria-current="page"':""}><span class="ti">${ic}</span><span>${l}</span></button>`).join("");
@@ -937,8 +975,10 @@ document.addEventListener("click",ev=>{
    if(!sets.length){toast("Hake mindestens einen Satz ab");break}
    S.workouts.push({id:uid(),date:TODAY(),name:CUR.name,min:Math.max(10,Math.round((Date.now()-CUR.start)/60000)),sets});CUR=null;stopRest();save();render();toast("Training gespeichert");break}
   case"delWk":S.workouts=S.workouts.filter(w=>w.id!==d.id);save();render(true);break;
+  case"obEquip":OB.p.equip=toggleEquip(OB.p.equip,d.v);OB.err="";render(true);break;
+  case"equip":{const n=toggleEquip(S.profile.equip||["gym"],d.v);if(!n.length){toast("Wähle mindestens eine Option");break}S.profile.equip=n;save();render(true);break}
   case"obPick":OB.p[d.k]=d.v;OB.err="";render(true);break;
-  case"obBack":OB.step--;OB.err="";render();window.scrollTo(0,0);break;
+  case"obBack":OB.step--;if(OB.step===6&&!obStrength())OB.step--;OB.err="";render();window.scrollTo(0,0);break;
   case"obNext":obNext();break;
   case"obFinish":obFinish();break;
   case"saveWeight":{const kg=num(wkg.value);if(!(kg>=35&&kg<=250)){toast("Bitte ein Gewicht zwischen 35 und 250 kg eingeben");break}

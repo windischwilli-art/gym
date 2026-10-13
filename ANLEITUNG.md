@@ -46,7 +46,7 @@
 ## 6. Updates einspielen
 
 Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` die Zeile
-`const VERSION = "formwerk-v2";` hochzählen (v2, v3, …). Die App holt sich das Update beim nächsten Öffnen.
+`const VERSION = "formwerk-v3";` hochzählen (v2, v3, …). Die App holt sich das Update beim nächsten Öffnen.
 
 ## Was die App kann
 
