@@ -36,17 +36,18 @@
 5. Ab jetzt kommen neue Läufe automatisch, sobald du die App öffnest.
    Tipp: In der Garmin-Connect-App Strava verknüpfen, dann landen auch Läufe von der Uhr hier.
 
-## 5. Deine Daten
+## 5. Deine Daten (Cloud-Sync wie in der Spanisch-App)
 
-- Alles bleibt auf deinem iPhone, es gibt keinen Server.
-- **Sichern:** Coach → Daten & Verbindungen → **Sichern** → in iCloud Drive speichern.
-- **Neues iPhone:** App installieren, bei der Einrichtung auf „Wiederherstellen“ tippen und die Sicherung wählen.
-- Wichtig: Löschst du die App vom Homescreen, sind die Daten weg. Vorher sichern.
+- Coach → Daten & Verbindungen → **Sync-Code erstellen**. Ab dann wird alles automatisch in der Cloud gespeichert.
+- Den Code gut aufschreiben (z. B. in Notizen).
+- **Anderes Gerät:** App öffnen, bei der Einrichtung „Schon einen Sync-Code?“ → Code eingeben → Laden.
+- Zusätzlich kannst du weiterhin eine Sicherungsdatei in iCloud Drive speichern.
+- Gespeichert wird im selben Firebase-Projekt wie die Spanisch-App (Sammlung `syncStates`, Einträge beginnen mit `formwerk_`).
 
 ## 6. Updates einspielen
 
 Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` die Zeile
-`const VERSION = "formwerk-v5";` hochzählen (v2, v3, …). Die App holt sich das Update beim nächsten Öffnen.
+`const VERSION = "formwerk-v6";` hochzählen (v2, v3, …). Die App holt sich das Update beim nächsten Öffnen.
 
 ## Was die App kann
 

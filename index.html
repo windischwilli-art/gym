@@ -173,6 +173,8 @@ nav.tabs svg{width:24px;height:24px}
 .streak svg{width:15px;height:15px}
 .streak.off{background:var(--surface2);color:var(--muted);box-shadow:none}
 .mono{font-family:ui-monospace,Menlo,monospace}
+.synccode{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--sec) 10%,var(--surface2));border:1.5px dashed color-mix(in srgb,var(--sec) 45%,transparent)}
+.synccode .mono{font-size:15px;font-weight:700;letter-spacing:.02em;white-space:nowrap;user-select:all;-webkit-user-select:all}
 .steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 .btn.sv,.btn.sv:not(.ghost){background:#FC4C02;color:#fff;box-shadow:0 6px 16px -8px #FC4C02}
 @media (prefers-reduced-motion:no-preference){
@@ -207,6 +209,8 @@ details summary{cursor:pointer;font-weight:600;color:var(--fg)}
 <input type="file" id="barcodefile" accept="image/*" capture="environment" hidden aria-label="Strichcode fotografieren">
 <input type="file" id="restorefile" accept="application/json,.json" hidden aria-label="Sicherung wiederherstellen">
 <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 
 <script>
 // ---------- Daten ----------
@@ -281,19 +285,104 @@ function seed(){
 let S=null; // null = noch nicht eingerichtet -> Onboarding
 try{const x=JSON.parse(localStorage.getItem("formwerk-v2"));if(x&&x.v===2)S=x}catch(e){}
 // ---------- Speicherung auf dem Gerät + Sicherung als Datei ----------
-const CLOUD={status:"local"};
+// ---------- Speicherung: Gerät + Cloud-Sync per Sync-Code (wie Español con Willi) ----------
+// Gleiches Firebase-Projekt wie die Spanisch-App. Firestore-Regel erlaubt syncStates/{code}.
+const FIREBASE_CONFIG={
+ apiKey:"AIzaSyAVFyFnfbTtGI4qDhKVW2y3XZEXWa6BP-M",
+ authDomain:"spanischapp-75a3f.firebaseapp.com",
+ projectId:"spanischapp-75a3f",
+ storageBucket:"spanischapp-75a3f.firebasestorage.app",
+ messagingSenderId:"733643089029",
+ appId:"1:733643089029:web:27e28ba9638e34a338f5ec"
+};
+const CLOUD={status:"local",msg:"",timer:null,busy:false,again:false,db:null,sentFood:{},confirm:null};
 let PENDINGRESTORE=null;
+const SYNC_ALPHA="0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+function genSyncCode(){const r=new Uint32Array(16);try{crypto.getRandomValues(r)}catch(e){for(let i=0;i<16;i++)r[i]=Math.floor(Math.random()*4294967295)}
+ let s="";for(let i=0;i<16;i++)s+=SYNC_ALPHA[r[i]%32];return s.match(/.{4}/g).join("-")}
+const normCode=c=>((String(c||"").toUpperCase().replace(/[^0-9A-Z]/g,"").match(/.{1,4}/g))||[]).join("-");
+const docId=(code,suffix)=>"formwerk_"+code.replace(/-/g,"")+(suffix?"_"+suffix:"");
+function cloudDb(){
+ if(CLOUD.db)return CLOUD.db;
+ try{if(typeof firebase==="undefined")return null;if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);CLOUD.db=firebase.firestore();return CLOUD.db}catch(e){return null}
+}
 function save(){if(S)S.updated=Date.now();
- try{localStorage.setItem("formwerk-v2",JSON.stringify(S))}catch(e){toast("Speicher voll. Erstelle eine Sicherung und lösche alte Einträge.")}}
-function cloudInit(){try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}}
-function cloudWipe(){}
+ try{localStorage.setItem("formwerk-v2",JSON.stringify(S))}catch(e){toast("Speicher voll. Lösche alte Einträge.")}
+ if(S&&S.syncCode){clearTimeout(CLOUD.timer);CLOUD.timer=setTimeout(cloudPush,1500)}}
+function saveLocalOnly(){try{localStorage.setItem("formwerk-v2",JSON.stringify(S))}catch(e){}}
+// Ernährung nach Jahr aufteilen, damit kein Dokument zu groß wird
+function foodYears(){const by={};(S.foods||[]).forEach(f=>{const y=String(f.date).slice(0,4);(by[y]=by[y]||[]).push(f)});return by}
+async function cloudPush(force){
+ CLOUD.timer=null;if(!S||!S.syncCode)return;
+ const db=cloudDb();if(!db){CLOUD.status="offline";paintCloud();return}
+ if(CLOUD.busy){CLOUD.again=true;return}
+ CLOUD.busy=true;CLOUD.status="saving";paintCloud();
+ try{
+  const col=db.collection("syncStates"),code=S.syncCode,by=foodYears(),years=Object.keys(by);
+  for(const y of years){const js=JSON.stringify(by[y]);if(force||CLOUD.sentFood[y]!==js){await col.doc(docId(code,"food"+y)).set({app:"formwerk",foods:by[y]});CLOUD.sentFood[y]=js}}
+  const{foods,syncCode,...rest}=S;
+  await col.doc(docId(code)).set({app:"formwerk",v:2,savedAt:S.updated||Date.now(),foodYears:years,data:JSON.parse(JSON.stringify(rest))});
+  S.lastSynced=S.updated;saveLocalOnly();
+  CLOUD.status="saved";CLOUD.msg="";
+ }catch(e){CLOUD.status="error"}
+ CLOUD.busy=false;paintCloud();
+ if(CLOUD.again){CLOUD.again=false;cloudPush()}
+}
+async function cloudFetch(code){
+ const db=cloudDb();if(!db)throw new Error("offline");
+ const col=db.collection("syncStates"),main=await col.doc(docId(code)).get();
+ if(!main.exists)return null;
+ const m=main.data(),foods=[];
+ for(const y of(m.foodYears||[])){const d=await col.doc(docId(code,"food"+y)).get();if(d.exists){const f=d.data().foods||[];foods.push(...f);CLOUD.sentFood[y]=JSON.stringify(f)}}
+ return{savedAt:m.savedAt||0,state:{...m.data,foods,syncCode:code,v:2}};
+}
+function applyCloud(st){
+ st.weights=st.weights||[];st.workouts=st.workouts||[];st.runs=st.runs||[];st.products=st.products||{};
+ st.updated=st.lastSynced=st.savedAt||st.updated||Date.now();
+ S=st;OB=null;saveLocalOnly();
+}
+async function cloudInit(){
+ try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}
+ if(!S||!S.syncCode){paintCloud();return}
+ // leise prüfen, ob auf einem anderen Gerät Neueres gespeichert wurde
+ try{const r=await cloudFetch(S.syncCode);
+  if(r&&r.savedAt>(S.lastSynced||0)&&r.savedAt>(S.updated||0)){r.state.savedAt=r.savedAt;applyCloud(r.state);render(true);toast("Neuester Stand geladen")}
+  else if(S.updated>(S.lastSynced||0))cloudPush();
+  else{CLOUD.status="saved";paintCloud()}
+ }catch(e){CLOUD.status="offline";paintCloud()}
+}
+async function cloudLoad(code){
+ code=normCode(code);if(code.replace(/-/g,"").length!==16){CLOUD.msg="Der Code hat 16 Zeichen, z. B. AB3K-9F2Q-XX7M-2QRT.";CLOUD.status="error";paintCloud();render(true);return}
+ CLOUD.status="loading";CLOUD.msg="";paintCloud();if(!S)render(true);
+ try{const r=await cloudFetch(code);
+  if(!r){CLOUD.status="error";CLOUD.msg="Zu diesem Code wurde nichts gefunden. Prüfe die Schreibweise.";paintCloud();if(!S)render(true);return}
+  r.state.savedAt=r.savedAt;applyCloud(r.state);CLOUD.confirm=null;CLOUD.status="saved";
+  tab="heute";render();window.scrollTo(0,0);toast("Fortschritt geladen"+(S.profile&&S.profile.name?". Hallo "+S.profile.name+"!":""));
+ }catch(e){CLOUD.status="error";CLOUD.msg="Keine Verbindung. Prüfe dein Internet und versuch es nochmal.";paintCloud();if(!S)render(true)}
+}
+function cloudWipe(){/* Cloud-Daten bleiben beim Zurücksetzen erhalten, damit der Sync-Code weiter funktioniert */}
 function cloudStatusHTML(){
- const t=S&&S.lastBackup,fresh=t&&Date.now()-t<14*864e5;
- const when=t?new Date(t).toLocaleDateString("de-DE",{day:"numeric",month:"short"}):"";
- if(PENDINGRESTORE)return`<div style="font-weight:600">Sicherung „${esc(PENDINGRESTORE.name)}“ einspielen?</div><div class="small muted">Deine aktuellen Daten auf diesem iPhone werden dabei ersetzt.</div><div class="grid2"><button class="btn ghost" data-a="restoreNo">Abbrechen</button><button class="btn" data-a="restoreYes">Einspielen</button></div>`;
- return`<div class="row between"><span style="font-weight:600">Datensicherung</span><span class="pill ${t?(fresh?"good":"warn"):"warn"}">${t?"zuletzt "+when:"noch keine"}</span></div>
- <div class="small muted">Deine Daten bleiben auf diesem iPhone. Sichere sie ab und zu in iCloud Drive, dann kannst du sie jederzeit oder auf einem neuen Gerät wiederherstellen.</div>
- <div class="grid2"><button class="btn ghost" data-a="backup">Sichern</button><button class="btn ghost" data-a="restore">Wiederherstellen</button></div>`;
+ const has=S&&S.syncCode;
+ const pill={local:["","aus"],saving:["acc","speichert …"],saved:["good","gespeichert"],loading:["acc","lädt …"],error:["warn","Fehler"],offline:["warn","offline"]}[has?CLOUD.status==="local"?"saved":CLOUD.status:CLOUD.status==="loading"||CLOUD.status==="error"?CLOUD.status:"local"]||["",""];
+ const msg=CLOUD.msg?`<div class="small" role="alert" style="color:var(--bad);font-weight:600">${esc(CLOUD.msg)}</div>`:"";
+ let h=`<div class="row between"><span style="font-weight:700;font-size:16px">Cloud-Sync</span><span class="pill ${pill[0]}">${pill[1]}</span></div>`;
+ if(has){
+  h+=`<div class="small muted">Dein Fortschritt wird automatisch gespeichert. Mit diesem Code lädst du ihn auf jedem Gerät.</div>
+  <div class="synccode"><span class="mono" id="synccode">${esc(S.syncCode)}</span><button class="btn ghost sm" data-a="syncCopy">Kopieren</button></div>
+  <button class="btn ghost block" data-a="syncNow">Jetzt synchronisieren</button>
+  ${CLOUD.status==="offline"?'<div class="small muted">Gerade offline. Deine Daten sind auf dem iPhone sicher und werden später hochgeladen.</div>':""}
+  ${CLOUD.status==="error"&&!CLOUD.msg?'<div class="small" style="color:var(--bad);font-weight:600">Speichern hat nicht geklappt. Tippe auf „Jetzt synchronisieren“.</div>':""}`;
+ }else{
+  h+=`<div class="small muted">Erstelle einen Sync-Code, dann wird dein Fortschritt in der Cloud gespeichert und du kannst ihn auf jedem Gerät laden.</div>
+  <button class="btn block" data-a="syncCreate">Sync-Code erstellen</button>`;
+ }
+ if(CLOUD.confirm)h+=`<div class="small" style="font-weight:600">Fortschritt von Code ${esc(CLOUD.confirm)} laden? Deine aktuellen Daten auf diesem Gerät werden ersetzt.</div>
+  <div class="grid2"><button class="btn ghost" data-a="syncLoadNo">Abbrechen</button><button class="btn" data-a="syncLoadYes">Laden</button></div>`;
+ else h+=`<div class="row"><input id="syncin" placeholder="Code eingeben" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn ghost" data-a="syncLoad">Laden</button></div>`;
+ h+=msg;
+ if(PENDINGRESTORE)h+=`<div style="font-weight:600">Sicherung „${esc(PENDINGRESTORE.name)}“ einspielen?</div><div class="small muted">Deine aktuellen Daten werden dabei ersetzt.</div><div class="grid2"><button class="btn ghost" data-a="restoreNo">Abbrechen</button><button class="btn" data-a="restoreYes">Einspielen</button></div>`;
+ else h+=`<div class="row between small"><span class="muted">Zusätzlich als Datei:</span><span class="row" style="gap:14px"><button class="link small" data-a="backup">Sichern</button><button class="link small" data-a="restore">Wiederherstellen</button></span></div>`;
+ return h;
 }
 function paintCloud(){const el=document.getElementById("cloud");if(el)el.innerHTML=cloudStatusHTML()}
 async function doBackup(){
@@ -652,7 +741,7 @@ function tips(){
  else if(tdp.opt)out.push({k:"",t:"Heute optional: "+tdp.t,d:tdp.d});
  if(trains("run")&&wkm<t.km*.5&&((new Date().getDay()+6)%7)>=3)out.push({k:"",t:"Noch Kilometer offen",d:`Bis Sonntag fehlen ${r1(t.km-wkm)} km. Ein lockerer Lauf von 40 Minuten bringt dich nah ans Ziel.`});
  if(s.fib<15&&h>=17)out.push({k:"",t:"Ballaststoffe ausbauen",d:"Gemüse, Linsen oder Vollkornbrot zum Abendessen bringen dich Richtung 30 g."});
- if((S.foods.length+S.runs.length+S.workouts.length)>=10&&(!S.lastBackup||Date.now()-S.lastBackup>14*864e5))out.push({k:"",t:"Zeit für eine Sicherung",d:"Sichere deine Daten im Coach unter „Daten & Verbindungen“ in iCloud Drive. So geht nichts verloren."});
+ if(!S.syncCode&&(S.foods.length+S.runs.length+S.workouts.length)>=5)out.push({k:"",t:"Fortschritt in der Cloud sichern",d:"Erstelle im Coach unter „Daten & Verbindungen“ einen Sync-Code. Dann ist alles automatisch gesichert und auf jedem Gerät verfügbar."});
  if(!out.length)out.push({k:"good",t:"Alles im Plan",d:"Ernährung und Training liegen heute im Zielbereich. Weiter so."});
  return out;
 }
@@ -728,7 +817,7 @@ function obField(k,label,unit,ph,mode="decimal"){return`<label class="f">${label
 function obProfile(){const p=OB.p;return{name:p.name.trim(),sex:p.sex,age:num(p.age),height:num(p.height),weight:num(p.weight),targetWeight:p.targetWeight===""?"":num(p.targetWeight),activity:num(p.activity),goal:p.goal,level:p.level||"easy",train:p.train,equip:(p.train==="both"||p.train==="strength")?(p.equip.length?p.equip:["gym"]):(p.equip.length?p.equip:["none"])}}
 function viewOnboarding(){
  const s=OB.step,N=8;let h="",title="";
- if(s===0){title="Lass uns dich kennenlernen";h=`${CLOUD.status==="loading"?'<p class="small muted" style="margin:0">Ich suche nach deinem gespeicherten Fortschritt …</p>':""}<p class="muted" style="margin:0">Mit deinen Angaben berechne ich deinen Kalorienbedarf, deine Nährwert-Ziele und deinen Trainingsplan. Alles bleibt auf deinem iPhone.</p>${obField("name","Wie heißt du?","","Vorname","text")}<button class="link" style="text-align:left" data-a="restore">Du hast schon eine Sicherung? Wiederherstellen</button>`}
+ if(s===0){title="Lass uns dich kennenlernen";h=`${CLOUD.status==="loading"?'<p class="small muted" style="margin:0">Ich suche nach deinem gespeicherten Fortschritt …</p>':""}<p class="muted" style="margin:0">Mit deinen Angaben berechne ich deinen Kalorienbedarf, deine Nährwert-Ziele und deinen Trainingsplan.</p>${obField("name","Wie heißt du?","","Vorname","text")}<div class="card" style="padding:14px;gap:8px"><div style="font-weight:700">Schon einen Sync-Code?</div><div class="small muted">Dann lade deinen Fortschritt von deinem anderen Gerät.</div><div class="row"><input id="syncin" placeholder="z. B. AB3K-9F2Q-XX7M-2QRT" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn ghost" data-a="syncLoad">Laden</button></div>${CLOUD.msg?`<div class="small" role="alert" style="color:var(--bad);font-weight:600">${esc(CLOUD.msg)}</div>`:""}<button class="link small" style="text-align:left" data-a="restore">Oder Sicherungsdatei wiederherstellen</button></div>`}
  else if(s===1){title="Geschlecht und Alter";h=`<div class="grid2">${choice("sex","m","Männlich")}${choice("sex","w","Weiblich")}</div>${obField("age","Alter","Jahre","z. B. 30","numeric")}<p class="small muted" style="margin:0">Beides brauche ich für deinen Grundumsatz.</p>`}
  else if(s===2){title="Größe und Gewicht";h=`${obField("height","Größe","cm","z. B. 178","numeric")}${obField("weight","Aktuelles Gewicht","kg","z. B. 82,5")}${obField("targetWeight","Zielgewicht (optional)","kg","z. B. 76")}`}
  else if(s===3){title="Wie aktiv bist du?";h=`<div class="stack" style="gap:10px">${ACTS.map(a=>choice("activity",a[0],a[1],a[2])).join("")}</div>`}
@@ -1002,6 +1091,13 @@ document.addEventListener("click",ev=>{
   case"copyCode":{const t=HANDOFF||"";const ok=()=>toast("Code kopiert. Jetzt Formwerk vom Homescreen öffnen.");
    try{navigator.clipboard.writeText(t).then(ok,()=>{selectCode();toast("Code markiert. Tippe auf Kopieren.")})}catch(e){selectCode()}break}
   case"backup":doBackup();break;
+  case"syncCreate":S.syncCode=genSyncCode();CLOUD.msg="";save();clearTimeout(CLOUD.timer);cloudPush(true);toast("Sync-Code erstellt. Notier ihn dir gut!");break;
+  case"syncCopy":{const c=S&&S.syncCode;if(!c)break;const ok=()=>toast("Code kopiert");try{navigator.clipboard.writeText(c).then(ok,()=>{const el=document.getElementById("synccode");if(el){const r=document.createRange();r.selectNodeContents(el);const sel=getSelection();sel.removeAllRanges();sel.addRange(r)}toast("Code markiert, tippe auf Kopieren")})}catch(e){}break}
+  case"syncNow":clearTimeout(CLOUD.timer);CLOUD.msg="";cloudPush(true);break;
+  case"syncLoad":{const c=normCode((document.getElementById("syncin")||{}).value);if(!c){CLOUD.msg="Bitte gib deinen Sync-Code ein.";paintCloud();if(!S)render(true);break}
+   if(!S)cloudLoad(c);else if(S.syncCode&&c===S.syncCode){clearTimeout(CLOUD.timer);cloudInit();toast("Das ist schon dein Code. Ich prüfe auf Neues.")}else{CLOUD.confirm=c;CLOUD.msg="";paintCloud()}break}
+  case"syncLoadYes":{const c=CLOUD.confirm;CLOUD.confirm=null;if(c)cloudLoad(c);break}
+  case"syncLoadNo":CLOUD.confirm=null;paintCloud();break;
   case"restore":document.getElementById("restorefile").click();break;
   case"restoreNo":PENDINGRESTORE=null;paintCloud();break;
   case"restoreYes":if(PENDINGRESTORE)applyRestore(PENDINGRESTORE);break;
@@ -1024,12 +1120,14 @@ document.addEventListener("change",ev=>{
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&SHEET)closeSheet();
  if(e.key==="Enter"&&!S&&e.target.dataset&&e.target.dataset.ob){e.preventDefault();obNext()}
+ if(e.key==="Enter"&&e.target.id==="syncin"){e.preventDefault();document.querySelector('[data-a="syncLoad"]').click()}
  if(e.key==="Enter"&&e.target.id==="eanin"){e.preventDefault();document.querySelector('[data-a="scanManual"]').click()}});
 function tick(){const w=document.getElementById("watch");if(w)w.textContent=fmtTime(wElapsed());paintLive()}
 function startRest(){stopRest();REST.left=90;REST.iv=setInterval(()=>{REST.left--;const r=document.getElementById("rest");if(r)r.textContent=fmtTime(Math.max(0,REST.left));if(REST.left<=0){stopRest();toast("Pause vorbei, nächster Satz");if(tab==="kraft")render(true)}},1000)}
 function stopRest(){clearInterval(REST.iv);REST.left=0}
 
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&W.running)wakeOn();if(!document.hidden&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false);if(document.hidden&&SHEET&&SHEET.scan&&SHEET.scan.stage==="live"){stopCam();SHEET.scan={stage:"start"};drawSheet()}});
+let LASTPULL=0;
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&W.running)wakeOn();if(document.hidden&&CLOUD.timer){clearTimeout(CLOUD.timer);cloudPush()}if(!document.hidden&&S&&S.syncCode&&!CUR&&!W.running&&!SHEET&&Date.now()-LASTPULL>60000){LASTPULL=Date.now();cloudInit()}if(!document.hidden&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false);if(document.hidden&&SHEET&&SHEET.scan&&SHEET.scan.stage==="live"){stopCam();SHEET.scan={stage:"start"};drawSheet()}});
 if("serviceWorker"in navigator)window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})});
 render();animate();
 cloudInit();

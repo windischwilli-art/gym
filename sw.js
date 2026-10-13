@@ -1,6 +1,6 @@
 // Formwerk Service Worker: macht die App offline nutzbar.
 // Bei einem Update der App diese Versionsnummer erhöhen.
-const VERSION = "formwerk-v5";
+const VERSION = "formwerk-v6";
 const SHELL = [
   "./",
   "./index.html",
@@ -11,7 +11,9 @@ const SHELL = [
   "./icons/apple-touch-icon.png"
 ];
 const CDN = [
-  "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"
+  "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js",
+  "https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js",
+  "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"
 ];
 
 self.addEventListener("install", event => {
@@ -57,6 +59,7 @@ self.addEventListener("fetch", event => {
   // Alles andere (Icons, Schriften, Scanner): aus dem Speicher, im Hintergrund aktualisieren
   const cacheable = url.origin === self.location.origin ||
     url.hostname === "cdn.jsdelivr.net" ||
+    url.hostname === "www.gstatic.com" ||
     url.hostname === "fonts.googleapis.com" ||
     url.hostname === "fonts.gstatic.com";
   if (!cacheable) return;
