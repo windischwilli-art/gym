@@ -586,6 +586,7 @@ function viewLaufen(){
  <section class="card" style="align-items:stretch"><div class="row between"><h2>Lauf aufzeichnen</h2><span class="pill ${W.running?"acc":""}" id="wstate">${W.running?"läuft":el?"pausiert":"bereit"}</span></div>
   <div class="watch ${W.running?"on":""}" id="watch">${fmtTime(el)}</div>
   <div class="grid2">${W.running?`<button class="btn ghost" data-a="wPause">Pause</button>`:`<button class="btn" data-a="wStart">${el?"Weiter":"Start"}</button>`}<button class="btn ghost" data-a="wStop" ${el?"":"disabled"}>Beenden</button></div>
+  ${!W.running&&!el?`<button class="btn ghost block" data-a="gRunWarm">Vorher aufwärmen (ca. 6 Min.)</button>`:""}
   <div class="gps"><div><div class="eyebrow">Distanz</div><div class="num" style="font-size:26px;font-weight:700"><span id="gkm">${de(r1(G.m/1000))}</span><span class="muted" style="font-size:14px"> km</span></div></div><div><div class="eyebrow">Pace</div><div class="num" style="font-size:26px;font-weight:700" id="gpace">${G.m>50?fmtTime(el/(G.m/1000)):"–"}</div></div><div><div class="eyebrow">GPS</div><div class="num" style="font-size:20px;font-weight:700;margin-top:4px" id="gsig">${gpsLabel()}</div></div></div>
   <p class="small muted" style="margin:0">Lass die App beim Laufen geöffnet, das Display bleibt an. Wird das iPhone gesperrt, pausiert die GPS-Messung.</p></section>
  <section class="card"><h2>Lauf speichern</h2>
@@ -621,12 +622,13 @@ function viewKraft(){
  const hist=[...S.workouts].sort((a,b)=>b.date.localeCompare(a.date));
  const pr={};S.workouts.forEach(w=>w.sets.forEach(s=>{if(s.kg>0){const v=e1rm(s.kg,s.reps);if(!pr[s.e]||v>pr[s.e].v)pr[s.e]={v,kg:s.kg,reps:s.reps}}}));
  const cur=CUR?`<section class="card"><div class="row between"><div><div class="eyebrow">Aktives Training</div><h2>${CUR.name}</h2></div><button class="link" data-a="cancelWk">Abbrechen</button></div>
-  ${CUR.ex.map((x,xi)=>`<div class="ex"><div class="row between"><span class="t" style="font-weight:700">${x.e}</span><button class="link small" data-a="addSet" data-x="${xi}">+ Satz</button></div>
+  <button class="btn block" data-a="guideResume">Geführt weitermachen</button>
+  ${CUR.ex.map((x,xi)=>`<div class="ex"><div class="row between"><button class="exname" data-a="gInfo" data-n="${esc(x.e)}">${esc(x.e)}<span class="q" aria-hidden="true">?</span></button><button class="link small" data-a="addSet" data-x="${xi}">+ Satz</button></div>
    <div class="sethead"><span>Satz</span><span>kg</span><span>Wdh.</span><span></span></div>
    ${x.sets.map((s,si)=>`<div class="setrow"><span class="setno">${si+1}</span><input inputmode="decimal" aria-label="${x.e} Satz ${si+1} kg" data-set="${xi}-${si}-kg" value="${s.kg}"><input inputmode="numeric" aria-label="${x.e} Satz ${si+1} Wiederholungen" data-set="${xi}-${si}-reps" value="${s.reps}"><button class="check" aria-pressed="${s.done}" aria-label="Satz erledigt" data-a="doneSet" data-x="${xi}" data-s="${si}">${I.ok}</button></div>`).join("")}</div>`).join("")}
   <div class="row between" style="background:var(--surface2);border-radius:12px;padding:10px 12px"><span>Satzpause <span class="num" style="font-size:22px;font-weight:700" id="rest">${REST.left?fmtTime(REST.left):"1:30"}</span></span><button class="btn sm ghost" style="background:var(--surface)" data-a="rest">${REST.left?"Stopp":"Start"}</button></div>
   <button class="btn block" data-a="saveWk">Training speichern</button></section>`
- :`<section class="card"><h2>Training starten</h2><p class="small muted" style="margin:0">Wähle eine Vorlage. Gewichte und Wiederholungen vom letzten Mal werden übernommen.</p><div class="row between" style="gap:8px"><span class="small"><span class="muted">Passend zu:</span> ${esc(equipLabel(S.profile.equip))}</span><button class="link small" data-go="coach">Ändern</button></div>
+ :`<section class="card"><h2>Training starten</h2><p class="small muted" style="margin:0">Wähle eine Vorlage. Du startest mit einem passenden Aufwärmprogramm und wirst mit Animationen durch jede Übung geführt.</p><div class="row between" style="gap:8px"><span class="small"><span class="muted">Passend zu:</span> ${esc(equipLabel(S.profile.equip))}</span><button class="link small" data-go="coach">Ändern</button></div>
   <div class="grid2">${Object.keys(TEMPLATES).map(n=>`<button class="card tile lift" data-a="startWk" data-n="${n}"><span class="num" style="font-size:22px;font-weight:700">${n}</span><span class="small muted">${TEMPLATES[n].slice(0,2).join(", ")} …</span></button>`).join("")}</div></section>`;
  return header("Krafttraining","Kraft-Tracker")+`<div class="stack">${cur}
  <section class="card"><h2>Bestleistungen</h2><p class="small muted" style="margin:0">Geschätztes Maximalgewicht für 1 Wiederholung (Epley-Formel).</p>
@@ -966,7 +968,7 @@ document.addEventListener("click",ev=>{
   case"saveRun":{const km=num(rkm.value),s=parseTime(rtime.value);if(!(km>0)||!(s>0)){toast("Distanz und Dauer prüfen");break}
    S.runs.push({id:uid(),date:rdate.value||TODAY(),km:r1(km),sec:s,type:rtype.value});W={running:false,start:0,acc:0,iv:null};G.m=0;save();render(true);toast("Lauf gespeichert · "+pace(s,km));break}
   case"delRun":S.runs=S.runs.filter(r=>r.id!==d.id);save();render(true);break;
-  case"startWk":startWorkout(d.n);break;
+  case"startWk":startWorkout(d.n);if(window.guideStart)window.guideStart();break;
   case"cancelWk":CUR=null;render();break;
   case"addSet":{const x=CUR.ex[+d.x],l=x.sets[x.sets.length-1];x.sets.push({kg:l.kg,reps:l.reps,done:false});render(true);break}
   case"doneSet":{const s=CUR.ex[+d.x].sets[+d.s];s.done=!s.done;if(s.done)startRest();render(true);break}
@@ -1033,5 +1035,6 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
+<script src="guide.js"></script>
 </body>
 </html>

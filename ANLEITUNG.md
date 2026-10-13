@@ -46,12 +46,14 @@
 ## 6. Updates einspielen
 
 Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` die Zeile
-`const VERSION = "formwerk-v3";` hochzählen (v2, v3, …). Die App holt sich das Update beim nächsten Öffnen.
+`const VERSION = "formwerk-v4";` hochzählen (v2, v3, …). Die App holt sich das Update beim nächsten Öffnen.
 
 ## Was die App kann
 
 - Kalorien & Nährwerte mit Live-Barcode-Scanner (Produktdaten von Open Food Facts)
 - Lauf-Tracker mit GPS, Pace, Wochenziel, automatischem Strava-Abgleich und Datei-Import (TCX/GPX)
-- Krafttraining mit Vorlagen, Sätzen, Pausentimer und Bestleistungen
+- Geführtes Krafttraining: passendes Aufwärmen, animierte Übungsanleitungen, Satz-für-Satz-Führung mit Pausentimer
+- Übungen passend zum eigenen Equipment, Bestleistungen und Verlauf
+- Aufwärmprogramm vor dem Laufen
 - Coach mit persönlichem Plan je nach Ziel und Trainingswahl, Gewichtsverlauf
 - Funktioniert offline (außer der Produktsuche beim ersten Scan eines neuen Produkts)
