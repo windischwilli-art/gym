@@ -22,6 +22,8 @@
   --bg:#EDF0EA; --surface:#FFFFFF; --surface2:#E2E7DF; --fg:#16201A; --muted:#5B695F; --line:#D2D9CE;
   --accent:#2747E0; --accent-fg:#FFFFFF; --accent-soft:#DCE2FB;
   --prot:#B9461A; --carb:#C08A0C; --fat:#0E8574; --good:#1E7A3C; --warn:#B26B00; --bad:#B42318;
+  --c-food:#F2542D; --c-run:#1F6FFF; --c-lift:#8338EC; --c-coach:#0E9F6E; --sec:var(--accent);
+  --hero1:#2747E0; --hero2:#8338EC; --hero3:#E6407A;
   --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --r:14px;
@@ -29,11 +31,11 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0E1310; --surface:#171E19; --surface2:#212A24; --fg:#E7EDE8; --muted:#97A59B; --line:#2B362F;
   --accent:#7D93FF; --accent-fg:#0B1030; --accent-soft:#232C55;
-  --prot:#F08A5D; --carb:#E9BA45; --fat:#3CC7B1; --good:#52C27A; --warn:#E5A63A; --bad:#F2786D; color-scheme:dark}}
+  --prot:#F08A5D; --carb:#E9BA45; --fat:#3CC7B1; --good:#52C27A; --warn:#E5A63A; --bad:#F2786D; --c-food:#FF7A52; --c-run:#5B95FF; --c-lift:#A970FF; --c-coach:#34D399; --hero1:#3550E8; --hero2:#7B35E0; --hero3:#D63A72; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0E1310; --surface:#171E19; --surface2:#212A24; --fg:#E7EDE8; --muted:#97A59B; --line:#2B362F;
   --accent:#7D93FF; --accent-fg:#0B1030; --accent-soft:#232C55;
-  --prot:#F08A5D; --carb:#E9BA45; --fat:#3CC7B1; --good:#52C27A; --warn:#E5A63A; --bad:#F2786D; color-scheme:dark}
+  --prot:#F08A5D; --carb:#E9BA45; --fat:#3CC7B1; --good:#52C27A; --warn:#E5A63A; --bad:#F2786D; --c-food:#FF7A52; --c-run:#5B95FF; --c-lift:#A970FF; --c-coach:#34D399; --hero1:#3550E8; --hero2:#7B35E0; --hero3:#D63A72; color-scheme:dark}
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;height:100%}
@@ -41,10 +43,15 @@ body{margin:0;min-height:100%;overscroll-behavior-y:none}
 img{max-width:100%}
 [hidden]{display:none!important}
 html,body{background:var(--bg);color:var(--fg)}
+body[data-sec="heute"]{--sec:var(--hero1)} body[data-sec="essen"]{--sec:var(--c-food)} body[data-sec="laufen"]{--sec:var(--c-run)} body[data-sec="kraft"]{--sec:var(--c-lift)} body[data-sec="coach"]{--sec:var(--c-coach)}
+body::before{content:"";position:fixed;inset:0 0 auto 0;height:340px;pointer-events:none;z-index:0;
+ background:radial-gradient(420px 260px at 0% 0%,color-mix(in srgb,var(--sec) 22%,transparent),transparent 70%),radial-gradient(360px 240px at 100% 10%,color-mix(in srgb,var(--hero2) 14%,transparent),transparent 70%);transition:background .4s}
+.app{position:relative;z-index:1}
 body{font-family:var(--body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
 .app{max-width:440px;margin:0 auto;padding:0 16px 110px}
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);margin-inline:-16px;padding-inline:16px;padding-block:14px 10px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
 .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+header.top .eyebrow{color:var(--sec)}
 h1{font-family:var(--display);font-weight:700;font-size:34px;line-height:1;margin:2px 0 0;letter-spacing:.01em;text-wrap:balance}
 h2{font-family:var(--display);font-weight:600;font-size:22px;margin:0;letter-spacing:.02em;text-wrap:balance}
 .num{font-family:var(--display);font-variant-numeric:tabular-nums;letter-spacing:.01em}
@@ -58,12 +65,15 @@ h2{font-family:var(--display);font-weight:600;font-size:22px;margin:0;letter-spa
 .grow{flex:1;min-width:0}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.btn{background:var(--accent);color:var(--accent-fg);border-radius:999px;padding:11px 18px;font-weight:600;font-size:15px}
+.btn{background:var(--accent);color:var(--accent-fg);border-radius:999px;padding:11px 18px;font-weight:600;font-size:15px;transition:transform .12s ease,filter .12s ease,box-shadow .2s}
+.btn:not(.ghost){background:linear-gradient(135deg,var(--sec),color-mix(in srgb,var(--sec) 55%,var(--hero2)));color:#fff;box-shadow:0 6px 16px -8px color-mix(in srgb,var(--sec) 80%,transparent)}
+.btn:active,.card[data-go]:active,.card[data-a]:active,.choice:active{transform:scale(.97)}
+.link{transition:opacity .15s}.link:active{opacity:.6}
 .btn.ghost{background:var(--surface2);color:var(--fg)}
 .btn.sm{padding:7px 13px;font-size:13px}
 .btn.block{width:100%}
 .btn:disabled{opacity:.45;cursor:default}
-.link{color:var(--accent);font-weight:600;font-size:14px}
+.link{color:var(--sec);font-weight:600;font-size:14px}
 .icon-btn{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
 .icon-btn:hover{background:var(--surface2)}
 input,select{font:inherit;font-size:16px;color:var(--fg);background:var(--surface2);border:1px solid transparent;border-radius:10px;padding:10px 12px;width:100%;min-width:0}
@@ -81,7 +91,7 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:60
 .li:first-child{border-top:0}
 .li .t{font-weight:600}
 .li .s{font-size:13px;color:var(--muted)}
-.bar{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.bar{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden}
 .bar>i{display:block;height:100%;border-radius:99px}
 .banner{background:var(--accent-soft);color:var(--fg);border-radius:var(--r);padding:10px 14px;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between}
 
@@ -89,7 +99,9 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:60
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
 nav.tabs .in{max-width:440px;margin:0 auto;display:grid;grid-auto-flow:column;grid-auto-columns:1fr}
 nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:11px;font-weight:600;color:var(--muted)}
-nav.tabs button[aria-current="page"]{color:var(--accent)}
+nav.tabs button[aria-current="page"]{color:var(--sec)}
+nav.tabs .ti{display:grid;place-items:center;padding:3px 16px;border-radius:999px;transition:background .25s}
+nav.tabs button[aria-current="page"] .ti{background:color-mix(in srgb,var(--sec) 16%,transparent)}
 nav.tabs svg{width:24px;height:24px}
 
 /* ring */
@@ -109,7 +121,7 @@ nav.tabs svg{width:24px;height:24px}
 
 /* stopwatch */
 .watch{font-family:var(--display);font-weight:700;font-size:72px;line-height:.95;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.01em}
-.watch.on{color:var(--accent)}
+.watch.on{color:var(--sec)}
 
 /* chart */
 .chart svg{width:100%;height:auto;display:block}
@@ -146,6 +158,34 @@ nav.tabs svg{width:24px;height:24px}
 .cam .scanline{position:absolute;left:12%;right:12%;top:50%;height:2px;background:#FF5A4E;box-shadow:0 0 8px #FF5A4E}
 @media (prefers-reduced-motion:no-preference){.cam .scanline{animation:sl 1.6s ease-in-out infinite alternate}@keyframes sl{from{top:32%}to{top:68%}}}
 .gps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}
+.hero{background:linear-gradient(140deg,var(--hero1) 0%,var(--hero2) 62%,var(--hero3) 120%);color:#fff;
+ --fg:#fff;--muted:rgba(255,255,255,.78);--surface2:rgba(255,255,255,.2);--accent:#fff;--bad:#FFC2BC;
+ --prot:#FFB08A;--carb:#FFE27A;--fat:#7DF2DE;box-shadow:0 18px 40px -22px var(--hero2)}
+.hero .btn:not(.ghost){background:#fff;color:var(--hero1);box-shadow:none}
+.hero .btn.ghost{background:rgba(255,255,255,.18);color:#fff}
+.tile{padding:12px;text-align:left;gap:6px}
+.tile.run{background:color-mix(in srgb,var(--c-run) 13%,var(--surface))}
+.tile.lift{background:color-mix(in srgb,var(--c-lift) 13%,var(--surface))}
+.tile.run .eyebrow{color:var(--c-run)} .tile.lift .eyebrow{color:var(--c-lift)}
+.tile .bar>i{background:var(--c-run)}
+.streak{display:inline-flex;align-items:center;gap:4px;padding:6px 11px;border-radius:999px;font-weight:700;font-size:14px;
+ background:linear-gradient(135deg,#FF8A3D,#F2542D);color:#fff;box-shadow:0 6px 14px -8px #F2542D;white-space:nowrap}
+.streak svg{width:15px;height:15px}
+.streak.off{background:var(--surface2);color:var(--muted);box-shadow:none}
+.mono{font-family:ui-monospace,Menlo,monospace}
+.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.btn.sv,.btn.sv:not(.ghost){background:#FC4C02;color:#fff;box-shadow:0 6px 16px -8px #FC4C02}
+@media (prefers-reduced-motion:no-preference){
+ .anim .stack>*{animation:rise .45s cubic-bezier(.2,.8,.2,1) both}
+ .anim .stack>*:nth-child(2){animation-delay:.05s}.anim .stack>*:nth-child(3){animation-delay:.1s}.anim .stack>*:nth-child(4){animation-delay:.15s}.anim .stack>*:nth-child(n+5){animation-delay:.2s}
+ @keyframes rise{from{opacity:0;transform:translateY(14px)}}
+ .anim .bar>i{animation:grow .9s cubic-bezier(.2,.8,.2,1) .15s both;transform-origin:left}
+ @keyframes grow{from{transform:scaleX(0)}}
+ .anim .ring .arc{animation:ringin 1.1s cubic-bezier(.2,.8,.2,1) .1s both}
+ @keyframes ringin{from{stroke-dashoffset:var(--c)}}
+ .streak svg{animation:flick 1.6s ease-in-out infinite alternate;transform-origin:50% 90%}
+ @keyframes flick{to{transform:scale(1.12) rotate(-4deg)}}
+}
 details summary{cursor:pointer;font-weight:600;color:var(--fg)}
 /* onboarding */
 .obwrap{display:flex;flex-direction:column;gap:18px;padding-block:28px 32px;min-height:calc(100vh - 20px)}
@@ -286,14 +326,109 @@ async function importFiles(files){
 function accountCard(){
  return`<section class="card"><h2>Daten & Verbindungen</h2>
  <div id="cloud" class="stack" style="gap:4px">${cloudStatusHTML()}</div>
- <div class="list"><div class="li"><div class="grow"><div class="t">Garmin</div><div class="s">Läufe als TCX- oder GPX-Datei importieren</div></div><span class="pill">Datei</span></div>
- <div class="li"><div class="grow"><div class="t">Strava</div><div class="s">Läufe als GPX-Datei importieren</div></div><span class="pill">Datei</span></div></div>
- <button class="btn ghost block" data-a="import">Läufe importieren</button>
+ <div id="strava" class="stack" style="gap:10px">${stravaHTML()}</div>
+ <div class="list"><div class="li"><div class="grow"><div class="t">Garmin</div><div class="s">Verknüpfe Garmin Connect mit Strava, dann kommen deine Uhr-Läufe automatisch hierher. Oder importiere TCX/GPX-Dateien.</div></div></div></div>
+ <button class="btn ghost block" data-a="import">Lauf-Dateien importieren</button>
  <details class="small muted"><summary>So exportierst du deine Läufe</summary><div class="stack" style="gap:6px;margin-top:8px">
  <div><b>Garmin Connect:</b> Am Computer connect.garmin.com öffnen, Aktivität öffnen, Zahnrad oben rechts, dann „Als TCX exportieren“.</div>
  <div><b>Strava:</b> Auf strava.com die Aktivität öffnen, auf die drei Punkte tippen, dann „GPX exportieren“.</div>
  <div>Die Datei in der Dateien-App speichern und hier importieren. Bereits importierte Läufe werden erkannt und nicht doppelt angelegt. Radfahrten und andere Sportarten werden übersprungen.</div></div></details></section>`;
 }
+
+// ---------- Strava ----------
+const SV_KEY="formwerk-strava",SV_REDIRECT=location.origin+location.pathname;
+let SV={};try{SV=JSON.parse(localStorage.getItem(SV_KEY))||{}}catch(e){}
+let SVUI={setup:false,busy:false,msg:""},HANDOFF=null;
+function svSave(){try{localStorage.setItem(SV_KEY,JSON.stringify(SV))}catch(e){}}
+const svConnected=()=>!!SV.refresh;
+const isStandalone=()=>{try{return navigator.standalone===true||matchMedia("(display-mode: standalone)").matches}catch(e){return false}};
+function svAuthorize(){
+ location.href="https://www.strava.com/oauth/authorize?client_id="+encodeURIComponent(SV.cid)+"&response_type=code&redirect_uri="+encodeURIComponent(SV_REDIRECT)+"&approval_prompt=auto&scope="+encodeURIComponent("read,activity:read_all")+"&state=formwerk";
+}
+async function svToken(params){
+ const r=await fetch("https://www.strava.com/oauth/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({client_id:SV.cid,client_secret:SV.secret,...params})});
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok||!j.access_token){const e=new Error("token");e.status=r.status;throw e}
+ SV.access=j.access_token;SV.refresh=j.refresh_token||SV.refresh;SV.exp=j.expires_at;
+ if(j.athlete)SV.name=[j.athlete.firstname,j.athlete.lastname].filter(Boolean).join(" ");
+ svSave();
+}
+async function svAccess(){if(SV.access&&SV.exp&&SV.exp*1000>Date.now()+60000)return SV.access;await svToken({grant_type:"refresh_token",refresh_token:SV.refresh});return SV.access}
+function svRunType(a){if(a.workout_type===2||a.distance>=14000||(a.moving_time||0)>=4500)return"Langer Lauf";if(a.workout_type===3)return"Tempo";if(a.workout_type===1)return"Tempo";return"Locker"}
+async function svSync(manual){
+ if(!svConnected()||SVUI.busy||!S)return;
+ SVUI.busy=true;SVUI.msg="";paintStrava();
+ try{
+  const tok=await svAccess(),after=SV.last?Math.floor(SV.last/1000)-3*86400:Math.floor(Date.now()/1000)-90*86400;
+  const all=[];
+  for(let page=1;page<=5;page++){
+   const r=await fetch(`https://www.strava.com/api/v3/athlete/activities?after=${after}&per_page=100&page=${page}`,{headers:{Authorization:"Bearer "+tok}});
+   if(r.status===401){SV.access=null;svSave();throw new Error("auth")}
+   if(r.status===429)throw new Error("rate");
+   if(!r.ok)throw new Error("http");
+   const arr=await r.json();all.push(...arr);if(arr.length<100)break;
+  }
+  let added=0;
+  for(const a of all){
+   const t=String(a.sport_type||a.type||"");if(!/Run/i.test(t))continue;
+   const src="strava:"+a.id;if(S.runs.some(x=>x.src===src))continue;
+   const km=(a.distance||0)/1000,sec=a.moving_time||a.elapsed_time||0;if(!(km>0.2&&sec>0))continue;
+   S.runs.push({id:uid(),date:String(a.start_date_local||a.start_date||"").slice(0,10)||TODAY(),km:r1(km),sec,type:svRunType(a),src,via:"Strava",title:a.name||""});added++;
+  }
+  SV.last=Date.now();svSave();if(added)save();
+  SVUI.msg=added?(added===1?"1 neuer Lauf":added+" neue Läufe"):"alles aktuell";
+  if(added)render(true);if(manual||added)toast(added?SVUI.msg+" von Strava":"Strava: alles aktuell");
+ }catch(e){
+  const bad=e.status===400||e.status===401;
+  SVUI.msg=e.message==="auth"||bad?"Strava-Anmeldung abgelaufen. Bitte neu verbinden.":e.message==="rate"?"Strava-Limit erreicht. Versuch es in 15 Minuten nochmal.":"Strava nicht erreichbar. Prüfe deine Internetverbindung.";
+  if(e.message==="auth"||bad){SV.refresh=null;SV.access=null;svSave()}
+  if(manual)toast(SVUI.msg);
+ }
+ SVUI.busy=false;paintStrava();
+}
+async function svExchange(code){
+ SVUI.busy=true;SVUI.msg="";paintStrava();
+ try{await svToken({code,grant_type:"authorization_code"});SV.pending=false;svSave();SVUI.busy=false;SVUI.setup=false;
+  toast("Strava verbunden"+(SV.name?": "+SV.name:""));render(true);svSync(true);return true}
+ catch(e){SVUI.busy=false;SVUI.msg=e.status===400||e.status===401?"Das hat nicht geklappt. Prüfe Client-ID und Secret, oder der Code ist abgelaufen. Melde dich nochmal bei Strava an.":"Strava nicht erreichbar. Prüfe deine Internetverbindung.";paintStrava();return false}
+}
+async function svCallback(){
+ const q=new URLSearchParams(location.search);if(q.get("state")!=="formwerk")return false;
+ const code=q.get("code"),err=q.get("error"),scope=q.get("scope")||"";
+ try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}
+ if(err||!code){toast("Strava-Verbindung abgebrochen");return true}
+ if(!/activity:read/.test(scope)){SVUI.msg="Bitte erlaube Strava, deine Aktivitäten zu lesen (Häkchen nicht entfernen).";paintStrava();toast(SVUI.msg);return true}
+ if(SV.cid&&SV.secret){await svExchange(code);return true}
+ HANDOFF=code;render();return true;
+}
+function viewHandoff(){
+ return`<div class="obwrap"><div><div class="eyebrow" style="color:#FC4C02">Strava</div><h1 style="font-size:38px;margin-top:6px">Fast geschafft</h1></div>
+ <p class="muted" style="margin:0">Strava hat dich hier in Safari statt in der Formwerk-App zurückgebracht. Kopiere diesen Code, öffne Formwerk vom Homescreen und füge ihn im Coach bei Strava ein.</p>
+ <div class="card"><div class="mono" id="hcode" style="font-size:15px;word-break:break-all;user-select:all;-webkit-user-select:all">${esc(HANDOFF)}</div><button class="btn sv block" data-a="copyCode">Code kopieren</button></div>
+ <p class="small muted" style="margin:0">Der Code ist nur kurz gültig. Füge ihn am besten gleich ein.</p></div>`;
+}
+function stravaHTML(){
+ const head=(pill,cls)=>`<div class="row between"><span style="font-weight:700;font-size:16px">Strava</span><span class="pill ${cls}">${pill}</span></div>`;
+ const msg=SVUI.msg&&!svConnected()?`<div class="small" role="alert" style="color:var(--bad);font-weight:600">${esc(SVUI.msg)}</div>`:"";
+ if(svConnected()){const t=SV.last?new Date(SV.last).toLocaleString("de-DE",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"noch nie";
+  return head(SVUI.busy?"gleicht ab …":"verbunden","good")+`<div class="small muted">${SV.name?esc(SV.name)+" · ":""}Letzter Abgleich: ${t}${SVUI.msg?" · "+esc(SVUI.msg):""}</div>
+  <div class="grid2"><button class="btn sv" data-a="svSync" ${SVUI.busy?"disabled":""}>Jetzt abgleichen</button><button class="btn ghost" data-a="svOff">Trennen</button></div>
+  <div class="small muted">Neue Läufe kommen automatisch, wenn du die App öffnest. Daten von Strava.</div>`}
+ if(SV.pending&&SV.cid)return head("fast fertig","acc")+`<div class="small muted">Hat Strava dich in Safari statt in der App zurückgebracht? Dann kopiere dort den Code und füge ihn hier ein.</div>
+  <div class="row"><input id="sv-code" placeholder="Code einfügen" autocomplete="off" autocapitalize="off"><button class="btn sv" data-a="svCode" ${SVUI.busy?"disabled":""}>Verbinden</button></div>${msg}
+  <div class="row between"><button class="link" data-a="svAuth">Nochmal bei Strava anmelden</button><button class="link" style="color:var(--muted)" data-a="svReset">Abbrechen</button></div>`;
+ if(SVUI.setup||SV.cid)return head(SV.cid?"getrennt":"einrichten","")+`<ol class="small steps">
+  <li>Am Computer <b>strava.com/settings/api</b> öffnen und eine App anlegen.</li>
+  <li>Name: Formwerk · Kategorie: Training · Website: <span class="mono">${esc(SV_REDIRECT)}</span></li>
+  <li>Bei <b>Authorization Callback Domain</b> eintragen: <span class="mono">${esc(location.hostname)}</span></li>
+  <li>Client-ID und Client-Secret von dort hier eintragen.</li></ol>
+  <div class="grid2"><label class="f">Client-ID<input id="sv-cid" inputmode="numeric" autocomplete="off" value="${esc(SV.cid||"")}"></label><label class="f">Client-Secret<input id="sv-secret" type="password" autocomplete="off" value="${esc(SV.secret||"")}"></label></div>${msg}
+  <button class="btn sv block" data-a="svStart">Mit Strava verbinden</button>
+  <div class="small muted">Client-ID und Secret bleiben nur auf diesem iPhone gespeichert.</div>`;
+ return head("nicht verbunden","")+`<div class="small muted">Verbinde Strava, dann kommen deine Läufe automatisch in die App. Auch von deiner Garmin-Uhr, wenn Garmin Connect mit Strava verknüpft ist.</div>
+  <button class="btn sv block" data-a="svSetup">Strava verbinden</button>`;
+}
+function paintStrava(){const el=document.getElementById("strava");if(el)el.innerHTML=stravaHTML()}
 
 // ---------- Berechnungen ----------
 function targets(p=S.profile){
@@ -328,6 +463,7 @@ const I={
  lift:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9v6M6 6v12M18 6v12M21 9v6M6 12h12"/></svg>',
  coach:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 15l3-4 3 2 5-6"/></svg>',
  x:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+ flame:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c1 3.5-1.5 5.2-2.6 7C8.2 11 8 12.4 8.6 14c-1.4-.6-2.2-2-2.3-3.4C4.8 12.3 4 14.3 4 16a8 8 0 0 0 16 0c0-4.6-3.4-6.9-4.6-9.6-.4 1.6-1.2 2.6-2.3 3.2.6-2.9-.2-5.7-1.1-7.6Z"/></svg>',
  ok:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>'
 };
 const TABS=[["heute","Heute",I.today],["essen","Ernährung",I.food],["laufen","Laufen",I.run],["kraft","Kraft",I.lift],["coach","Coach",I.coach]];
@@ -341,7 +477,7 @@ function macroBar(label,val,goal,color,unit="g"){
 }
 function ring(val,goal){
  const R=64,C=2*Math.PI*R,pct=Math.min(1,goal?val/goal:0),over=val>goal;
- return`<svg viewBox="0 0 150 150" aria-hidden="true"><circle cx="75" cy="75" r="${R}" fill="none" stroke="var(--surface2)" stroke-width="13"/><circle cx="75" cy="75" r="${R}" fill="none" stroke="${over?"var(--bad)":"var(--accent)"}" stroke-width="13" stroke-linecap="round" stroke-dasharray="${C*pct} ${C}"/></svg>`;
+ return`<svg viewBox="0 0 150 150" aria-hidden="true"><circle cx="75" cy="75" r="${R}" fill="none" stroke="var(--surface2)" stroke-width="13"/><circle cx="75" cy="75" r="${R}" fill="none" stroke="${over?"var(--bad)":"var(--accent)"}" stroke-width="13" stroke-linecap="round" class="arc" style="--c:${C}" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}" ${pct>0?"":'visibility="hidden"'}/></svg>`;
 }
 function exampleBanner(){return S.example?`<div class="banner"><span>Du siehst Beispieldaten zum Ausprobieren.</span><button class="link" data-a="clearEx">Löschen</button></div>`:""}
 function header(eye,title,right=""){return`<header class="top"><div><div class="eyebrow">${eye}</div><h1>${title}</h1></div>${right}</header>`}
@@ -355,11 +491,12 @@ function viewHeute(){
  const wkm=S.runs.filter(r=>inWeek(r.date)).reduce((a,r)=>a+r.km,0);
  const wk=S.workouts.filter(w=>inWeek(w.date)).length;
  const tip=tips()[0],td=planDays()[(new Date().getDay()+6)%7],tiles=[],btns=[];
- if(trains("run")){tiles.push(`<button class="card" style="background:var(--surface2);padding:12px;text-align:left" data-go="laufen"><span class="eyebrow">Laufen</span><span class="num" style="font-size:30px;font-weight:700">${de(r1(wkm))} <span style="font-size:16px" class="muted">/ ${t.km} km</span></span></button>`);btns.push(`<button class="btn ghost" data-go="laufen">Lauf starten</button>`)}
- if(trains("strength")){tiles.push(`<button class="card" style="background:var(--surface2);padding:12px;text-align:left" data-go="kraft"><span class="eyebrow">Krafttraining</span><span class="num" style="font-size:30px;font-weight:700">${wk} <span style="font-size:16px" class="muted">Einheiten</span></span></button>`);btns.push(`<button class="btn ghost" data-go="kraft">Training starten</button>`)}
+ if(trains("run")){tiles.push(`<button class="card tile run" data-go="laufen"><span class="eyebrow">Laufen</span><span class="num" style="font-size:30px;font-weight:700">${de(r1(wkm))} <span style="font-size:16px" class="muted">/ ${t.km} km</span></span><div class="bar"><i style="width:${Math.min(100,t.km?wkm/t.km*100:0)}%"></i></div></button>`);btns.push(`<button class="btn ghost" data-go="laufen">Lauf starten</button>`)}
+ if(trains("strength")){tiles.push(`<button class="card tile lift" data-go="kraft"><span class="eyebrow">Krafttraining</span><span class="num" style="font-size:30px;font-weight:700">${wk} <span style="font-size:16px" class="muted">Einheiten</span></span></button>`);btns.push(`<button class="btn ghost" data-go="kraft">Training starten</button>`)}
  const dstr=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long"});
- return header(dstr,S.profile.name?"Hallo "+esc(S.profile.name):"Dein Tag")+`<div class="stack">${exampleBanner()}
- <section class="card"><div class="ringwrap"><div class="ring">${ring(s.kcal,t.kcal)}<div class="c"><span class="big">${de(r0(Math.abs(left)))}</span><span class="small muted">${left>=0?"kcal übrig":"kcal drüber"}</span></div></div>
+ const st=streak();
+ return header(dstr,S.profile.name?"Hallo "+esc(S.profile.name):"Dein Tag",`<span class="streak ${st?"":"off"}" title="Tage in Folge mit Einträgen">${I.flame}${st} ${st===1?"Tag":"Tage"}</span>`)+`<div class="stack">${exampleBanner()}
+ <section class="card hero"><div class="ringwrap"><div class="ring">${ring(s.kcal,t.kcal)}<div class="c"><span class="big">${de(r0(Math.abs(left)))}</span><span class="small muted">${left>=0?"kcal übrig":"kcal drüber"}</span></div></div>
   <div class="stack" style="gap:8px"><div class="kv"><span class="muted">Ziel</span><b>${de(t.kcal)}</b></div><div class="kv"><span class="muted">Gegessen</span><b>${de(r0(s.kcal))}</b></div><div class="kv"><span class="muted">Verbrannt</span><b>+${de(r0(burn))}</b></div></div></div>
   ${macroBar("Protein",s.p,t.prot,"var(--prot)")}${macroBar("Kohlenhydrate",s.c,t.carb,"var(--carb)")}${macroBar("Fett",s.f,t.fat,"var(--fat)")}
   <div class="grid2"><button class="btn" data-a="addFood" data-meal="${suggestMeal()}">Essen erfassen</button><button class="btn ghost" data-a="scan" data-meal="${suggestMeal()}">Scannen</button></div></section>
@@ -369,6 +506,8 @@ function viewHeute(){
  ${btns.length||acts.length?`<section class="card"><h2>Aktivität heute</h2>${acts.length?`<div class="list">${acts.join("")}</div>`:`<p class="muted small" style="margin:0">Noch nichts eingetragen.</p>`}
   ${btns.length?`<div class="${btns.length>1?"grid2":"stack"}">${btns.join("")}</div>`:""}</section>`:""}</div>`;
 }
+function streak(){const days=new Set([...S.foods.map(f=>f.date),...S.runs.map(r=>r.date),...S.workouts.map(w=>w.date)]);
+ let n=0,d=new Date();if(!days.has(iso(d)))d.setDate(d.getDate()-1);while(days.has(iso(d))){n++;d.setDate(d.getDate()-1)}return n}
 function suggestMeal(){const h=new Date().getHours();return h<10?"Frühstück":h<14?"Mittagessen":h<17?"Snacks":"Abendessen"}
 
 function viewEssen(){
@@ -461,7 +600,7 @@ function viewKraft(){
   <div class="row between" style="background:var(--surface2);border-radius:12px;padding:10px 12px"><span>Satzpause <span class="num" style="font-size:22px;font-weight:700" id="rest">${REST.left?fmtTime(REST.left):"1:30"}</span></span><button class="btn sm ghost" style="background:var(--surface)" data-a="rest">${REST.left?"Stopp":"Start"}</button></div>
   <button class="btn block" data-a="saveWk">Training speichern</button></section>`
  :`<section class="card"><h2>Training starten</h2><p class="small muted" style="margin:0">Wähle eine Vorlage. Gewichte und Wiederholungen vom letzten Mal werden übernommen.</p>
-  <div class="grid2">${Object.keys(TEMPLATES).map(n=>`<button class="card" style="background:var(--surface2);padding:12px;text-align:left;gap:4px" data-a="startWk" data-n="${n}"><span class="num" style="font-size:22px;font-weight:700">${n}</span><span class="small muted">${TEMPLATES[n].slice(0,2).join(", ")} …</span></button>`).join("")}</div></section>`;
+  <div class="grid2">${Object.keys(TEMPLATES).map(n=>`<button class="card tile lift" data-a="startWk" data-n="${n}"><span class="num" style="font-size:22px;font-weight:700">${n}</span><span class="small muted">${TEMPLATES[n].slice(0,2).join(", ")} …</span></button>`).join("")}</div></section>`;
  return header("Krafttraining","Kraft-Tracker")+`<div class="stack">${cur}
  <section class="card"><h2>Bestleistungen</h2><p class="small muted" style="margin:0">Geschätztes Maximalgewicht für 1 Wiederholung (Epley-Formel).</p>
  ${Object.keys(pr).length?`<div class="list">${Object.entries(pr).sort((a,b)=>b[1].v-a[1].v).map(([e,p])=>`<div class="li"><div class="grow"><div class="t">${e}</div><div class="s">bester Satz ${de(p.kg)} kg × ${p.reps}</div></div><span class="num" style="font-size:20px;font-weight:700">${de(r0(p.v))} <span class="muted" style="font-size:14px">kg</span></span></div>`).join("")}</div>`:`<p class="small muted">Noch keine Daten.</p>`}</section>
@@ -599,15 +738,20 @@ function obFinish(){const pr=obProfile();S={v:2,example:false,profile:pr,foods:[
 const VIEWS={heute:viewHeute,essen:viewEssen,laufen:viewLaufen,kraft:viewKraft,coach:viewCoach};
 function render(keepScroll){
  const y=window.scrollY,nav=document.querySelector("nav.tabs");
+ if(HANDOFF){document.getElementById("app").innerHTML=viewHandoff();nav.hidden=true;return}
  if(!S){if(!OB)OB=newOB();document.getElementById("app").innerHTML=viewOnboarding();nav.hidden=true;if(keepScroll)window.scrollTo(0,y);return}
  nav.hidden=false;
  if(!tabOn(tab))tab="heute";
  document.getElementById("app").innerHTML=VIEWS[tab]();
- document.getElementById("tabs").innerHTML=TABS.filter(x=>tabOn(x[0])).map(([k,l,ic])=>`<button data-go="${k}" ${k===tab?'aria-current="page"':""}>${ic}<span>${l}</span></button>`).join("");
+ document.getElementById("tabs").innerHTML=TABS.filter(x=>tabOn(x[0])).map(([k,l,ic])=>`<button data-go="${k}" ${k===tab?'aria-current="page"':""}><span class="ti">${ic}</span><span>${l}</span></button>`).join("");
+ document.body.dataset.sec=tab;
  if(keepScroll)window.scrollTo(0,y);
  if(tab==="laufen")bindPace();
 }
-function go(t){tab=t;try{history.replaceState(null,"","#"+t)}catch(e){}render();window.scrollTo(0,0)}
+let ANIMT=null;
+function animate(){const a=document.getElementById("app");a.classList.add("anim");clearTimeout(ANIMT);ANIMT=setTimeout(()=>a.classList.remove("anim"),1400)}
+function go(t){tab=t;try{history.replaceState(null,"","#"+t)}catch(e){}render();animate();window.scrollTo(0,0)}
+function selectCode(){const el=document.getElementById("hcode");if(!el)return;const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}
 function toast(msg){const d=document.createElement("div");d.className="toast";d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),1800)}
 const num=v=>parseFloat(String(v).replace(",","."));
 function parseTime(s){const p=String(s).trim().split(":").map(Number);if(p.some(isNaN)||!p.length)return NaN;return p.reduce((a,v)=>a*60+v,0)}
@@ -802,6 +946,19 @@ document.addEventListener("click",ev=>{
   case"resetArm":RESETARM=true;render(true);break;
   case"resetNo":RESETARM=false;render(true);break;
   case"import":document.getElementById("impfile").click();break;
+  case"svSetup":SVUI.setup=true;SVUI.msg="";paintStrava();break;
+  case"svStart":{const cid=(document.getElementById("sv-cid").value||"").trim(),sec=(document.getElementById("sv-secret").value||"").trim();
+   if(!/^\d+$/.test(cid)){SVUI.msg="Die Client-ID besteht nur aus Ziffern.";paintStrava();break}
+   if(sec.length<20){SVUI.msg="Das Client-Secret ist zu kurz. Kopiere es vollständig von strava.com/settings/api.";paintStrava();break}
+   SV.cid=cid;SV.secret=sec;SV.pending=true;svSave();svAuthorize();break}
+  case"svAuth":svAuthorize();break;
+  case"svCode":{const c=(document.getElementById("sv-code").value||"").trim();if(c.length<10){SVUI.msg="Bitte den ganzen Code einfügen.";paintStrava();break}svExchange(c);break}
+  case"svReset":SV={};svSave();SVUI={setup:false,busy:false,msg:""};paintStrava();break;
+  case"svSync":svSync(true);break;
+  case"svOff":{const tok=SV.access;if(tok)fetch("https://www.strava.com/oauth/deauthorize",{method:"POST",headers:{Authorization:"Bearer "+tok}}).catch(()=>{});
+   SV={cid:SV.cid,secret:SV.secret};svSave();SVUI={setup:false,busy:false,msg:""};paintStrava();toast("Strava getrennt. Deine Läufe bleiben gespeichert.");break}
+  case"copyCode":{const t=HANDOFF||"";const ok=()=>toast("Code kopiert. Jetzt Formwerk vom Homescreen öffnen.");
+   try{navigator.clipboard.writeText(t).then(ok,()=>{selectCode();toast("Code markiert. Tippe auf Kopieren.")})}catch(e){selectCode()}break}
   case"backup":doBackup();break;
   case"restore":document.getElementById("restorefile").click();break;
   case"restoreNo":PENDINGRESTORE=null;paintCloud();break;
@@ -830,10 +987,11 @@ function tick(){const w=document.getElementById("watch");if(w)w.textContent=fmtT
 function startRest(){stopRest();REST.left=90;REST.iv=setInterval(()=>{REST.left--;const r=document.getElementById("rest");if(r)r.textContent=fmtTime(Math.max(0,REST.left));if(REST.left<=0){stopRest();toast("Pause vorbei, nächster Satz");if(tab==="kraft")render(true)}},1000)}
 function stopRest(){clearInterval(REST.iv);REST.left=0}
 
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&W.running)wakeOn();if(document.hidden&&SHEET&&SHEET.scan&&SHEET.scan.stage==="live"){stopCam();SHEET.scan={stage:"start"};drawSheet()}});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&W.running)wakeOn();if(!document.hidden&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false);if(document.hidden&&SHEET&&SHEET.scan&&SHEET.scan.stage==="live"){stopCam();SHEET.scan={stage:"start"};drawSheet()}});
 if("serviceWorker"in navigator)window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})});
-render();
+render();animate();
 cloudInit();
+svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
 </body>
 </html>
