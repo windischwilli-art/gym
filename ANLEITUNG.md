@@ -54,7 +54,7 @@
 ## 7. Updates einspielen
 
 Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` die Zeile
-`const VERSION = "formwerk-v11";` hochzählen (v10, v11, …) und in `index.html` die Zahl hinter `guide.js?v=` und `ai.js?v=` erhöhen. Die App holt sich das Update beim nächsten Öffnen.
+`const VERSION = "formwerk-v12";` hochzählen (v10, v11, …) und in `index.html` die Zahl hinter `guide.js?v=` und `ai.js?v=` erhöhen. Die App holt sich das Update beim nächsten Öffnen.
 
 ## Was die App kann
 
@@ -63,6 +63,7 @@ Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` d
 - Lauf-Tracker mit GPS, Pace, Wochenziel, automatischem Strava-Abgleich und Datei-Import (TCX/GPX)
 - Geführtes Krafttraining: passendes Aufwärmen, animierte Übungsanleitungen, Satz-für-Satz-Führung mit Pausentimer
 - Übungen passend zum eigenen Equipment, mit Alternativen zum Tauschen, eigenen Übungen und anpassbaren Vorlagen
+- Lauftrainer: Intervalle, Easy Run, Long Run mit Pace-Zonen, Steigerung, Entlastungswochen und geführten Einheiten
 - Aufwärmprogramm vor dem Laufen
 - Eigene Trainings frei zusammenstellen, nachtragen und als Vorlage speichern
 - Tagesbericht beim ersten Öffnen: Plan für heute, Wochenziel, Ernährung der letzten 7 Tage, Tipps (optional mit KI)

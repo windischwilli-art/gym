@@ -649,7 +649,8 @@ function targets(p=S.profile){
  const prot=Math.round(p.weight*(p.goal==="lose"?2:p.goal==="gain"?1.8:1.6));
  const fat=Math.round(kcal*0.27/9);
  const carb=Math.max(0,Math.round((kcal-prot*4-fat*9)/4));
- const tr=p.train||"both",km=(tr==="both"||tr==="run")?{easy:12,mid:25,pro:40}[p.level||"easy"]:0;
+ const tr=p.train||"both";let km=(tr==="both"||tr==="run")?{easy:12,mid:25,pro:40}[p.level||"easy"]:0;
+ try{if(km&&window.runWeekKm&&S&&p===S.profile&&S.profile.runCfg){const k=window.runWeekKm();if(k)km=k}}catch(e){}
  return{bmr:r0(bmr),tdee:r0(tdee),kcal,prot,fat,carb,fib:30,sug:50,km};
 }
 const foodsOn=d=>S.foods.filter(f=>f.date===d);
@@ -850,7 +851,7 @@ function viewLaufen(){
  const runs=[...S.runs].sort((a,b)=>b.date.localeCompare(a.date));
  const best5=S.runs.filter(r=>r.km>=5).map(r=>r.sec/r.km).sort((a,b)=>a-b)[0];
  const el=wElapsed();
- return header("Laufen","Lauf-Tracker")+`<div class="stack">
+ return header("Laufen","Lauf-Tracker")+`<div class="stack">${window.runCardHTML?window.runCardHTML():""}
  <section class="card" style="align-items:stretch"><div class="row between"><h2>Lauf aufzeichnen</h2><span class="pill ${W.running?"acc":""}" id="wstate">${W.running?"läuft":el?"pausiert":"bereit"}</span></div>
   <div class="watch ${W.running?"on":""}" id="watch">${fmtTime(el)}</div>
   <div class="grid2">${W.running?`<button class="btn ghost" data-a="wPause">Pause</button>`:`<button class="btn" data-a="wStart">${el?"Weiter":"Start"}</button>`}<button class="btn ghost" data-a="wStop" ${el?"":"disabled"}>Beenden</button></div>
@@ -949,7 +950,9 @@ function planDays(){
  const src={both:P,run:RUN,strength:STR,none:NONE}[tr];
  const home=!TEMPLATES.Push,MAP={Push:"Oberkörper",Pull:"Ganzkörper",Beine:"Unterkörper"};
  const fix=t=>home?t.replace(/\b(Push|Pull|Beine)\b/g,m=>MAP[m]):t;
- return src.map(x=>({t:x[0],d:fix(x[1]),opt:!!x[2]}));
+ let out=src.map(x=>({t:x[0],d:fix(x[1]),opt:!!x[2]}));
+ if(window.runPlanOverlay)out=window.runPlanOverlay(out);
+ return out;
 }
 function plan(){
  const P=planDays().map(x=>[x.t,x.d,x.opt]),today=(new Date().getDay()+6)%7;
@@ -1407,8 +1410,9 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=11"></script>
-<script src="ai.js?v=11"></script>
-<script src="brief.js?v=11"></script>
+<script src="guide.js?v=12"></script>
+<script src="ai.js?v=12"></script>
+<script src="brief.js?v=12"></script>
+<script src="run.js?v=12"></script>
 </body>
 </html>
