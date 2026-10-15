@@ -1,6 +1,6 @@
 // Formwerk Service Worker: macht die App offline nutzbar.
 // Bei einem Update der App diese Versionsnummer erhöhen.
-const VERSION = "formwerk-v8";
+const VERSION = "formwerk-v9";
 const SHELL = [
   "./",
   "./index.html",
@@ -20,8 +20,8 @@ const CDN = [
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(VERSION);
-    await cache.addAll(SHELL);
-    // Scanner-Bibliothek gleich mitladen, damit der Scanner auch offline geht
+    // cache: "reload" umgeht den Browser-Cache, damit nie eine alte Datei in die neue Version rutscht
+    await Promise.all(SHELL.map(u => fetch(new Request(u, { cache: "reload" })).then(r => { if (r.ok) return cache.put(u, r); }).catch(() => {})));
     await Promise.all(CDN.map(u => fetch(u, { mode: "no-cors" }).then(r => cache.put(u, r)).catch(() => {})));
     self.skipWaiting();
   })());
@@ -34,30 +34,33 @@ self.addEventListener("activate", event => {
   })());
 });
 
+async function networkFirst(req, key) {
+  const cache = await caches.open(VERSION);
+  try {
+    const res = await fetch(req, { cache: "no-cache" });
+    if (res && res.ok) cache.put(key || req, res.clone());
+    return res;
+  } catch (e) {
+    return (await cache.match(key || req, { ignoreSearch: true })) || (await caches.match(key || req, { ignoreSearch: true })) || new Response("", { status: 504 });
+  }
+}
+
 self.addEventListener("fetch", event => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
 
-  // Produktdatenbank immer live abfragen, nie zwischenspeichern
-  if (url.hostname.endsWith("openfoodfacts.org")) return;
+  // Produktdatenbank, KI und Strava immer live, nie zwischenspeichern
+  if (url.hostname.endsWith("openfoodfacts.org") || url.hostname.endsWith("googleapis.com") && url.hostname !== "fonts.googleapis.com" || url.hostname.endsWith("anthropic.com") || url.hostname.endsWith("strava.com")) return;
 
-  // App-Seite: zuerst online (für Updates), sonst aus dem Speicher
-  if (req.mode === "navigate") {
-    event.respondWith((async () => {
-      try {
-        const res = await fetch(req);
-        const cache = await caches.open(VERSION);
-        cache.put("./index.html", res.clone());
-        return res;
-      } catch (e) {
-        return (await caches.match("./index.html")) || (await caches.match("./"));
-      }
-    })());
+  // App-Seite und eigene Skripte: immer zuerst online (damit alle Teile zusammenpassen), sonst aus dem Speicher
+  if (req.mode === "navigate") { event.respondWith(networkFirst(req, "./index.html")); return; }
+  if (url.origin === self.location.origin && /\.(js|json|webmanifest)$/.test(url.pathname)) {
+    event.respondWith(networkFirst(req, "." + url.pathname.slice(url.pathname.lastIndexOf("/"))));
     return;
   }
 
-  // Alles andere (Icons, Schriften, Scanner): aus dem Speicher, im Hintergrund aktualisieren
+  // Bilder, Icons, Schriften, Bibliotheken: aus dem Speicher, im Hintergrund aktualisieren
   const cacheable = url.origin === self.location.origin ||
     url.hostname === "cdn.jsdelivr.net" ||
     url.hostname === "www.gstatic.com" ||

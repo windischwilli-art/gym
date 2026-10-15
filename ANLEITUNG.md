@@ -54,7 +54,7 @@
 ## 7. Updates einspielen
 
 Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` die Zeile
-`const VERSION = "formwerk-v8";` hochzählen (v2, v3, …). Die App holt sich das Update beim nächsten Öffnen.
+`const VERSION = "formwerk-v9";` hochzählen (v10, v11, …) und in `index.html` die Zahl hinter `guide.js?v=` und `ai.js?v=` erhöhen. Die App holt sich das Update beim nächsten Öffnen.
 
 ## Was die App kann
 
@@ -66,3 +66,9 @@ Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` d
 - Aufwärmprogramm vor dem Laufen
 - Coach mit persönlichem Plan je nach Ziel und Trainingswahl, Gewichtsverlauf
 - Funktioniert offline (außer der Produktsuche beim ersten Scan eines neuen Produkts)
+
+
+## Quellen
+
+- Übungsfotos: [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (Unlicense, gemeinfrei)
+- Produktdaten: [Open Food Facts](https://openfoodfacts.org) (ODbL)

@@ -1184,6 +1184,7 @@ document.addEventListener("click",ev=>{
    save();closeSheet();render(true);toast(actType(x.type)[1]+": +"+de(r0(actKcal(x)))+" kcal");break}
   case"delAct":S.acts=(S.acts||[]).filter(x=>x.id!==d.id);save();render(true);break;
   case"wkInt":if(CUR){CUR.int=d.v;render(true)}break;
+  case"exSwap":case"exAdd":case"tplEdit":if(!window.guideEx2){toast("Bitte App einmal schließen und neu öffnen, damit das Update geladen wird")}break;
   case"sPick":{const f=allFoods().find(x=>x.key===d.k);if(!f)break;
    if(f.online&&f.ean){S.products=S.products||{};S.products[f.ean]={name:f.name,kcal:f.kcal,p:f.p,c:f.c,sug:f.sug,f:f.f,fib:f.fib,portion:f.portion,ean:f.ean,src:"off"};save()}
    SHEET.pick=f;SHEET.g=f.portion||100;drawSheet();break}
@@ -1292,7 +1293,7 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js"></script>
-<script src="ai.js"></script>
+<script src="guide.js?v=9"></script>
+<script src="ai.js?v=9"></script>
 </body>
 </html>

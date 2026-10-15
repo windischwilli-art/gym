@@ -216,6 +216,16 @@ function mountAnim(el,patName,item,mus){
  RUNNING.add(st);requestAnimationFrame(frame);
  return st;
 }
+// ---- Echte Übungsfotos (free-exercise-db, gemeinfrei/Unlicense): Start- und Endposition ----
+const PHOTO={"Bankdrücken": "Barbell_Bench_Press_-_Medium_Grip", "Kurzhantel-Bankdrücken": "Dumbbell_Bench_Press", "Kurzhantel-Bodendrücken": "Dumbbell_Floor_Press", "Liegestütze": "Pushups", "Enge Liegestütze": "Pushups_Close_and_Wide_Hand_Positions", "Schulterdrücken": "Standing_Military_Press", "Kurzhantel-Schulterdrücken": "Dumbbell_Shoulder_Press", "Kettlebell-Schulterdrücken": "Two-Arm_Kettlebell_Military_Press", "Schulterdrücken mit Band": "Shoulder_Press_-_With_Bands", "Dips": "Dips_-_Triceps_Version", "Dips am Stuhl": "Bench_Dips", "Trizepsdrücken am Kabel": "Triceps_Pushdown_-_Rope_Attachment", "Kurzhantel-French-Press": "Dumbbell_One-Arm_Triceps_Extension", "Trizepsdrücken mit Band": "Speed_Band_Overhead_Triceps", "Klimmzüge": "Pullups", "Chin-ups (enger Griff)": "Chin-Up", "Latzug mit Band": "Straight-Arm_Pulldown", "Rudern unter dem Tisch": "Inverted_Row", "Langhantelrudern": "Bent_Over_Barbell_Row", "Kurzhantelrudern einarmig": "One-Arm_Dumbbell_Row", "Kettlebell-Rudern": "One-Arm_Kettlebell_Row", "Rudern mit Band": "Seated_Cable_Rows", "Superman (Rückenstrecker)": "Superman", "Bizepscurls": "Dumbbell_Bicep_Curl", "Kettlebell-Curls": "Dumbbell_Alternate_Bicep_Curl", "Bizepscurls mit Band": "Standing_Biceps_Cable_Curl", "Face Pulls": "Face_Pull", "Face Pulls mit Band": "Face_Pull", "Kurzhantel-Reverse-Flys": "Seated_Bent-Over_Rear_Delt_Raise", "Y-T-W-Heben am Boden": "Superman", "Kniebeugen": "Barbell_Squat", "Goblet Squats": "Goblet_Squat", "Kniebeugen mit Band": "Bodyweight_Squat", "Kniebeugen (Körpergewicht)": "Bodyweight_Squat", "Rumänisches Kreuzheben": "Romanian_Deadlift", "Kurzhantel-Kreuzheben": "Stiff-Legged_Dumbbell_Deadlift", "Kettlebell Swings": "One-Arm_Kettlebell_Swings", "Good Mornings mit Band": "Band_Good_Morning", "Einbeiniges Kreuzheben": "Kettlebell_One-Legged_Deadlift", "Ausfallschritte": "Dumbbell_Rear_Lunge", "Bulgarian Split Squats": "Split_Squat_with_Dumbbells", "Wadenheben": "Standing_Calf_Raises", "Plank (Sek.)": "Plank", "Hip Thrusts": "Barbell_Hip_Thrust", "Glute Bridges": "Butt_Lift_Bridge", "Schrägbankdrücken (Kurzhantel)": "Incline_Dumbbell_Press", "Brustpresse (Maschine)": "Machine_Bench_Press", "Butterfly (Maschine)": "Butterfly", "Liegestütze erhöht (leichter)": "Incline_Push-Up", "Arnold Press": "Arnold_Dumbbell_Press", "Schulterpresse (Maschine)": "Leverage_Shoulder_Press", "Seitheben": "Side_Lateral_Raise", "Seitheben mit Band": "Lateral_Raise_-_With_Bands", "Bankdrücken eng": "Close-Grip_Barbell_Bench_Press", "Trizeps-Kickbacks": "Tricep_Dumbbell_Kickback", "Overhead-Trizeps mit Band": "Speed_Band_Overhead_Triceps", "Latzug (Maschine)": "Wide-Grip_Lat_Pulldown", "Negativ-Klimmzüge": "Pullups", "Kabelrudern sitzend": "Seated_Cable_Rows", "T-Bar-Rudern": "T-Bar_Row_with_Handle", "Hammer Curls": "Hammer_Curls", "Kabelcurls": "Standing_Biceps_Cable_Curl", "Reverse Flys mit Band": "Back_Flyes_-_With_Bands", "Beinpresse": "Leg_Press", "Front Squats": "Front_Squat_Clean_Grip", "Sumo Squats": "Plie_Dumbbell_Squat", "Split Squats": "Split_Squats", "Kreuzheben (klassisch)": "Barbell_Deadlift", "Beinbeuger (Maschine)": "Lying_Leg_Curls", "Step-ups": "Dumbbell_Step_Ups", "Walking Lunges": "Bodyweight_Walking_Lunge", "Seitliche Ausfallschritte": "Barbell_Side_Split_Squat", "Wadenheben einbeinig": "Calf_Raise_On_A_Dumbbell", "Wadenheben an der Maschine": "Smith_Machine_Calf_Raise", "Seitstütz (Sek.)": "Side_Bridge", "Bergsteiger (Sek.)": "Mountain_Climbers", "Dead Bug": "Dead_Bug", "Russian Twists": "Russian_Twist", "Hanging Knee Raises": "Hanging_Leg_Raise", "Hip Thrusts mit Band": "Butt_Lift_Bridge", "Pike-Liegestütze": "Handstand_Push-Ups", "Hampelmann": "Star_Jump", "Armkreisen": "Arm_Circles", "Katze-Kuh": "Cat_Stretch", "Liegestütze locker": "Incline_Push-Up", "Band Pull-Aparts": "Band_Pull_Apart", "Y-T-W-Heben": "Superman", "Kniebeugen locker": "Bodyweight_Squat", "Ausfallschritte mit Drehung": "Bodyweight_Walking_Lunge", "Glute Bridges locker": "Butt_Lift_Bridge", "Bergsteiger": "Mountain_Climbers", "Wadenheben locker": "Standing_Calf_Raises", "Anfersen": "Single_Leg_Butt_Kick"};
+function mountEx(el,n){
+ const inf=info(n),id=PHOTO[n];
+ if(!id||!el){el&&el.classList.remove("gphoto");return mountAnim(el,inf[0],itemFor(inf),inf[2])}
+ el.classList.add("gphoto");
+ el.innerHTML=`<img src="img/ex/${id}/0.jpg" alt="${esc2(n)}: Startposition" decoding="async"><img class="b" src="img/ex/${id}/1.jpg" alt="${esc2(n)}: Endposition" decoding="async"><div class="gph-tag" aria-hidden="true"><span class="s0">Start</span><span class="s1">Ende</span></div>`;
+ let failed=false;el.querySelectorAll("img").forEach(im=>im.addEventListener("error",()=>{if(failed)return;failed=true;el.classList.remove("gphoto");mountAnim(el,inf[0],itemFor(inf),inf[2])}));
+ return{on:true};
+}
 function stopAnims(){RUNNING.forEach(s=>s.on=false);RUNNING.clear()}
 
 // ================= Übungswissen =================
@@ -443,7 +453,7 @@ function show(){
  // Animation einhängen
  const fig=document.getElementById("gfig");
  if(fig){let n=null;if(st.k==="warm")n=st.n;else if(st.k==="set")n=CUR.ex[st.x].e;else if(st.k==="rest"){const nx=G2.steps.slice(G2.i+1).find(s=>s.k==="set");n=nx?CUR.ex[nx.x].e:null}
-  if(n){const inf=info(n);mountAnim(fig,inf[0],itemFor(inf),inf[2])}}
+  if(n)mountEx(fig,n)}
  if(st.k==="warm"&&st.sec)startTimer(st.sec,next);
  if(st.k==="rest")startTimer(st.sec,next);
 }
@@ -556,7 +566,7 @@ function drawSwap(){
 let MINIOBS=null;
 function stopMini(){if(MINIOBS){MINIOBS.disconnect();MINIOBS=null}}
 function mountMini(root){
- const go=el=>{if(el.dataset.on)return;el.dataset.on="1";const n=el.dataset.anim,inf=info(n);mountAnim(el,inf[0],itemFor(inf),inf[2])};
+ const go=el=>{if(el.dataset.on)return;el.dataset.on="1";mountEx(el,el.dataset.anim)};
  const els=root.querySelectorAll("[data-anim]");
  if("IntersectionObserver"in window){MINIOBS=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)go(e.target)}),{root:root.querySelector(".sheet")});els.forEach(e=>MINIOBS.observe(e))}
  else els.forEach(go);
@@ -603,9 +613,9 @@ function showInfo(n){
  const d=document.createElement("div");d.id="ginfo";d.className="scrim";d.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="${esc2(n)}"><div class="grab"></div>
  <div class="row between"><h2>${esc2(n)}</h2><button class="icon-btn" data-a="gInfoClose" aria-label="Schließen">${I.x}</button></div>
  <div class="gfig" id="gifig"></div>${inf[2]?`<div class="gleg"><i></i>Trainiert: ${esc2(inf[2])}</div>`:""}
- <ul class="gcues">${inf[3].map(c=>`<li>${esc2(c)}</li>`).join("")}</ul></div>`;
+ <ul class="gcues">${inf[3].map(c=>`<li>${esc2(c)}</li>`).join("")}</ul>${PHOTO[n]?'<div class="small muted">Fotos: free-exercise-db (gemeinfrei)</div>':""}</div>`;
  d.addEventListener("click",e=>{if(e.target===d)closeInfo()});
- document.body.appendChild(d);mountAnim(document.getElementById("gifig"),inf[0],itemFor(inf),inf[2]);
+ document.body.appendChild(d);mountEx(document.getElementById("gifig"),n);
 }
 function closeInfo(){const d=document.getElementById("ginfo");if(d)d.remove()}
 
@@ -623,6 +633,21 @@ css.textContent=`
 .gfig{background:var(--surface);border-radius:20px;aspect-ratio:5/4;max-width:100%;color:var(--fg);box-shadow:0 14px 34px -24px var(--c-lift);overflow:hidden}
 .gfig.gsmall{width:84px;flex:none;border-radius:14px;box-shadow:none;background:var(--surface2)}
 .gfigsvg{width:100%;height:100%;display:block}
+.gfig.gphoto{position:relative;aspect-ratio:3/2;background:#1a1a1a}
+.gphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.gphoto img.b{opacity:0}
+.gph-tag{position:absolute;left:10px;bottom:10px;display:flex;gap:4px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.gph-tag span{padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.45);color:rgba(255,255,255,.7)}
+.gph-tag .s0{background:var(--c-lift);color:#fff}
+.gfig.gmini .gph-tag,.gfig.gsmall .gph-tag{display:none}
+@media (prefers-reduced-motion:no-preference){
+ .gphoto img.b{animation:phb 3.2s ease-in-out infinite}
+ .gph-tag .s0{animation:pht0 3.2s ease-in-out infinite}.gph-tag .s1{animation:pht1 3.2s ease-in-out infinite}
+ @keyframes phb{0%,38%{opacity:0}50%,88%{opacity:1}100%{opacity:0}}
+ @keyframes pht0{0%,38%{background:var(--c-lift);color:#fff}50%,88%{background:rgba(0,0,0,.45);color:rgba(255,255,255,.7)}100%{background:var(--c-lift);color:#fff}}
+ @keyframes pht1{0%,38%{background:rgba(0,0,0,.45);color:rgba(255,255,255,.7)}50%,88%{background:var(--c-lift);color:#fff}100%{background:rgba(0,0,0,.45);color:rgba(255,255,255,.7)}}
+}
+@media (prefers-reduced-motion:reduce){.gphoto img{width:50%}.gphoto img.b{left:50%;opacity:1}}
 .gfigsvg{--skin:#E9B48F;--skin2:#C98F6B;--shirt:var(--c-lift);--shirt2:color-mix(in srgb,var(--c-lift) 62%,#000);--shorts:#262B40;--shorts2:#1A1E2E;--hair:#3B2A1E;--shoe:#F25C3B}
 .gfigsvg .bs{fill:var(--skin)}.gfigsvg .bs2{fill:var(--skin2)}
 .gfigsvg .bt{fill:var(--shirt);stroke:var(--shirt);stroke-width:1.2;stroke-linejoin:round}.gfigsvg .bt2{fill:var(--shirt2)}
@@ -671,5 +696,6 @@ window.guideStart=()=>open("wk");
 window.guideOpen=open;
 window.guideInfo=showInfo;
 window.guideAnim=mountAnim;
+window.guideEx2=mountEx;
 window.guideEx=EX;
 })();
