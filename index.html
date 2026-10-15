@@ -304,20 +304,20 @@ const MEALS=["Frühstück","Mittagessen","Abendessen","Snacks"];
 const EQUIP=[["gym","Fitnessstudio","Alle Geräte und Maschinen"],["db","Kurzhanteln",""],["bb","Langhantel + Ständer",""],["bench","Hantelbank",""],["kb","Kettlebell",""],["bar","Klimmzugstange",""],["band","Widerstandsbänder",""],["none","Nur Körpergewicht","Kein Equipment"]];
 // Je Übungsplatz: Kandidaten in Reihenfolge der Eignung, jeweils [Name, benötigtes Equipment]
 const SLOTS={
- hpress:[["Bankdrücken",["bb","bench"]],["Kurzhantel-Bankdrücken",["db","bench"]],["Kurzhantel-Bodendrücken",["db"]],["Liegestütze",[]]],
- vpress:[["Schulterdrücken",["bb"]],["Kurzhantel-Schulterdrücken",["db"]],["Kettlebell-Schulterdrücken",["kb"]],["Schulterdrücken mit Band",["band"]],["Pike-Liegestütze",[]]],
- dips:[["Dips",["gym"]],["Dips am Stuhl",[]]],
- tri:[["Trizepsdrücken am Kabel",["gym"]],["Kurzhantel-French-Press",["db"]],["Trizepsdrücken mit Band",["band"]],["Enge Liegestütze",[]]],
- vpull:[["Klimmzüge",["bar"]],["Latzug mit Band",["band"]],["Rudern unter dem Tisch",[]]],
- hpull:[["Langhantelrudern",["bb"]],["Kurzhantelrudern einarmig",["db"]],["Kettlebell-Rudern",["kb"]],["Rudern mit Band",["band"]],["Superman (Rückenstrecker)",[]]],
- curl:[["Bizepscurls",["db"]],["Bizepscurls",["bb"]],["Kettlebell-Curls",["kb"]],["Bizepscurls mit Band",["band"]],["Chin-ups (enger Griff)",["bar"]],["Handtuch-Curls (isometrisch, Sek.)",[]]],
- rear:[["Face Pulls",["gym"]],["Face Pulls mit Band",["band"]],["Kurzhantel-Reverse-Flys",["db"]],["Y-T-W-Heben am Boden",[]]],
- squat:[["Kniebeugen",["bb"]],["Goblet Squats",["db"]],["Goblet Squats",["kb"]],["Kniebeugen mit Band",["band"]],["Kniebeugen (Körpergewicht)",[]]],
- hinge:[["Rumänisches Kreuzheben",["bb"]],["Kurzhantel-Kreuzheben",["db"]],["Kettlebell Swings",["kb"]],["Good Mornings mit Band",["band"]],["Einbeiniges Kreuzheben",[]]],
- lunge:[["Ausfallschritte",["db"]],["Bulgarian Split Squats",["bench"]],["Ausfallschritte",[]]],
- calf:[["Wadenheben",[]]],
- core:[["Plank (Sek.)",[]]],
- glute:[["Hip Thrusts",["bb","bench"]],["Glute Bridges",[]]]
+ hpress:[["Bankdrücken",["bb","bench"]],["Kurzhantel-Bankdrücken",["db","bench"]],["Kurzhantel-Bodendrücken",["db"]],["Liegestütze",[]],["Schrägbankdrücken (Kurzhantel)",["db","bench"]],["Brustpresse (Maschine)",["gym"]],["Butterfly (Maschine)",["gym"]],["Liegestütze erhöht (leichter)",[]]],
+ vpress:[["Schulterdrücken",["bb"]],["Kurzhantel-Schulterdrücken",["db"]],["Kettlebell-Schulterdrücken",["kb"]],["Schulterdrücken mit Band",["band"]],["Pike-Liegestütze",[]],["Arnold Press",["db"]],["Schulterpresse (Maschine)",["gym"]],["Seitheben",["db"]],["Seitheben mit Band",["band"]]],
+ dips:[["Dips",["gym"]],["Dips am Stuhl",[]],["Bankdrücken eng",["bb","bench"]],["Enge Liegestütze",[]]],
+ tri:[["Trizepsdrücken am Kabel",["gym"]],["Kurzhantel-French-Press",["db"]],["Trizepsdrücken mit Band",["band"]],["Enge Liegestütze",[]],["Trizeps-Kickbacks",["db"]],["Overhead-Trizeps mit Band",["band"]],["Dips am Stuhl",[]]],
+ vpull:[["Klimmzüge",["bar"]],["Latzug mit Band",["band"]],["Rudern unter dem Tisch",[]],["Latzug (Maschine)",["gym"]],["Negativ-Klimmzüge",["bar"]],["Chin-ups (enger Griff)",["bar"]]],
+ hpull:[["Langhantelrudern",["bb"]],["Kurzhantelrudern einarmig",["db"]],["Kettlebell-Rudern",["kb"]],["Rudern mit Band",["band"]],["Superman (Rückenstrecker)",[]],["Kabelrudern sitzend",["gym"]],["T-Bar-Rudern",["bb"]],["Rudern unter dem Tisch",[]]],
+ curl:[["Bizepscurls",["db"]],["Bizepscurls",["bb"]],["Kettlebell-Curls",["kb"]],["Bizepscurls mit Band",["band"]],["Chin-ups (enger Griff)",["bar"]],["Handtuch-Curls (isometrisch, Sek.)",[]],["Hammer Curls",["db"]],["Kabelcurls",["gym"]]],
+ rear:[["Face Pulls",["gym"]],["Face Pulls mit Band",["band"]],["Kurzhantel-Reverse-Flys",["db"]],["Y-T-W-Heben am Boden",[]],["Reverse Flys mit Band",["band"]],["Superman (Rückenstrecker)",[]]],
+ squat:[["Kniebeugen",["bb"]],["Goblet Squats",["db"]],["Goblet Squats",["kb"]],["Kniebeugen mit Band",["band"]],["Kniebeugen (Körpergewicht)",[]],["Beinpresse",["gym"]],["Front Squats",["bb"]],["Sumo Squats",["db"]],["Split Squats",[]]],
+ hinge:[["Rumänisches Kreuzheben",["bb"]],["Kurzhantel-Kreuzheben",["db"]],["Kettlebell Swings",["kb"]],["Good Mornings mit Band",["band"]],["Einbeiniges Kreuzheben",[]],["Kreuzheben (klassisch)",["bb"]],["Beinbeuger (Maschine)",["gym"]],["Glute Bridges",[]]],
+ lunge:[["Ausfallschritte",["db"]],["Bulgarian Split Squats",["bench"]],["Ausfallschritte",[]],["Step-ups",["bench"]],["Walking Lunges",[]],["Seitliche Ausfallschritte",[]]],
+ calf:[["Wadenheben",[]],["Wadenheben einbeinig",[]],["Wadenheben an der Maschine",["gym"]]],
+ core:[["Plank (Sek.)",[]],["Seitstütz (Sek.)",[]],["Bergsteiger (Sek.)",[]],["Dead Bug",[]],["Russian Twists",[]],["Hanging Knee Raises",["bar"]]],
+ glute:[["Hip Thrusts",["bb","bench"]],["Glute Bridges",[]],["Kettlebell Swings",["kb"]],["Hip Thrusts mit Band",["band"]]]
 };
 const PLANS={"Push":["hpress","vpress","dips","tri"],"Pull":["vpull","hpull","curl","rear"],"Beine":["squat","hinge","lunge","calf"],"Ganzkörper":["squat","hpress","hpull","core"]};
 const PLANS_HOME={"Oberkörper":["hpress","hpull","vpress","vpull","tri"],"Unterkörper":["squat","hinge","lunge","glute","calf"],"Ganzkörper":["squat","hpress","hpull","hinge","core"]};
@@ -328,6 +328,7 @@ function buildTemplates(eq){
  const full=eq.includes("gym")||(eq.includes("bb")&&eq.includes("bench"));
  const src=full?PLANS:PLANS_HOME,out={};
  for(const[k,slots]of Object.entries(src)){const names=[];slots.forEach(s=>{const n=pickEx(s,eq);if(!names.includes(n))names.push(n)});out[k]=names}
+ let ov={};try{ov=(S&&S.profile&&S.profile.tpl)||{}}catch(e){}for(const k in ov)if(out[k]&&Array.isArray(ov[k])&&ov[k].length)out[k]=ov[k].slice();
  return out;
 }
 const equipLabel=eq=>(eq&&eq.length?eq:["gym"]).map(k=>(EQUIP.find(e=>e[0]===k)||[k,k])[1]).join(", ");
@@ -813,14 +814,16 @@ function viewKraft(){
  const pr={};S.workouts.forEach(w=>w.sets.forEach(s=>{if(s.kg>0){const v=e1rm(s.kg,s.reps);if(!pr[s.e]||v>pr[s.e].v)pr[s.e]={v,kg:s.kg,reps:s.reps}}}));
  const cur=CUR?`<section class="card"><div class="row between"><div><div class="eyebrow">Aktives Training</div><h2>${CUR.name}</h2></div><button class="link" data-a="cancelWk">Abbrechen</button></div>
   <button class="btn block" data-a="guideResume">Geführt weitermachen</button>
-  ${CUR.ex.map((x,xi)=>`<div class="ex"><div class="row between"><button class="exname" data-a="gInfo" data-n="${esc(x.e)}">${esc(x.e)}<span class="q" aria-hidden="true">?</span></button><button class="link small" data-a="addSet" data-x="${xi}">+ Satz</button></div>
+  ${CUR.ex.map((x,xi)=>`<div class="ex"><div class="row between"><button class="exname" data-a="gInfo" data-n="${esc(x.e)}">${esc(x.e)}<span class="q" aria-hidden="true">?</span></button><span class="row" style="gap:14px;flex:none"><button class="link small" data-a="exSwap" data-x="${xi}">Tauschen</button><button class="link small" data-a="addSet" data-x="${xi}">+ Satz</button></span></div>
    <div class="sethead"><span>Satz</span><span>kg</span><span>Wdh.</span><span></span></div>
    ${x.sets.map((s,si)=>`<div class="setrow"><span class="setno">${si+1}</span><input inputmode="decimal" aria-label="${x.e} Satz ${si+1} kg" data-set="${xi}-${si}-kg" value="${s.kg}"><input inputmode="numeric" aria-label="${x.e} Satz ${si+1} Wiederholungen" data-set="${xi}-${si}-reps" value="${s.reps}"><button class="check" aria-pressed="${s.done}" aria-label="Satz erledigt" data-a="doneSet" data-x="${xi}" data-s="${si}">${I.ok}</button></div>`).join("")}</div>`).join("")}
+  <button class="btn ghost block" data-a="exAdd">+ Übung hinzufügen</button>
   <div class="row between" style="background:var(--surface2);border-radius:12px;padding:10px 12px"><span>Satzpause <span class="num" style="font-size:22px;font-weight:700" id="rest">${REST.left?fmtTime(REST.left):"1:30"}</span></span><button class="btn sm ghost" style="background:var(--surface)" data-a="rest">${REST.left?"Stopp":"Start"}</button></div>
   <div class="stack" style="gap:6px"><div class="small" style="font-weight:600">Wie anstrengend war es?</div><div class="grid3">${INTS.map(([k,l])=>`<button class="chip" data-a="wkInt" data-v="${k}" aria-pressed="${(CUR.int||"mittel")===k}">${l}</button>`).join("")}</div></div>
   <button class="btn block" data-a="saveWk">Training speichern</button></section>`
  :`<section class="card"><h2>Training starten</h2><p class="small muted" style="margin:0">Wähle eine Vorlage. Du startest mit einem passenden Aufwärmprogramm und wirst mit Animationen durch jede Übung geführt.</p><div class="row between" style="gap:8px"><span class="small"><span class="muted">Passend zu:</span> ${esc(equipLabel(S.profile.equip))}</span><button class="link small" data-go="coach">Ändern</button></div>
-  <div class="grid2">${Object.keys(TEMPLATES).map(n=>`<button class="card tile lift" data-a="startWk" data-n="${n}"><span class="num" style="font-size:22px;font-weight:700">${n}</span><span class="small muted">${TEMPLATES[n].slice(0,2).join(", ")} …</span></button>`).join("")}</div></section>`;
+  <div class="grid2">${Object.keys(TEMPLATES).map(n=>`<button class="card tile lift" data-a="startWk" data-n="${n}"><span class="num" style="font-size:22px;font-weight:700">${n}</span><span class="small muted">${TEMPLATES[n].slice(0,2).join(", ")} …</span>${S.profile.tpl&&S.profile.tpl[n]?'<span class="pill acc" style="align-self:flex-start">angepasst</span>':""}</button>`).join("")}</div>
+  <div class="row wrap" style="gap:6px;align-items:center"><span class="small muted">Vorlage bearbeiten:</span>${Object.keys(TEMPLATES).map(n=>`<button class="chip" data-a="tplEdit" data-n="${n}">${n}</button>`).join("")}</div></section>`;
  return header("Krafttraining","Kraft-Tracker")+`<div class="stack">${cur}
  <section class="card"><h2>Bestleistungen</h2><p class="small muted" style="margin:0">Geschätztes Maximalgewicht für 1 Wiederholung (Epley-Formel).</p>
  ${Object.keys(pr).length?`<div class="list">${Object.entries(pr).sort((a,b)=>b[1].v-a[1].v).map(([e,p])=>`<div class="li"><div class="grow"><div class="t">${e}</div><div class="s">bester Satz ${de(p.kg)} kg × ${p.reps}</div></div><span class="num" style="font-size:20px;font-weight:700">${de(r0(p.v))} <span class="muted" style="font-size:14px">kg</span></span></div>`).join("")}</div>`:`<p class="small muted">Noch keine Daten.</p>`}</section>

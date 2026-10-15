@@ -74,6 +74,13 @@ pat("facepull",{anchor:"foot",at:[86,FLOOR],fix:["post"],band:[195,40],poses:[{t
 pat("revfly",{anchor:"foot",at:[104,FLOOR],poses:[{t:105,a:[0,0],l:[12,-8]},{a:[-75,-75]}],dur:1.1});
 pat("superman",{anchor:"root",poses:[{r:[82,145],t:90,hd:90,a:[90,90],l:[-90,-90],f:0},{t:100,hd:105,a:[108,108],l:[-100,-100]}],dur:1.2});
 pat("plank",{anchor:"hand",at:[142,FLOOR],poses:[{t:103,a:[0,90],l:[-77,-77],f:10},{t:101,l:[-79,-79]}],dur:1.8});
+pat("lateral",{anchor:"root",front:true,band:"foot",poses:[{r:[100,90],t:180,a1:[12,12],a2:[-12,-12],l1:[4,4],l2:[-4,-4],f1:90,f2:-90},{a1:[86,88],a2:[-86,-88]}],dur:1.1});
+pat("kickback",{anchor:"foot",at:[104,FLOOR],poses:[{t:110,a:[-95,0],l:[20,-12]},{a:[-95,-95]}],dur:1});
+pat("legcurl",{anchor:"root",fix:["bench"],poses:[{r:[96,114],t:90,hd:90,a:[90,90],l:[-90,-90],f:0},{l:[-90,-190]}],dur:1.1});
+pat("deadbug",{anchor:"root",poses:[{r:[110,144],t:-90,hd:-90,a1:[180,180],a2:[180,180],l1:[180,90],l2:[180,90]},{a1:[-100,-100],l1:[100,95]}],dur:1.3});
+pat("twist",{anchor:"root",poses:[{r:[100,144],t:205,hd:195,a:[120,100],l:[120,80],f:60},{a:[70,50]}],dur:.7});
+pat("kneeraise",{anchor:"hand",at:[100,26],fix:["pullbar"],poses:[{t:180,a:[180,180],l:[0,0]},{t:185,l:[95,0]}],dur:1.1});
+pat("sideplank",{anchor:"root",front:true,poses:[{r:[100,128],t:110,hd:110,a1:[0,0],a2:[180,180],l1:[-70,-70],l2:[-72,-72]},{r:[100,124]}],dur:1.6});
 // Aufwärmen
 pat("jacks",{anchor:"root",front:true,vb:"-14 -24 228 182",poses:[{r:[100,90],t:180,a1:[20,20],a2:[-20,-20],l1:[8,8],l2:[-8,-8],f1:90,f2:-90},{r:[100,85],a1:[155,165],a2:[-155,-165],l1:[22,22],l2:[-22,-22]}],dur:.45});
 pat("armcircles",{anchor:"root",front:true,poses:[{r:[100,90],t:180,a1:[90,90],a2:[-90,-90],l1:[4,4],l2:[-4,-4],f1:90,f2:-90},{a1:[112,112],a2:[-112,-112]},{a1:[90,90],a2:[-90,-90]},{a1:[68,68],a2:[-68,-68]}],dur:.32});
@@ -261,6 +268,41 @@ const EX={
  "Plank (Sek.)":["plank",null,"Rumpf",["Unterarme unter den Schultern","Körper gerade wie ein Brett","Bauch und Po fest anspannen, ruhig atmen"],1,45],
  "Hip Thrusts":["hipthrust","bbhip","Po, hintere Oberschenkel",["Schultern an der Bank, Stange auf der Hüfte","Hüfte hochdrücken, bis der Körper gerade ist","Oben Po fest anspannen"]],
  "Glute Bridges":["bridge",null,"Po, hintere Oberschenkel",["Rückenlage, Füße hüftbreit aufgestellt","Hüfte hochdrücken bis zur geraden Linie","Oben Po anspannen, langsam ablegen"],1],
+ "Schrägbankdrücken (Kurzhantel)":["bench","db","Obere Brust, Schultern",["Bank auf ca. 30° schräg stellen","Hanteln über der oberen Brust nach oben drücken","Langsam absenken, Ellbogen leicht angewinkelt"]],
+ "Brustpresse (Maschine)":["bench",null,"Brust, Trizeps",["Sitz so einstellen, dass die Griffe auf Brusthöhe sind","Griffe kontrolliert nach vorn drücken","Langsam zurück, Schultern bleiben unten"]],
+ "Butterfly (Maschine)":["bench",null,"Brust",["Arme leicht gebeugt, Ellbogen auf Schulterhöhe","Griffe vor der Brust zusammenführen","Langsam öffnen bis zur Dehnung"]],
+ "Liegestütze erhöht (leichter)":["pushup",null,"Brust, Trizeps",["Hände auf Bank, Tisch oder Wand","Körper bleibt gerade","Je höher die Hände, desto leichter"],1],
+ "Arnold Press":["ohp","db","Schultern",["Hanteln vor dem Gesicht, Handflächen zu dir","Beim Hochdrücken die Hände nach aussen drehen","Langsam zurück in die Startposition"]],
+ "Schulterpresse (Maschine)":["ohp",null,"Schultern, Trizeps",["Griffe auf Schulterhöhe","Rücken fest an der Lehne","Nach oben drücken, langsam zurück"]],
+ "Seitheben":["lateral","db","Seitliche Schulter",["Hanteln seitlich am Körper, Arme leicht gebeugt","Seitlich bis auf Schulterhöhe heben","Langsam absenken, nicht schwingen"]],
+ "Seitheben mit Band":["lateral","band","Seitliche Schulter",["Band unter die Füsse","Arme seitlich bis Schulterhöhe heben","Langsam nachgeben"]],
+ "Bankdrücken eng":["bench","bb","Trizeps, Brust",["Griff schulterbreit","Ellbogen nah am Körper absenken","Kraftvoll hochdrücken"]],
+ "Trizeps-Kickbacks":["kickback","db","Trizeps",["Oberkörper nach vorn, Oberarm am Körper","Unterarm nach hinten strecken","Oberarm bleibt ruhig, langsam zurück"]],
+ "Overhead-Trizeps mit Band":["french","band","Trizeps",["Band unter den Fuss, Enden hinter dem Kopf","Arme nach oben strecken","Ellbogen zeigen nach vorn"]],
+ "Latzug (Maschine)":["pulldown","cable","Rücken, Bizeps",["Stange etwas breiter als schulterbreit greifen","Zur oberen Brust ziehen, Brust raus","Langsam nach oben zurück"]],
+ "Negativ-Klimmzüge":["pullup",null,"Rücken, Bizeps",["Mit Sprung oder Hocker nach oben","Ganz langsam ablassen (3–5 Sekunden)","Ideal, um Klimmzüge zu lernen"],1],
+ "Kabelrudern sitzend":["rowband","cable","Rücken, Bizeps",["Aufrecht sitzen, Knie leicht gebeugt","Griff zum Bauch ziehen, Schulterblätter zusammen","Langsam nach vorn nachgeben"]],
+ "T-Bar-Rudern":["row","bb","Rücken",["Oberkörper nach vorn, Rücken gerade","Stange zur Brust ziehen","Kontrolliert absenken"]],
+ "Hammer Curls":["curl","db","Bizeps, Unterarme",["Daumen zeigen nach oben","Ellbogen am Körper, hochbeugen","Langsam absenken"]],
+ "Kabelcurls":["curl","cable","Bizeps",["Griff am unteren Kabelzug","Ellbogen fixiert, hochbeugen","Spannung halten, langsam zurück"]],
+ "Reverse Flys mit Band":["facepull","band","Hintere Schulter",["Band auf Brusthöhe vor dem Körper","Arme gestreckt nach aussen ziehen","Schulterblätter zusammen"]],
+ "Beinpresse":["squat_bw",null,"Beine, Po",["Füsse schulterbreit auf der Platte","Knie bis ca. 90° beugen","Drücken, Knie nicht ganz durchstrecken"]],
+ "Front Squats":["squat_goblet","bb","Beine, Rumpf",["Stange vorn auf den Schultern","Ellbogen hoch, Oberkörper aufrecht","Tief in die Hocke, hochdrücken"]],
+ "Sumo Squats":["squat_goblet","db","Beine, Innenseite, Po",["Breiter Stand, Zehen nach aussen","Hantel zwischen den Beinen halten","Tief absenken, über die Fersen hochdrücken"]],
+ "Split Squats":["lunge",null,"Beine, Po",["Schrittstellung, Füsse bleiben stehen","Hinteres Knie Richtung Boden","Über das vordere Bein hochdrücken"],1],
+ "Kreuzheben (klassisch)":["hinge","bb","Rücken, Po, Beine",["Stange über der Fussmitte, Rücken gerade","Mit Beinen und Hüfte hochdrücken","Stange nah am Körper, oben aufrichten"]],
+ "Beinbeuger (Maschine)":["legcurl",null,"Hintere Oberschenkel",["Polster knapp über den Fersen","Fersen Richtung Po ziehen","Langsam zurück"]],
+ "Step-ups":["lunge","db?","Beine, Po",["Ganzen Fuss auf die Bank setzen","Über das vordere Bein hochdrücken","Langsam wieder absteigen, Seite wechseln"]],
+ "Walking Lunges":["lunge",null,"Beine, Po",["Grosser Schritt nach vorn","Hinteres Knie knapp über den Boden","Direkt in den nächsten Schritt"],1],
+ "Seitliche Ausfallschritte":["lunge",null,"Beine, Innenseite",["Breiter Schritt zur Seite","Hüfte nach hinten, anderes Bein gestreckt","Zurückdrücken, Seite wechseln"],1],
+ "Wadenheben einbeinig":["calf",null,"Waden",["Auf einem Bein, z. B. auf einer Stufe","Ganz hoch auf die Zehen","Langsam absenken"],1],
+ "Wadenheben an der Maschine":["calf","bbneck","Waden",["Schultern unter die Polster","Hoch auf die Zehen drücken","Unten kurz dehnen"]],
+ "Seitstütz (Sek.)":["sideplank",null,"Seitlicher Rumpf",["Unterarm unter der Schulter","Hüfte hoch, Körper gerade","Halten, dann Seite wechseln"],1,30],
+ "Bergsteiger (Sek.)":["climbers",null,"Rumpf, Kreislauf",["Liegestützposition","Knie abwechselnd zur Brust","Hüfte bleibt unten"],1,30],
+ "Dead Bug":["deadbug",null,"Rumpf",["Rückenlage, Arme hoch, Knie 90°","Gegengleich Arm und Bein strecken","Unterer Rücken bleibt am Boden"],1],
+ "Russian Twists":["twist",null,"Seitlicher Rumpf",["Sitzen, Oberkörper leicht zurück","Hände von Seite zu Seite führen","Füsse optional anheben"],1],
+ "Hanging Knee Raises":["kneeraise",null,"Bauch, Hüftbeuger",["An der Stange hängen","Knie zur Brust ziehen","Langsam absenken, nicht schwingen"],1],
+ "Hip Thrusts mit Band":["hipthrust",null,"Po",["Band über der Hüfte","Hüfte hochdrücken","Oben Po fest anspannen"]],
  // Aufwärmen
  "Hampelmann":["jacks",null,"Ganzer Körper",["Locker auf der Stelle springen","Arme über den Kopf, Beine auseinander","Gleichmäßiges Tempo"],1],
  "Armkreisen":["armcircles",null,"Schultern",["Arme seitlich ausstrecken","Kleine Kreise, langsam größer werden","Nach der Hälfte Richtung wechseln"],1],
@@ -377,7 +419,7 @@ function show(){
   <label class="f">${hold?"Sekunden":"Wiederholungen"}<input id="greps" inputmode="numeric" value="${s.reps===""?(hold||""):esc2(s.reps)}" placeholder="${hold?hold:"10"}"></label></div>
   ${ls?`<div class="small muted">Letztes Mal: ${ls.kg?String(ls.kg).replace(".",",")+" kg × ":""}${ls.reps}${hold?" Sek.":""}</div>`:""}
   ${hold?`<div id="ghold"></div><button class="btn block gbig" data-g="hold">Halten starten</button>`:`<button class="btn block gbig" data-g="done">Satz erledigt</button>`}
-  <button class="glink gskip" data-g="list">Zur Übersicht</button>`;
+  <div class="row" style="justify-content:center;gap:22px"><button class="glink" data-a="exSwap" data-x="${st.x}">Übung tauschen</button><button class="glink" style="color:var(--muted)" data-g="list">Zur Übersicht</button></div>`;
  }else if(st.k==="rest"){
   const nx=G2.steps.slice(G2.i+1).find(s=>s.k==="set"),nxe=nx?CUR.ex[nx.x]:null;
   body=top("Pause")+`<div class="grest">${ringTimer(st.sec)}
@@ -438,13 +480,122 @@ document.addEventListener("click",ev=>{
  }
  const c=ev.target.closest("[data-a]");if(!c)return;
  const a=c.dataset.a;
+ if(a==="exSwap"){SW={kind:"cur",x:+c.dataset.x,remember:false};drawSwap();return}
+ if(a==="exAdd"){SW={kind:"add",remember:false};drawSwap();return}
+ if(a==="tplEdit"){SW={kind:"edit",name:c.dataset.n};drawSwap();return}
  if(a==="guideStart"||a==="guideResume")open("wk");
  else if(a==="gRunWarm")open("run");
  else if(a==="gInfo")showInfo(c.dataset.n);
  else if(a==="gInfoClose")closeInfo();
 });
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(document.getElementById("ginfo"))closeInfo();else if(G2)close()}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(SW){SW=null;drawSwap()}else if(document.getElementById("ginfo"))closeInfo();else if(G2)close()}});
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&G2&&typeof wakeOn==="function")wakeOn()});
+
+// ================= Übungen tauschen & Vorlagen bearbeiten =================
+const EQL={gym:"Studio",bb:"Langhantel",db:"Kurzhanteln",kb:"Kettlebell",bench:"Bank",bar:"Stange",band:"Band"};
+const SLOTLBL={hpress:"Brust",vpress:"Schultern",dips:"Brust & Trizeps",tri:"Trizeps",vpull:"Rücken (ziehen von oben)",hpull:"Rücken (rudern)",curl:"Bizeps",rear:"Hintere Schulter",squat:"Beine (Kniebeugen)",hinge:"Hüfte & Beinrückseite",lunge:"Beine (einbeinig)",calf:"Waden",core:"Rumpf",glute:"Po"};
+const REL={hpress:["dips"],dips:["hpress","tri"],tri:["dips"],vpull:["hpull"],hpull:["vpull","rear"],rear:["hpull"],squat:["lunge"],lunge:["squat"],hinge:["glute"],glute:["hinge"]};
+const reqOf=(n,slot)=>{for(const k of slot?[slot,...Object.keys(SLOTS)]:Object.keys(SLOTS)){const c=SLOTS[k].find(x=>x[0]===n);if(c)return c[1]}return[]};
+const slotOf=n=>{for(const k in SLOTS)if(SLOTS[k].some(c=>c[0]===n))return k;return null};
+const eqText=req=>req&&req.length?req.map(r=>EQL[r]||r).join(" + "):"ohne Geräte";
+function optionsFor(name,exclude){
+ const eq=eqNow(),slot=name?slotOf(name):null,seen=new Set(exclude||[]),fit=[],other=[];
+ if(name)seen.add(name);
+ const add=n=>{if(seen.has(n))return;seen.add(n);const req=reqOf(n);(hasEq(req,eq)||(SLOTS&&Object.values(SLOTS).some(l=>l.some(c=>c[0]===n&&hasEq(c[1],eq))))?fit:other).push(n)};
+ if(slot){SLOTS[slot].forEach(c=>add(c[0]));(REL[slot]||[]).forEach(s=>SLOTS[s].forEach(c=>add(c[0])))}
+ else Object.keys(SLOTS).forEach(k=>SLOTS[k].forEach(c=>add(c[0])));
+ return{fit,other,slot};
+}
+let SW=null; // {kind:"cur"|"add"|"edit"|"tswap"|"tadd", x, name, remember}
+const swHost=()=>{let h=document.getElementById("gswap");if(!h){h=document.createElement("div");h.id="gswap";document.body.appendChild(h)}return h};
+function swOpt(n,extra){const inf=info(n),req=reqOf(n);return`<button class="swopt" data-sw="pick" data-n="${esc2(n)}"><div class="gfig gmini" data-anim="${esc2(n)}"></div><div class="grow" style="text-align:left;min-width:0"><div style="font-weight:700">${esc2(n)}</div><div class="small muted">${esc2(inf[2]||"")}</div><div class="small" style="color:var(--c-lift);font-weight:600">${esc2(eqText(req))}</div></div>${extra||""}</button>`}
+function swList(name,exclude,grouped){
+ if(grouped){ // alle Übungen nach Muskelgruppe
+  const eq=eqNow(),seen=new Set(exclude||[]);let h="";
+  for(const k of Object.keys(SLOTS)){const fit=[...new Set(SLOTS[k].filter(c=>hasEq(c[1],eq)).map(c=>c[0]))].filter(n=>!seen.has(n));if(!fit.length)continue;fit.forEach(n=>seen.add(n));
+   h+=`<details class="swgrp" ${k==="hpress"?"open":""}><summary>${SLOTLBL[k]} <span class="muted small">${fit.length}</span></summary><div class="stack" style="gap:8px;margin-top:8px">${fit.map(n=>swOpt(n)).join("")}</div></details>`}
+  return h;
+ }
+ const o=optionsFor(name,exclude);
+ return`<div class="eyebrow">Passend zu deinem Equipment</div><div class="stack" style="gap:8px">${o.fit.length?o.fit.map(n=>swOpt(n)).join(""):'<p class="small muted" style="margin:0">Keine weiteren Alternativen mit deinem Equipment.</p>'}</div>
+ ${o.other.length?`<details class="swgrp"><summary>Mit anderem Equipment <span class="muted small">${o.other.length}</span></summary><div class="stack" style="gap:8px;margin-top:8px">${o.other.map(n=>swOpt(n)).join("")}</div></details>`:""}`;
+}
+function tplList(name){return(TEMPLATES[name]||[]).slice()}
+function saveTpl(name,list){S.profile.tpl=S.profile.tpl||{};S.profile.tpl[name]=list;save()}
+function drawSwap(){
+ stopMini();const h=swHost();if(!SW){h.innerHTML="";return}
+ let title="",body="";
+ const custom=`<div class="card" style="padding:12px;gap:8px;background:var(--surface2)"><div style="font-weight:700">Eigene Übung</div><div class="row"><input id="swcustom" placeholder="z. B. Brustpresse schräg" autocomplete="off"><button class="btn ghost" data-sw="custom">Übernehmen</button></div></div>`;
+ if(SW.kind==="cur"||SW.kind==="tswap"){
+  const cur=SW.kind==="cur"?CUR.ex[SW.x].e:tplList(SW.name)[SW.x],tname=SW.kind==="cur"?CUR.name:SW.name;
+  title="Übung tauschen";
+  body=`<div class="swcur"><div class="gfig gmini" data-anim="${esc2(cur)}"></div><div class="grow"><div class="eyebrow">Aktuell</div><div style="font-weight:700;font-size:17px">${esc2(cur)}</div></div></div>
+  ${swList(cur,SW.kind==="cur"?CUR.ex.map(e=>e.e):tplList(SW.name))}${custom}
+  ${SW.kind==="cur"?`<label class="swrem"><input type="checkbox" id="swremember" ${SW.remember?"checked":""}> Auch in der Vorlage „${esc2(tname)}“ dauerhaft ändern</label>
+  <button class="glink" style="align-self:center;color:var(--bad)" data-sw="remove">Übung aus diesem Training entfernen</button>`:""}`;
+ }else if(SW.kind==="add"||SW.kind==="tadd"){
+  title="Übung hinzufügen";
+  body=`${custom}${swList(null,SW.kind==="add"?CUR.ex.map(e=>e.e):tplList(SW.name),true)}
+  ${SW.kind==="add"?`<label class="swrem"><input type="checkbox" id="swremember" ${SW.remember?"checked":""}> Auch zur Vorlage „${esc2(CUR.name)}“ hinzufügen</label>`:""}`;
+ }else if(SW.kind==="edit"){
+  const list=tplList(SW.name),changed=S.profile.tpl&&S.profile.tpl[SW.name];
+  title="Vorlage „"+SW.name+"“";
+  body=`<p class="small muted" style="margin:0">Tausche, entferne oder ergänze Übungen. Die Änderungen gelten für alle künftigen Trainings mit dieser Vorlage.</p>
+  <div class="stack" style="gap:8px">${list.map((n,i)=>`<div class="swopt static"><div class="gfig gmini" data-anim="${esc2(n)}"></div><div class="grow" style="min-width:0"><div style="font-weight:700">${esc2(n)}</div><div class="small muted">${esc2(info(n)[2]||"")}</div></div>
+   <div class="stack" style="gap:4px;flex:none;align-items:flex-end"><button class="link small" data-sw="tswap" data-x="${i}">Tauschen</button><button class="link small" style="color:var(--muted)" data-sw="tdel" data-x="${i}">Entfernen</button>
+   <span class="row" style="gap:10px">${i?`<button class="link small" data-sw="tup" data-x="${i}" aria-label="Nach oben">▲</button>`:""}${i<list.length-1?`<button class="link small" data-sw="tdown" data-x="${i}" aria-label="Nach unten">▼</button>`:""}</span></div></div>`).join("")}</div>
+  <button class="btn ghost block" data-sw="tadd">+ Übung hinzufügen</button>
+  ${changed?`<button class="glink" style="align-self:center;color:var(--muted)" data-sw="treset">Standard wiederherstellen</button>`:""}
+  <button class="btn block" data-sw="close">Fertig</button>`;
+ }
+ h.innerHTML=`<div class="scrim gsw" data-sw="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc2(title)}"><div class="grab"></div>
+  <div class="row between"><h2>${esc2(title)}</h2><button class="icon-btn" aria-label="Schließen" data-sw="close">${I.x}</button></div>${body}</div></div>`;
+ mountMini(h);
+}
+// kleine Animationen nur für sichtbare Einträge starten
+let MINIOBS=null;
+function stopMini(){if(MINIOBS){MINIOBS.disconnect();MINIOBS=null}}
+function mountMini(root){
+ const go=el=>{if(el.dataset.on)return;el.dataset.on="1";const n=el.dataset.anim,inf=info(n);mountAnim(el,inf[0],itemFor(inf),inf[2])};
+ const els=root.querySelectorAll("[data-anim]");
+ if("IntersectionObserver"in window){MINIOBS=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)go(e.target)}),{root:root.querySelector(".sheet")});els.forEach(e=>MINIOBS.observe(e))}
+ else els.forEach(go);
+ root.querySelectorAll("details").forEach(d=>d.addEventListener("toggle",()=>{if(d.open)d.querySelectorAll("[data-anim]").forEach(go)}));
+}
+function newSets(n,count){const l=typeof lastFor==="function"?lastFor(n):null,hold=holdSec(n);return Array.from({length:count||3},(_,i)=>({kg:l?(l[i]||l[0]).kg:"",reps:l?(l[i]||l[0]).reps:(hold?String(hold):""),done:false}))}
+function afterCurChange(){if(typeof save==="function")save();if(G2&&G2.mode==="wk")rebuild();else if(typeof render==="function")render(true)}
+function rebuild(){const st=G2.steps[G2.i],pastWarm=st&&st.k!=="warm";G2.steps=buildSteps();
+ if(pastWarm){const i=G2.steps.findIndex(s=>s.k==="set");G2.i=i<0?G2.steps.length-1:i}else G2.i=Math.min(G2.i,G2.steps.length-1);show()}
+function applyPick(n){
+ n=String(n||"").trim();if(!n)return;
+ const rem=!!(document.getElementById("swremember")||{}).checked;
+ if(SW.kind==="cur"){const ex=CUR.ex[SW.x],old=ex.e,done=ex.sets.filter(s=>s.done),open=ex.sets.filter(s=>!s.done),nx={e:n,sets:newSets(n,open.length||3)};
+  if(done.length){ex.sets=done;CUR.ex.splice(SW.x+1,0,nx)}else CUR.ex[SW.x]=nx;
+  if(rem){const l=tplList(CUR.name).map(e=>e===old?n:e);saveTpl(CUR.name,l)}
+  SW=null;drawSwap();afterCurChange();toast("Getauscht: "+n);return}
+ if(SW.kind==="add"){CUR.ex.push({e:n,sets:newSets(n,3)});if(rem){const l=tplList(CUR.name);if(!l.includes(n))l.push(n);saveTpl(CUR.name,l)}
+  SW=null;drawSwap();afterCurChange();toast(n+" hinzugefügt");return}
+ if(SW.kind==="tswap"){const l=tplList(SW.name);l[SW.x]=n;saveTpl(SW.name,l);SW={kind:"edit",name:SW.name};drawSwap();if(typeof render==="function")render(true);return}
+ if(SW.kind==="tadd"){const l=tplList(SW.name);if(!l.includes(n))l.push(n);saveTpl(SW.name,l);SW={kind:"edit",name:SW.name};drawSwap();if(typeof render==="function")render(true);return}
+}
+document.addEventListener("click",ev=>{
+ const b=ev.target.closest("[data-sw]");if(!b||!SW)return;const k=b.dataset.sw;
+ if(k==="scrim"&&ev.target!==b)return;
+ const back=()=>{if(SW.kind==="tswap"||SW.kind==="tadd")SW={kind:"edit",name:SW.name};else SW=null;drawSwap()};
+ switch(k){
+  case"close":case"scrim":back();break;
+  case"pick":applyPick(b.dataset.n);break;
+  case"custom":{const v=(document.getElementById("swcustom")||{}).value;if(!v||!v.trim()){toast("Gib einen Namen für die Übung ein");break}applyPick(v);break}
+  case"remove":{if(CUR.ex.length<=1){toast("Ein Training braucht mindestens eine Übung");break}const n=CUR.ex[SW.x].e;CUR.ex.splice(SW.x,1);
+   if((document.getElementById("swremember")||{}).checked){saveTpl(CUR.name,tplList(CUR.name).filter(e=>e!==n))}SW=null;drawSwap();afterCurChange();toast(n+" entfernt");break}
+  case"tswap":SW={kind:"tswap",name:SW.name,x:+b.dataset.x};drawSwap();break;
+  case"tadd":SW={kind:"tadd",name:SW.name};drawSwap();break;
+  case"tdel":{const l=tplList(SW.name);if(l.length<=1){toast("Eine Vorlage braucht mindestens eine Übung");break}l.splice(+b.dataset.x,1);saveTpl(SW.name,l);drawSwap();if(typeof render==="function")render(true);break}
+  case"tup":case"tdown":{const l=tplList(SW.name),i=+b.dataset.x,j=k==="tup"?i-1:i+1;[l[i],l[j]]=[l[j],l[i]];saveTpl(SW.name,l);drawSwap();if(typeof render==="function")render(true);break}
+  case"treset":{if(S.profile.tpl){delete S.profile.tpl[SW.name];save()}if(typeof render==="function")render(true);drawSwap();toast("Standard wiederhergestellt");break}
+ }
+});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="swcustom"){e.preventDefault();const b=document.querySelector('[data-sw="custom"]');if(b)b.click()}});
 
 // ================= Übungs-Info =================
 function showInfo(n){
@@ -503,6 +654,13 @@ css.textContent=`
 .gbadge{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--c-lift),var(--hero3));box-shadow:0 14px 30px -14px var(--c-lift)}
 .gbadge svg{width:42px;height:42px}
 .gstats{text-align:center}.gstats .num{font-size:26px;font-weight:700}
+#gswap .scrim{z-index:50}
+.swopt{display:flex;align-items:center;gap:12px;padding:8px;border-radius:14px;background:var(--surface);border:1.5px solid transparent;width:100%;text-align:left}
+.swopt:not(.static):active{transform:scale(.98)}.swopt:not(.static):hover{border-color:color-mix(in srgb,var(--c-lift) 40%,transparent)}
+.gfig.gmini{width:78px;flex:none;border-radius:12px;box-shadow:none;background:var(--surface2)}
+.swcur{display:flex;align-items:center;gap:12px;padding:10px;border-radius:14px;background:color-mix(in srgb,var(--c-lift) 10%,var(--surface))}
+.swgrp summary{cursor:pointer;font-weight:700;padding:6px 0}
+.swrem{display:flex;gap:10px;align-items:center;font-size:14px}.swrem input{width:20px;height:20px;accent-color:var(--c-lift)}
 .exname{font-weight:700;text-align:left;display:inline-flex;align-items:center;gap:6px}
 .exname .q{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;background:color-mix(in srgb,var(--c-lift) 16%,transparent);color:var(--c-lift)}
 @media (prefers-reduced-motion:no-preference){.gin>*{animation:rise .35s cubic-bezier(.2,.8,.2,1) both}.gbadge{animation:pop .5s cubic-bezier(.3,1.6,.5,1) both}@keyframes pop{from{transform:scale(.3);opacity:0}}}
