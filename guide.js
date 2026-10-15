@@ -388,6 +388,9 @@ function show(){
   const min=Math.max(1,Math.round((Date.now()-CUR.start)/60000));
   body=top("Geschafft")+`<div class="gdone"><div class="gbadge">${I.ok}</div><h1>Starkes Training!</h1><p class="muted" style="margin:0">${esc2(CUR.name)} abgeschlossen.</p></div>
   <div class="grid3 gstats"><div><div class="eyebrow">Sätze</div><div class="num">${sets}</div></div><div><div class="eyebrow">Volumen</div><div class="num">${Math.round(vol).toLocaleString("de-DE")} kg</div></div><div><div class="eyebrow">Dauer</div><div class="num">${min} Min.</div></div></div>
+  <div class="stack" style="gap:8px"><div style="font-weight:700;text-align:center">Wie anstrengend war es?</div>
+  <div class="grid3">${[["leicht","Leicht"],["mittel","Mittel"],["hart","Hart"]].map(([k,l])=>`<button class="chip" data-g="int" data-v="${k}" aria-pressed="${(CUR.int||"mittel")===k}">${l}</button>`).join("")}</div>
+  <div class="small muted" style="text-align:center" id="gkcal">Verbrauch ca. ${typeof wkKcal==="function"?Math.round(wkKcal({min,int:CUR.int||"mittel"})).toLocaleString("de-DE"):"–"} kcal · zählt zu deinem Tagesziel</div></div>
   <button class="btn block gbig" data-g="save">Training speichern</button><button class="glink gskip" data-g="list">Zur Übersicht</button>`;
  }else if(st.k==="rundone"){
   body=top("Bereit")+`<div class="gdone"><div class="gbadge">${I.ok}</div><h1>Aufgewärmt!</h1><p class="muted" style="margin:0">Muskeln und Gelenke sind bereit. Viel Spaß beim Laufen.</p></div>
@@ -408,7 +411,7 @@ function readSet(){const st=G2.steps[G2.i],s=CUR.ex[st.x].sets[st.s];const kg=do
 function saveWorkout(){
  const sets=[];CUR.ex.forEach(x=>x.sets.forEach(s=>{if(s.done&&num(s.reps)>0)sets.push({e:x.e,kg:num(s.kg)||0,reps:num(s.reps)})}));
  if(!sets.length){toast("Hake mindestens einen Satz ab");return}
- S.workouts.push({id:uid(),date:TODAY(),name:CUR.name,min:Math.max(10,Math.round((Date.now()-CUR.start)/60000)),sets});
+ S.workouts.push({id:uid(),date:TODAY(),name:CUR.name,min:Math.max(10,Math.round((Date.now()-CUR.start)/60000)),int:CUR.int||"mittel",sets});
  CUR=null;save();close();toast("Training gespeichert");
 }
 
@@ -428,6 +431,7 @@ document.addEventListener("click",ev=>{
     const box=document.getElementById("ghold");if(box)box.innerHTML=ringTimer(sec);
     startTimer(sec,()=>{s.reps=String(sec);s.done=true;next()});break}
    case"save":saveWorkout();break;
+   case"int":CUR.int=b.dataset.v;show();break;
    case"runstart":close();if(typeof go==="function")go("laufen");setTimeout(()=>{const s=document.querySelector('[data-a="wStart"]');if(s)s.click()},60);break;
   }
   return;

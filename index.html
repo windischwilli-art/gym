@@ -214,17 +214,90 @@ details summary{cursor:pointer;font-weight:600;color:var(--fg)}
 
 <script>
 // ---------- Daten ----------
-const FOODS = [ // pro 100 g: kcal, Protein, KH, Fett, Ballaststoffe, Zucker
- ["Haferflocken",372,13.5,58.7,7,10,1],["Banane",93,1.1,20,0.2,2,17],["Magerquark",67,12,4,0.2,0,4],
- ["Hähnchenbrust",110,23,0,1.5,0,0],["Reis, gekocht",130,2.7,28,0.3,0.4,0],["Vollkornbrot",220,7,38,1.5,7,3],
- ["Ei",155,13,1.1,11,0,1.1],["Lachs",208,20,0,13,0,0],["Brokkoli",34,2.8,7,0.4,2.6,1.7],
- ["Kartoffeln, gekocht",77,2,17,0.1,2.2,0.8],["Nudeln, gekocht",158,5.8,31,0.9,1.8,0.6],["Apfel",52,0.3,14,0.2,2.4,10],
- ["Mandeln",579,21,22,50,12,4],["Olivenöl",884,0,0,100,0,0],["Milch 1,5 %",47,3.4,4.9,1.5,0,4.9],
- ["Naturjoghurt 3,5 %",61,3.5,4.7,3.3,0,4.7],["Linsen, gekocht",116,9,20,0.4,8,1.8],["Thunfisch in Wasser",116,26,0,1,0,0],
- ["Avocado",160,2,9,15,7,0.7],["Gouda",356,25,2.2,27,0,0],["Rinderhack 5 %",121,21,0,5,0,0],
- ["Tofu natur",120,12,2,7,1,0.5],["Whey-Proteinpulver",380,78,6,5,0,4],["Erdnussbutter",588,25,20,50,6,9],
- ["Tomaten",18,0.9,3.9,0.2,1.2,2.6],["Hüttenkäse",98,11,3.4,4.3,0,2.7],["Süßkartoffel, gekocht",76,1.4,17.7,0.1,2.5,5.7]
-].map(([name,kcal,p,c,f,fib,sug])=>({name,kcal,p,c,f,fib,sug}));
+const FOODS = [ // pro 100 g: kcal, Protein, KH, Fett, Ballaststoffe, Zucker, [Portion g, Portionsname]
+ // Getreide, Brot, Beilagen
+ ["Haferflocken",372,13.5,58.7,7,10,1,50,"Portion"],["Müesli (ungezuckert)",360,10,62,6.5,8,15,60,"Portion"],["Knuspermüesli",440,9,64,15,6,22,50,"Portion"],
+ ["Cornflakes",370,7,84,1,3,8,30,"Portion"],["Vollkornbrot",220,7,38,1.5,7,3,50,"Scheibe"],["Ruchbrot",240,8,46,1.5,5,2,50,"Scheibe"],
+ ["Weissbrot / Toast",265,8,49,3.5,3,4,30,"Scheibe"],["Zopf",320,9,50,9,2,5,40,"Scheibe"],["Gipfeli / Croissant",410,8,45,21,2,8,45,"Stück"],
+ ["Brötchen / Semmel",270,9,52,2,3,3,60,"Stück"],["Laugenbrezel",290,8,57,2.5,2.5,1,85,"Stück"],["Knäckebrot",360,10,67,2,15,2,10,"Scheibe"],
+ ["Reiswaffel",385,8,81,3,4,1,8,"Stück"],["Wrap / Tortilla",310,8,52,7,3,3,60,"Stück"],["Pita",275,9,56,1.2,2.2,1,70,"Stück"],
+ ["Reis, gekocht",130,2.7,28,0.3,0.4,0,180,"Portion"],["Vollkornreis, gekocht",123,2.7,26,1,1.8,0,180,"Portion"],
+ ["Nudeln, gekocht",158,5.8,31,0.9,1.8,0.6,200,"Portion"],["Vollkornnudeln, gekocht",150,6,28,1.5,4,0.8,200,"Portion"],
+ ["Kartoffeln, gekocht",77,2,17,0.1,2.2,0.8,200,"Portion"],["Süsskartoffel, gekocht",76,1.4,17.7,0.1,2.5,5.7,200,"Portion"],
+ ["Pommes frites",312,3.4,41,15,3.8,0.3,150,"Portion"],["Rösti",160,2.5,20,8,2,0.5,200,"Portion"],["Kartoffelstock / Püree",95,2,14,3.5,1.3,1.5,200,"Portion"],
+ ["Couscous, gekocht",112,3.8,23,0.2,1.4,0.1,180,"Portion"],["Bulgur, gekocht",83,3.1,19,0.2,4.5,0.1,180,"Portion"],
+ ["Quinoa, gekocht",120,4.4,21,1.9,2.8,0.9,180,"Portion"],["Polenta, gekocht",70,1.6,15,0.3,1,0.2,200,"Portion"],
+ ["Spätzli / Knöpfli",165,6,30,2.5,1.5,0.5,200,"Portion"],["Gnocchi",135,3.2,30,0.4,1.5,0.5,200,"Portion"],
+ // Fleisch, Fisch, Eier
+ ["Hähnchenbrust",110,23,0,1.5,0,0,150,"Portion"],["Poulet-Schenkel",180,18,0,12,0,0,150,"Stück"],["Trutenbrust",105,24,0,1,0,0,150,"Portion"],
+ ["Rindsplätzli / Steak",130,22,0,4.5,0,0,180,"Stück"],["Rinderhack 5 %",121,21,0,5,0,0,125,"Portion"],["Hackfleisch gemischt",250,18,0,20,0,0,125,"Portion"],
+ ["Schweinsfilet",115,21,0,3.5,0,0,150,"Portion"],["Schweinskotelett",210,19,0,15,0,0,180,"Stück"],["Kalbfleisch",105,21,0,2,0,0,150,"Portion"],
+ ["Cervelat",270,12,1,24,0,0.5,100,"Stück"],["Bratwurst",300,13,0.5,27,0,0.5,130,"Stück"],["Wienerli",260,13,1,23,0,0.5,50,"Stück"],
+ ["Schinken (gekocht)",115,19,1,4,0,1,20,"Scheibe"],["Rohschinken",250,26,0,16,0,0,15,"Scheibe"],["Salami",390,22,1,33,0,1,10,"Scheibe"],
+ ["Bündnerfleisch",210,38,1,6,0,0,10,"Scheibe"],["Speck",400,13,0.5,39,0,0.5,15,"Scheibe"],["Leberkäse",290,12,1,26,0,0.5,120,"Scheibe"],
+ ["Döner Kebab",215,12,20,10,1.5,2,350,"Stück"],["Chicken Nuggets",280,15,17,17,1,0.5,120,"Portion"],
+ ["Lachs",208,20,0,13,0,0,125,"Filet"],["Thunfisch in Wasser",116,26,0,1,0,0,80,"Dose"],["Thunfisch in Öl",200,25,0,11,0,0,80,"Dose"],
+ ["Kabeljau / Dorsch",82,18,0,0.7,0,0,150,"Filet"],["Forelle",120,20,0,4.5,0,0,150,"Filet"],["Crevetten",85,19,0,1,0,0,100,"Portion"],
+ ["Fischstäbchen",200,13,17,9,1,1,30,"Stück"],["Ei",155,13,1.1,11,0,1.1,60,"Stück"],["Rührei",170,11,2,13,0,1.5,120,"Portion"],
+ // Milchprodukte & Ersatz
+ ["Milch 1,5 %",47,3.4,4.9,1.5,0,4.9,250,"Glas"],["Vollmilch 3,5 %",64,3.3,4.8,3.5,0,4.8,250,"Glas"],["Hafermilch",45,0.5,6.5,1.5,0.8,4,250,"Glas"],
+ ["Sojamilch",40,3.3,1.2,2,0.6,0.5,250,"Glas"],["Mandelmilch (ungesüsst)",15,0.5,0.3,1.2,0.3,0,250,"Glas"],
+ ["Naturjoghurt 3,5 %",61,3.5,4.7,3.3,0,4.7,180,"Becher"],["Fruchtjoghurt",95,3.3,14,2.8,0,13,180,"Becher"],["Griechischer Joghurt 10 %",130,5,4,10,0,4,150,"Portion"],
+ ["Skyr",63,11,4,0.2,0,4,150,"Becher"],["Magerquark",67,12,4,0.2,0,4,250,"Becher"],["Rahmquark",160,9,3,12,0,3,100,"Portion"],
+ ["Hüttenkäse",98,11,3.4,4.3,0,2.7,200,"Becher"],["Protein-Pudding",80,10,7,1.5,0,4,200,"Becher"],["Proteinjoghurt / High Protein",65,10,5,0.3,0,4,200,"Becher"],
+ ["Gouda",356,25,2.2,27,0,0,30,"Scheibe"],["Emmentaler",380,28,0,30,0,0,30,"Scheibe"],["Gruyère",410,29,0,33,0,0,30,"Stück"],
+ ["Appenzeller",390,25,0,32,0,0,30,"Stück"],["Mozzarella",250,18,1,19,0,1,125,"Kugel"],["Feta",265,14,1,21,0,1,50,"Portion"],
+ ["Raclettekäse",350,24,0,28,0,0,200,"Portion"],["Parmesan",400,35,0,28,0,0,10,"EL"],["Frischkäse",250,6,3,24,0,3,30,"Portion"],
+ ["Butter",740,0.7,0.6,82,0,0.6,10,"Portion"],["Rahm / Sahne 35 %",340,2,3,35,0,3,30,"Schuss"],["Kaffeerahm",120,3,4,10,0,4,12,"Portion"],
+ // Gemüse
+ ["Brokkoli",34,2.8,7,0.4,2.6,1.7,150,"Portion"],["Blumenkohl",25,1.9,5,0.3,2,1.9,150,"Portion"],["Karotten",41,0.9,10,0.2,2.8,4.7,80,"Stück"],
+ ["Tomaten",18,0.9,3.9,0.2,1.2,2.6,120,"Stück"],["Gurke",15,0.6,3.6,0.1,0.5,1.7,150,"Portion"],["Paprika",31,1,6,0.3,2.1,4.2,150,"Stück"],
+ ["Zucchini",17,1.2,3.1,0.3,1,2.5,200,"Stück"],["Aubergine",25,1,6,0.2,3,3.5,250,"Stück"],["Spinat",23,2.9,3.6,0.4,2.2,0.4,150,"Portion"],
+ ["Blattsalat",15,1.4,2.9,0.2,1.3,0.8,80,"Portion"],["Rucola",25,2.6,3.7,0.7,1.6,2,30,"Handvoll"],["Zwiebel",40,1.1,9,0.1,1.7,4.2,100,"Stück"],
+ ["Champignons",22,3.1,3.3,0.3,1,2,100,"Portion"],["Erbsen",81,5.4,14,0.4,5,5.7,100,"Portion"],["Mais",86,3.3,19,1.4,2.7,6,80,"Portion"],
+ ["Grüne Bohnen",31,1.8,7,0.2,2.7,3.3,150,"Portion"],["Kichererbsen, gekocht",164,8.9,27,2.6,7.6,4.8,120,"Portion"],
+ ["Linsen, gekocht",116,9,20,0.4,8,1.8,150,"Portion"],["Kidneybohnen, gekocht",127,8.7,23,0.5,6.4,0.3,120,"Portion"],
+ ["Avocado",160,2,9,15,7,0.7,140,"Stück"],["Rotkohl",29,1.4,7,0.2,2.5,3.8,150,"Portion"],["Sauerkraut",19,0.9,4.3,0.1,2.9,1.8,150,"Portion"],
+ ["Gemischter Salat mit Dressing",90,1.5,5,7,1.5,3,200,"Portion"],
+ // Obst
+ ["Apfel",52,0.3,14,0.2,2.4,10,150,"Stück"],["Banane",93,1.1,20,0.2,2,17,120,"Stück"],["Birne",57,0.4,15,0.1,3.1,10,170,"Stück"],
+ ["Orange",47,0.9,12,0.1,2.4,9,150,"Stück"],["Mandarine",53,0.8,13,0.3,1.8,10.5,70,"Stück"],["Kiwi",61,1.1,15,0.5,3,9,75,"Stück"],
+ ["Erdbeeren",32,0.7,7.7,0.3,2,4.9,150,"Schale"],["Heidelbeeren",57,0.7,14,0.3,2.4,10,125,"Schale"],["Himbeeren",52,1.2,12,0.7,6.5,4.4,125,"Schale"],
+ ["Trauben",69,0.7,18,0.2,0.9,16,150,"Portion"],["Ananas",50,0.5,13,0.1,1.4,10,150,"Portion"],["Mango",60,0.8,15,0.4,1.6,14,200,"Stück"],
+ ["Wassermelone",30,0.6,8,0.2,0.4,6,300,"Stück"],["Pfirsich / Nektarine",44,0.9,10,0.3,1.7,8,150,"Stück"],["Datteln (getrocknet)",280,2.5,75,0.4,8,63,8,"Stück"],
+ ["Rosinen",300,3,79,0.5,3.7,59,30,"Handvoll"],["Apfelmus",70,0.2,17,0.1,1.2,15,100,"Portion"],
+ // Nüsse, Samen, Fette
+ ["Mandeln",579,21,22,50,12,4,30,"Handvoll"],["Baumnüsse / Walnüsse",654,15,14,65,7,2.6,30,"Handvoll"],["Cashewkerne",553,18,30,44,3.3,6,30,"Handvoll"],
+ ["Erdnüsse",567,26,16,49,8.5,4,30,"Handvoll"],["Haselnüsse",628,15,17,61,10,4.3,30,"Handvoll"],["Studentenfutter",470,13,40,30,6,30,40,"Handvoll"],
+ ["Chiasamen",486,17,42,31,34,0,15,"EL"],["Leinsamen",534,18,29,42,27,1.6,10,"EL"],["Kürbiskerne",560,30,11,49,6,1.4,15,"EL"],
+ ["Erdnussbutter",588,25,20,50,6,9,15,"EL"],["Olivenöl",884,0,0,100,0,0,10,"EL"],["Rapsöl",884,0,0,100,0,0,10,"EL"],
+ // Proteinprodukte, Vegetarisch
+ ["Whey-Proteinpulver",380,78,6,5,0,4,30,"Messlöffel"],["Proteinriegel",360,33,35,10,5,5,55,"Riegel"],["Tofu natur",120,12,2,7,1,0.5,100,"Portion"],
+ ["Tempeh",192,20,8,11,5,0,100,"Portion"],["Seitan",120,24,4,1.5,0.5,0,100,"Portion"],["Veggie-Burger",210,15,10,12,4,2,100,"Stück"],
+ ["Falafel",330,13,32,18,5,2,20,"Stück"],["Hummus",250,7,14,18,6,0.5,40,"Portion"],
+ // Mahlzeiten & Fertiggerichte
+ ["Pizza Margherita",250,11,31,9,2,3,350,"Pizza"],["Pizza Salami",270,12,30,11,2,3,370,"Pizza"],["Spaghetti Bolognese",150,7,18,5,1.5,2.5,400,"Teller"],
+ ["Lasagne",160,8,13,8.5,1,3,350,"Portion"],["Älplermagronen",190,7,20,9,1,2,400,"Teller"],["Zürcher Geschnetzeltes mit Rösti",175,9,12,10,1,1,450,"Teller"],
+ ["Käsefondue (pro Person)",290,15,12,20,0.5,0.5,400,"Portion"],["Raclette (mit Kartoffeln)",210,10,14,13,1,0.5,450,"Portion"],
+ ["Wienerschnitzel",280,18,14,17,0.5,0.5,180,"Stück"],["Cordon bleu",290,20,12,18,0.5,1,220,"Stück"],["Hamburger",250,13,25,11,1.5,5,230,"Stück"],
+ ["Cheeseburger",265,14,25,13,1.5,5,250,"Stück"],["Sandwich Schinken-Käse",250,13,27,10,2,3,180,"Stück"],["Sushi (Maki)",140,5,25,2,1,4,25,"Stück"],
+ ["Curry mit Reis",150,6,20,5,1.5,3,450,"Teller"],["Pad Thai",160,6,22,5.5,1.5,5,400,"Teller"],["Chili con Carne",110,8,9,4.5,3.5,2.5,400,"Teller"],
+ ["Gemüsesuppe",40,1.5,6,1.2,1.5,2,300,"Teller"],["Bircher Müesli",130,4,18,4.5,2.5,10,250,"Portion"],["Porridge mit Milch",95,4,14,2.5,1.5,4,300,"Schüssel"],
+ ["Pancakes",230,6,30,9,1,8,100,"Stück"],["Kebab-Teller mit Pommes",190,10,17,9,1.5,2,500,"Teller"],
+ // Süsses, Snacks
+ ["Schokolade Milch",535,7.5,57,30,2,55,20,"Riegel"],["Schokolade dunkel 70 %",580,8,34,43,11,28,20,"Riegel"],["Schokoriegel (z. B. Snickers)",490,9,60,24,2,48,50,"Riegel"],
+ ["Gummibärchen",340,7,77,0.2,0,46,25,"Handvoll"],["Kekse / Guetzli",480,6,67,21,2,28,10,"Stück"],["Croissant mit Schokolade",420,7,47,22,2.5,14,70,"Stück"],
+ ["Kuchen (Rührkuchen)",380,6,50,17,1,28,80,"Stück"],["Glace / Eis",210,3.5,24,11,0.5,21,100,"Kugel (2)"],["Chips",536,6,53,34,4.4,1,30,"Portion"],
+ ["Popcorn (gesalzen)",480,9,58,24,10,1,30,"Portion"],["Müsliriegel",420,6,64,15,4,28,25,"Riegel"],["Honig",304,0.3,82,0,0,82,20,"TL"],
+ ["Konfitüre / Marmelade",250,0.4,60,0.1,1,58,20,"Portion"],["Nutella",540,6,57,31,3,56,15,"Portion"],["Zucker",400,0,100,0,0,100,5,"TL"],
+ // Getränke (pro 100 ml)
+ ["Orangensaft",45,0.7,10,0.2,0.2,9,250,"Glas"],["Apfelschorle",24,0,6,0,0,5.5,330,"Glas"],["Cola",42,0,10.6,0,0,10.6,330,"Dose"],
+ ["Cola Zero / Light",0.3,0,0,0,0,0,330,"Dose"],["Eistee",28,0,7,0,0,7,500,"Flasche"],["Rivella rot",27,0.1,6.6,0,0,6.6,500,"Flasche"],
+ ["Energy Drink",45,0,11,0,0,11,250,"Dose"],["Bier",43,0.5,3.6,0,0,0.3,500,"Stange / Glas"],["Alkoholfreies Bier",25,0.4,5,0,0,3,500,"Glas"],
+ ["Wein rot",85,0.1,2.6,0,0,0.6,150,"Glas"],["Wein weiss",82,0.1,2.6,0,0,1,150,"Glas"],["Kaffee schwarz",2,0.1,0,0,0,0,150,"Tasse"],
+ ["Cappuccino",40,2,3.5,2,0,3.5,200,"Tasse"],["Latte Macchiato",50,2.6,4,2.6,0,4,300,"Glas"],["Proteinshake mit Milch",80,10,6,1.5,0,5,350,"Shaker"],
+ ["Isotonisches Getränk",25,0,6,0,0,6,500,"Flasche"]
+].map(([name,kcal,p,c,f,fib,sug,portion,unit])=>({name,kcal,p,c,f,fib,sug,portion:portion||0,unit:unit||""}));
 const MEALS=["Frühstück","Mittagessen","Abendessen","Snacks"];
 // Equipment: gym = Fitnessstudio (alles), bb = Langhantel + Ständer, db = Kurzhanteln, kb = Kettlebell,
 // bench = Hantelbank, bar = Klimmzugstange, band = Widerstandsbänder. Körpergewicht geht immer.
@@ -337,7 +410,7 @@ async function cloudFetch(code){
  return{savedAt:m.savedAt||0,state:{...m.data,foods,syncCode:code,v:2}};
 }
 function applyCloud(st){
- st.weights=st.weights||[];st.workouts=st.workouts||[];st.runs=st.runs||[];st.products=st.products||{};
+ st.weights=st.weights||[];st.workouts=st.workouts||[];st.runs=st.runs||[];st.products=st.products||{};st.acts=st.acts||[];
  st.updated=st.lastSynced=st.savedAt||st.updated||Date.now();
  S=st;OB=null;saveLocalOnly();
 }
@@ -400,7 +473,7 @@ async function doBackup(){
 async function readBackup(file){
  const j=JSON.parse(await file.text()),d=j&&j.data;
  if(!d||!d.profile||!Array.isArray(d.foods)||!Array.isArray(d.runs))throw new Error("format");
- d.v=2;d.weights=d.weights||[];d.workouts=d.workouts||[];d.products=d.products||{};return d;
+ d.v=2;d.weights=d.weights||[];d.workouts=d.workouts||[];d.products=d.products||{};d.acts=d.acts||[];return d;
 }
 async function applyRestore(file){
  try{S=await readBackup(file);OB=null;CUR=null;PENDINGRESTORE=null;save();tab="heute";render();window.scrollTo(0,0);toast("Wiederhergestellt"+(S.profile.name?". Hallo "+S.profile.name+"!":""))}
@@ -443,6 +516,7 @@ function accountCard(){
  return`<section class="card"><h2>Daten & Verbindungen</h2>
  <div id="cloud" class="stack" style="gap:4px">${cloudStatusHTML()}</div>
  <div id="strava" class="stack" style="gap:10px">${stravaHTML()}</div>
+ <div id="aicard" class="stack" style="gap:10px">${window.aiCardHTML?window.aiCardHTML():""}</div>
  <div class="list"><div class="li"><div class="grow"><div class="t">Garmin</div><div class="s">Verknüpfe Garmin Connect mit Strava, dann kommen deine Uhr-Läufe automatisch hierher. Oder importiere TCX/GPX-Dateien.</div></div></div></div>
  <button class="btn ghost block" data-a="import">Lauf-Dateien importieren</button>
  <details class="small muted"><summary>So exportierst du deine Läufe</summary><div class="stack" style="gap:6px;margin-top:8px">
@@ -470,6 +544,9 @@ async function svToken(params){
  svSave();
 }
 async function svAccess(){if(SV.access&&SV.exp&&SV.exp*1000>Date.now()+60000)return SV.access;await svToken({grant_type:"refresh_token",refresh_token:SV.refresh});return SV.access}
+function svActType(t){const m=[[/E?Bike|Ride|Velomobile|Handcycle/,"rad"],[/MountainBike/,"mtb"],[/Swim/,"schwimmen"],[/Hike/,"wandern"],[/Walk/,"gehen"],[/WeightTraining/,"kraft"],[/HighIntensity|Crossfit|Workout/,"hiit"],[/Elliptical|StairStepper/,"crosstrainer"],[/Rowing|Kayak|Canoe/,"rudern"],[/Soccer/,"fussball"],[/Tennis|Padel|Squash|Badminton|Pickleball/,"tennis"],[/Ski|Snowboard/,"ski"],[/Climb/,"klettern"],[/Yoga|Pilates/,"yoga"],[/Dance/,"tanzen"]];
+ for(const[re,k]of[[/MountainBike/,"mtb"],...m])if(re.test(t))return k;return t?"anderes":null}
+function svInt(a){const hr=a.average_heartrate,mx=220-((S&&S.profile&&S.profile.age)||35);if(!hr)return"mittel";const p=hr/mx;return p<.64?"leicht":p<.77?"mittel":"hart"}
 function svRunType(a){if(a.workout_type===2||a.distance>=14000||(a.moving_time||0)>=4500)return"Langer Lauf";if(a.workout_type===3)return"Tempo";if(a.workout_type===1)return"Tempo";return"Locker"}
 async function svSync(manual){
  if(!svConnected()||SVUI.busy||!S)return;
@@ -486,14 +563,17 @@ async function svSync(manual){
   }
   let added=0;
   for(const a of all){
-   const t=String(a.sport_type||a.type||"");if(!/Run/i.test(t))continue;
+   const t=String(a.sport_type||a.type||"");
+   if(!/Run/i.test(t)){const key=svActType(t);if(!key)continue;const src="strava:"+a.id;S.acts=S.acts||[];if(S.acts.some(x=>x.src===src))continue;
+    const min=Math.round((a.moving_time||a.elapsed_time||0)/60);if(min<5)continue;
+    S.acts.push({id:uid(),date:String(a.start_date_local||a.start_date||"").slice(0,10)||TODAY(),type:key,min,int:svInt(a),kcal:a.kilojoules?Math.round(a.kilojoules):0,src,via:"Strava"});added++;continue}
    const src="strava:"+a.id;if(S.runs.some(x=>x.src===src))continue;
    const km=(a.distance||0)/1000,sec=a.moving_time||a.elapsed_time||0;if(!(km>0.2&&sec>0))continue;
    S.runs.push({id:uid(),date:String(a.start_date_local||a.start_date||"").slice(0,10)||TODAY(),km:r1(km),sec,type:svRunType(a),src,via:"Strava",title:a.name||""});added++;
   }
   SV.last=Date.now();svSave();if(added)save();
   SVUI.msg=added?(added===1?"1 neuer Lauf":added+" neue Läufe"):"alles aktuell";
-  if(added)render(true);if(manual||added)toast(added?SVUI.msg+" von Strava":"Strava: alles aktuell");
+  if(added)render(true);if(manual||added)toast(added?SVUI.msg.replace("Läufe","Aktivitäten").replace("Lauf","Aktivität")+" von Strava":"Strava: alles aktuell");
  }catch(e){
   const bad=e.status===400||e.status===401;
   SVUI.msg=e.message==="auth"||bad?"Strava-Anmeldung abgelaufen. Bitte neu verbinden.":e.message==="rate"?"Strava-Limit erreicht. Versuch es in 15 Minuten nochmal.":"Strava nicht erreichbar. Prüfe deine Internetverbindung.";
@@ -549,7 +629,8 @@ function paintStrava(){const el=document.getElementById("strava");if(el)el.inner
 // ---------- Berechnungen ----------
 function targets(p=S.profile){
  const bmr=10*p.weight+6.25*p.height-5*p.age+(p.sex==="m"?5:-161);
- const tdee=bmr*p.activity;
+ const ALLTAG={1.2:1.2,1.375:1.35,1.55:1.5,1.725:1.65},af=ALLTAG[p.activity]||Math.min(p.activity,1.65);
+ const tdee=bmr*af;
  const kcal=Math.round((tdee+(p.goal==="lose"?-500:p.goal==="gain"?300:0))/10)*10;
  const prot=Math.round(p.weight*(p.goal==="lose"?2:p.goal==="gain"?1.8:1.6));
  const fat=Math.round(kcal*0.27/9);
@@ -559,9 +640,28 @@ function targets(p=S.profile){
 }
 const foodsOn=d=>S.foods.filter(f=>f.date===d);
 function sum(list){return list.reduce((a,f)=>({kcal:a.kcal+f.kcal,p:a.p+f.p,c:a.c+f.c,f:a.f+f.f,fib:a.fib+f.fib,sug:a.sug+f.sug}),{kcal:0,p:0,c:0,f:0,fib:0,sug:0})}
-const runKcal=r=>r.km*S.profile.weight*1.0;
-const wkKcal=w=>w.min*6;
-function burnedOn(d){return S.runs.filter(r=>r.date===d).reduce((a,r)=>a+runKcal(r),0)+S.workouts.filter(w=>w.date===d).reduce((a,w)=>a+wkKcal(w),0)}
+// Verbrauch nach MET (Compendium of Physical Activities). Gezählt wird nur der Mehrverbrauch über Ruhe (MET − 1),
+// weil der Grundumsatz schon im Tagesziel steckt.
+const INTS=[["leicht","Leicht"],["mittel","Mittel"],["hart","Hart"]];
+const INTF={leicht:.8,mittel:1,hart:1.2};
+const RUN_MET=[[6.4,6],[8,8.3],[9.7,9.8],[10.8,10.5],[11.3,11],[12.1,11.8],[12.9,12.3],[13.8,12.8],[14.5,13.8],[16.1,14.5],[17.7,16],[19.3,19]];
+function runMET(kmh){if(!(kmh>0))return 9.8;if(kmh<=RUN_MET[0][0])return Math.max(3.5,kmh/RUN_MET[0][0]*RUN_MET[0][1]);
+ for(let i=1;i<RUN_MET.length;i++){const[a,am]=RUN_MET[i-1],[b,bm]=RUN_MET[i];if(kmh<=b)return am+(bm-am)*(kmh-a)/(b-a)}return 19}
+const kgNow=()=>(S&&S.profile&&S.profile.weight)||75;
+function runKcal(r){const h=r.sec>0?r.sec/3600:r.km/9.5,kmh=r.sec>0?r.km/h:9.5;return Math.max(0,(runMET(kmh)-1)*kgNow()*h)}
+function runIntensity(r){const kmh=r.sec>0?r.km/(r.sec/3600):0;return kmh>=12.5?"hart":kmh>=9?"mittel":"leicht"}
+const WK_MET={leicht:3.5,mittel:5,hart:6};
+function wkKcal(w){return Math.max(0,((WK_MET[w.int||"mittel"]||5)-1)*kgNow()*(w.min||30)/60)}
+// Weitere Aktivitäten: [Schlüssel, Name, MET bei mittlerer Intensität]
+const ACT_TYPES=[["rad","Radfahren",7.5],["mtb","Mountainbike",8.5],["schwimmen","Schwimmen",7],["wandern","Wandern",6],["gehen","Spazieren / Gehen",3.5],
+ ["hiit","HIIT / Zirkeltraining",8],["kraft","Krafttraining (ohne App)",5],["crosstrainer","Crosstrainer",6],["rudern","Rudern / Rudergerät",7],
+ ["fussball","Fussball",7],["tennis","Tennis / Padel",7.3],["ski","Skifahren / Langlauf",7.5],["klettern","Klettern / Bouldern",7.5],
+ ["yoga","Yoga / Pilates",3],["tanzen","Tanzen",5],["arbeit","Körperliche Arbeit",4.5],["anderes","Andere Sportart",6]];
+const actType=k=>ACT_TYPES.find(a=>a[0]===k)||ACT_TYPES[ACT_TYPES.length-1];
+function actKcal(a){if(a.kcal>0)return a.kcal;const met=actType(a.type)[2]*(INTF[a.int||"mittel"]||1);return Math.max(0,(met-1)*kgNow()*(a.min||0)/60)}
+function burnedOn(d){return S.runs.filter(r=>r.date===d).reduce((a,r)=>a+runKcal(r),0)+S.workouts.filter(w=>w.date===d).reduce((a,w)=>a+wkKcal(w),0)+(S.acts||[]).filter(x=>x.date===d).reduce((a,x)=>a+actKcal(x),0)}
+// Tagesziel inkl. Training: Mehrverbrauch geht v. a. in Kohlenhydrate (65 %) und Fett (35 %)
+function dayTargets(d){const t=targets(),b=burnedOn(d);return{...t,base:t.kcal,burn:b,kcal:Math.round((t.kcal+b)/10)*10,carb:Math.round(t.carb+b*.65/4),fat:Math.round(t.fat+b*.35/9)}}
 function weekStart(off=0){const d=new Date();const wd=(d.getDay()+6)%7;d.setDate(d.getDate()-wd-7*off);return iso(d)}
 function inWeek(date,off=0){const s=weekStart(off);const e=new Date(s);e.setDate(e.getDate()+7);return date>=s&&date<iso(e)}
 const fmtTime=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return(h?h+":"+String(m).padStart(2,"0"):m)+":"+String(x).padStart(2,"0")};
@@ -600,10 +700,11 @@ function header(eye,title,right=""){return`<header class="top"><div><div class="
 
 // ---------- Ansichten ----------
 function viewHeute(){
- const t=targets(),s=sum(foodsOn(TODAY())),burn=burnedOn(TODAY());
- const left=t.kcal-s.kcal+burn;
+ const t=dayTargets(TODAY()),s=sum(foodsOn(TODAY())),burn=t.burn;
+ const left=t.kcal-s.kcal;
  const acts=[...S.runs.filter(r=>r.date===TODAY()).map(r=>`<div class="li"><span class="pill acc">Lauf</span><div class="grow"><div class="t">${de(r.km)} km · ${r.type}</div><div class="s">${fmtTime(r.sec)} · ${pace(r.sec,r.km)}</div></div><span class="num">${r0(runKcal(r))} kcal</span></div>`),
-  ...S.workouts.filter(w=>w.date===TODAY()).map(w=>`<div class="li"><span class="pill acc">Kraft</span><div class="grow"><div class="t">${w.name}</div><div class="s">${w.sets.length} Sätze · ${w.min} Min.</div></div><span class="num">${r0(wkKcal(w))} kcal</span></div>`)];
+  ...(S.acts||[]).filter(x=>x.date===TODAY()).map(x=>`<div class="li"><span class="pill acc">Sport</span><div class="grow"><div class="t">${esc(actType(x.type)[1])}</div><div class="s">${x.min} Min. · ${(INTS.find(i=>i[0]===x.int)||INTS[1])[1]}${x.kcal?" · von der Uhr":""}${x.via?" · "+esc(x.via):""}</div></div><span class="num">${r0(actKcal(x))} kcal</span><button class="icon-btn" aria-label="Aktivität entfernen" data-a="delAct" data-id="${x.id}">${I.x}</button></div>`),
+  ...S.workouts.filter(w=>w.date===TODAY()).map(w=>`<div class="li"><span class="pill acc">Kraft</span><div class="grow"><div class="t">${w.name}</div><div class="s">${w.sets.length} Sätze · ${w.min} Min. · ${(INTS.find(i=>i[0]===(w.int||"mittel"))||INTS[1])[1]}</div></div><span class="num">${r0(wkKcal(w))} kcal</span></div>`)];
  const wkm=S.runs.filter(r=>inWeek(r.date)).reduce((a,r)=>a+r.km,0);
  const wk=S.workouts.filter(w=>inWeek(w.date)).length;
  const tip=tips()[0],td=planDays()[(new Date().getDay()+6)%7],tiles=[],btns=[];
@@ -613,29 +714,29 @@ function viewHeute(){
  const st=streak();
  return header(dstr,S.profile.name?"Hallo "+esc(S.profile.name):"Dein Tag",`<span class="streak ${st?"":"off"}" title="Tage in Folge mit Einträgen">${I.flame}${st} ${st===1?"Tag":"Tage"}</span>`)+`<div class="stack">${exampleBanner()}
  <section class="card hero"><div class="ringwrap"><div class="ring">${ring(s.kcal,t.kcal)}<div class="c"><span class="big">${de(r0(Math.abs(left)))}</span><span class="small muted">${left>=0?"kcal übrig":"kcal drüber"}</span></div></div>
-  <div class="stack" style="gap:8px"><div class="kv"><span class="muted">Ziel</span><b>${de(t.kcal)}</b></div><div class="kv"><span class="muted">Gegessen</span><b>${de(r0(s.kcal))}</b></div><div class="kv"><span class="muted">Verbrannt</span><b>+${de(r0(burn))}</b></div></div></div>
+  <div class="stack" style="gap:8px"><div class="kv"><span class="muted">Grundziel</span><b>${de(t.base)}</b></div><div class="kv"><span class="muted">+ Training</span><b>${de(r0(burn))}</b></div><div class="kv"><span class="muted">Gegessen</span><b>${de(r0(s.kcal))}</b></div></div></div>
   ${macroBar("Protein",s.p,t.prot,"var(--prot)")}${macroBar("Kohlenhydrate",s.c,t.carb,"var(--carb)")}${macroBar("Fett",s.f,t.fat,"var(--fat)")}
   <div class="grid2"><button class="btn" data-a="addFood" data-meal="${suggestMeal()}">Essen erfassen</button><button class="btn ghost" data-a="scan" data-meal="${suggestMeal()}">Scannen</button></div></section>
  ${tip?`<section class="card"><div class="row between"><h2>Coach</h2><button class="link" data-go="coach">Alle Hinweise</button></div><div class="tip ${tip.k}"><i></i><div><div style="font-weight:600">${tip.t}</div><div class="small muted">${tip.d}</div></div></div></section>`:""}
  <section class="card"><div class="row between"><h2>Heute im Plan</h2>${td.opt?'<span class="pill">optional</span>':""}</div><div><div style="font-weight:600">${td.t}</div><div class="small muted">${td.d}</div></div></section>
  ${tiles.length?`<section class="card"><div class="row between"><h2>Diese Woche</h2><span class="small muted">seit Montag</span></div><div class="${tiles.length>1?"grid2":"stack"}">${tiles.join("")}</div></section>`:""}
- ${btns.length||acts.length?`<section class="card"><h2>Aktivität heute</h2>${acts.length?`<div class="list">${acts.join("")}</div>`:`<p class="muted small" style="margin:0">Noch nichts eingetragen.</p>`}
-  ${btns.length?`<div class="${btns.length>1?"grid2":"stack"}">${btns.join("")}</div>`:""}</section>`:""}</div>`;
+ <section class="card"><div class="row between"><h2>Aktivität heute</h2>${burn?`<span class="pill good">+${de(r0(burn))} kcal</span>`:""}</div>${acts.length?`<div class="list">${acts.join("")}</div>`:`<p class="muted small" style="margin:0">Noch nichts eingetragen. Jede Aktivität erhöht dein Kalorienziel für heute.</p>`}
+  ${btns.length?`<div class="${btns.length>1?"grid2":"stack"}">${btns.join("")}</div>`:""}<button class="btn ghost block" data-a="actOpen">Andere Aktivität eintragen</button></section></div>`;
 }
-function streak(){const days=new Set([...S.foods.map(f=>f.date),...S.runs.map(r=>r.date),...S.workouts.map(w=>w.date)]);
+function streak(){const days=new Set([...S.foods.map(f=>f.date),...S.runs.map(r=>r.date),...S.workouts.map(w=>w.date),...(S.acts||[]).map(x=>x.date)]);
  let n=0,d=new Date();if(!days.has(iso(d)))d.setDate(d.getDate()-1);while(days.has(iso(d))){n++;d.setDate(d.getDate()-1)}return n}
 function suggestMeal(){const h=new Date().getHours();return h<10?"Frühstück":h<14?"Mittagessen":h<17?"Snacks":"Abendessen"}
 
 function viewEssen(){
- const t=targets(),list=foodsOn(TODAY()),s=sum(list);
+ const t=dayTargets(TODAY()),list=foodsOn(TODAY()),s=sum(list);
  const meals=MEALS.map(m=>{const it=list.filter(f=>f.meal===m),ms=sum(it);
   return`<section class="card"><div class="row between"><h2>${m}</h2><span class="num muted" style="font-size:17px">${de(r0(ms.kcal))} kcal</span></div>
-  ${it.length?`<div class="list">${it.map(f=>`<div class="li"><div class="grow"><div class="t">${esc(f.name)}</div><div class="s">${f.g?de(f.g)+" g · ":""}P ${r0(f.p)} · K ${r0(f.c)} · F ${r0(f.f)}</div></div><span class="num" style="font-size:17px">${r0(f.kcal)}</span><button class="icon-btn" aria-label="${esc(f.name)} entfernen" data-a="delFood" data-id="${f.id}">${I.x}</button></div>`).join("")}</div>`:""}
+  ${it.length?`<div class="list">${it.map(f=>`<div class="li"><div class="grow"><div class="t">${esc(f.name)}${f.ai?' <span class="pill acc">KI</span>':""}</div><div class="s">${f.g?de(f.g)+" g · ":""}P ${r0(f.p)} · K ${r0(f.c)} · F ${r0(f.f)}</div></div><span class="num" style="font-size:17px">${r0(f.kcal)}</span><button class="icon-btn" aria-label="${esc(f.name)} entfernen" data-a="delFood" data-id="${f.id}">${I.x}</button></div>`).join("")}</div>`:""}
   <button class="link" style="text-align:left" data-a="addFood" data-meal="${m}">+ Lebensmittel hinzufügen</button></section>`}).join("");
  const row=(l,v,g,u,max)=>{const st=max?(v>g?"bad":"good"):(v>=g?"good":v>=g*.6?"warn":"");return`<div class="li"><div class="grow t" style="font-weight:500">${l}</div><span class="num" style="font-size:17px">${de(r1(v))} <span class="muted">${max?"max. ":"/ "}${g} ${u}</span></span>${st?`<span class="pill ${st}">${st==="good"?"ok":st==="bad"?"zu viel":"fehlt"}</span>`:'<span class="pill">offen</span>'}</div>`};
  return header("Ernährung","Kalorien & Nährwerte")+`<div class="stack">
  <section class="card"><div class="row between"><h2>Heute</h2><span class="num" style="font-size:22px;font-weight:700">${de(r0(s.kcal))} <span class="muted" style="font-size:15px">/ ${de(t.kcal)} kcal</span></span></div>
- ${macroBar("Protein",s.p,t.prot,"var(--prot)")}${macroBar("Kohlenhydrate",s.c,t.carb,"var(--carb)")}${macroBar("Fett",s.f,t.fat,"var(--fat)")}<div class="grid2"><button class="btn" data-a="scan" data-meal="${suggestMeal()}">Barcode scannen</button><button class="btn ghost" data-a="addFood" data-meal="${suggestMeal()}">Suchen</button></div></section>
+ ${macroBar("Protein",s.p,t.prot,"var(--prot)")}${macroBar("Kohlenhydrate",s.c,t.carb,"var(--carb)")}${macroBar("Fett",s.f,t.fat,"var(--fat)")}${t.burn?`<div class="small muted">Inklusive ${de(r0(t.burn))} kcal aus deinem Training heute.</div>`:""}<div class="grid3"><button class="btn ghost" data-a="addFood" data-meal="${suggestMeal()}">Suchen</button><button class="btn ghost" data-a="scan" data-meal="${suggestMeal()}">Scannen</button><button class="btn" data-a="aiPhoto" data-meal="${suggestMeal()}">Foto</button></div></section>
  ${meals}
  <section class="card"><h2>Nährwerte im Detail</h2><div class="list">
  ${row("Energie",s.kcal,t.kcal,"kcal",true)}${row("Protein",s.p,t.prot,"g")}${row("Kohlenhydrate",s.c,t.carb,"g")}${row("davon Zucker",s.sug,t.sug,"g",true)}${row("Fett",s.f,t.fat,"g")}${row("Ballaststoffe",s.fib,t.fib,"g")}
@@ -689,7 +790,7 @@ function viewLaufen(){
   <div><div class="eyebrow">Ø Pace</div><div class="num" style="font-size:26px;font-weight:700">${km?fmtTime(sec/km):"–"}</div></div></div>
   <div class="bar"><i style="width:${Math.min(100,km/t.km*100)}%;background:var(--accent)"></i></div><div class="small muted">Wochenziel ${t.km} km${best5?` · Beste Pace ab 5 km: ${fmtTime(best5)} /km`:""}</div>
   <div class="chart">${kmChart()}</div></section>
- <section class="card"><h2>Verlauf</h2>${runs.length?`<div class="list">${runs.map(r=>`<div class="li"><div class="grow"><div class="t">${de(r.km)} km · ${r.type}</div><div class="s">${dateLabel(r.date)} · ${fmtTime(r.sec)} · ${pace(r.sec,r.km)}${r.via?" · "+r.via:""}</div></div><button class="icon-btn" aria-label="Lauf entfernen" data-a="delRun" data-id="${r.id}">${I.x}</button></div>`).join("")}</div>`:`<p class="muted small" style="margin:0">Noch keine Läufe.</p>`}</section></div>`;
+ <section class="card"><h2>Verlauf</h2>${runs.length?`<div class="list">${runs.map(r=>`<div class="li"><div class="grow"><div class="t">${de(r.km)} km · ${r.type}</div><div class="s">${dateLabel(r.date)} · ${fmtTime(r.sec)} · ${pace(r.sec,r.km)} · ${de(r0(runKcal(r)))} kcal${r.via?" · "+r.via:""}</div></div><button class="icon-btn" aria-label="Lauf entfernen" data-a="delRun" data-id="${r.id}">${I.x}</button></div>`).join("")}</div>`:`<p class="muted small" style="margin:0">Noch keine Läufe.</p>`}</section></div>`;
 }
 function kmChart(){
  const weeks=[5,4,3,2,1,0].map(o=>({o,km:S.runs.filter(r=>inWeek(r.date,o)).reduce((a,r)=>a+r.km,0)}));
@@ -716,13 +817,14 @@ function viewKraft(){
    <div class="sethead"><span>Satz</span><span>kg</span><span>Wdh.</span><span></span></div>
    ${x.sets.map((s,si)=>`<div class="setrow"><span class="setno">${si+1}</span><input inputmode="decimal" aria-label="${x.e} Satz ${si+1} kg" data-set="${xi}-${si}-kg" value="${s.kg}"><input inputmode="numeric" aria-label="${x.e} Satz ${si+1} Wiederholungen" data-set="${xi}-${si}-reps" value="${s.reps}"><button class="check" aria-pressed="${s.done}" aria-label="Satz erledigt" data-a="doneSet" data-x="${xi}" data-s="${si}">${I.ok}</button></div>`).join("")}</div>`).join("")}
   <div class="row between" style="background:var(--surface2);border-radius:12px;padding:10px 12px"><span>Satzpause <span class="num" style="font-size:22px;font-weight:700" id="rest">${REST.left?fmtTime(REST.left):"1:30"}</span></span><button class="btn sm ghost" style="background:var(--surface)" data-a="rest">${REST.left?"Stopp":"Start"}</button></div>
+  <div class="stack" style="gap:6px"><div class="small" style="font-weight:600">Wie anstrengend war es?</div><div class="grid3">${INTS.map(([k,l])=>`<button class="chip" data-a="wkInt" data-v="${k}" aria-pressed="${(CUR.int||"mittel")===k}">${l}</button>`).join("")}</div></div>
   <button class="btn block" data-a="saveWk">Training speichern</button></section>`
  :`<section class="card"><h2>Training starten</h2><p class="small muted" style="margin:0">Wähle eine Vorlage. Du startest mit einem passenden Aufwärmprogramm und wirst mit Animationen durch jede Übung geführt.</p><div class="row between" style="gap:8px"><span class="small"><span class="muted">Passend zu:</span> ${esc(equipLabel(S.profile.equip))}</span><button class="link small" data-go="coach">Ändern</button></div>
   <div class="grid2">${Object.keys(TEMPLATES).map(n=>`<button class="card tile lift" data-a="startWk" data-n="${n}"><span class="num" style="font-size:22px;font-weight:700">${n}</span><span class="small muted">${TEMPLATES[n].slice(0,2).join(", ")} …</span></button>`).join("")}</div></section>`;
  return header("Krafttraining","Kraft-Tracker")+`<div class="stack">${cur}
  <section class="card"><h2>Bestleistungen</h2><p class="small muted" style="margin:0">Geschätztes Maximalgewicht für 1 Wiederholung (Epley-Formel).</p>
  ${Object.keys(pr).length?`<div class="list">${Object.entries(pr).sort((a,b)=>b[1].v-a[1].v).map(([e,p])=>`<div class="li"><div class="grow"><div class="t">${e}</div><div class="s">bester Satz ${de(p.kg)} kg × ${p.reps}</div></div><span class="num" style="font-size:20px;font-weight:700">${de(r0(p.v))} <span class="muted" style="font-size:14px">kg</span></span></div>`).join("")}</div>`:`<p class="small muted">Noch keine Daten.</p>`}</section>
- <section class="card"><h2>Verlauf</h2>${hist.length?`<div class="list">${hist.map(w=>{const vol=w.sets.reduce((a,s)=>a+s.kg*s.reps,0);return`<div class="li"><div class="grow"><div class="t">${w.name}</div><div class="s">${dateLabel(w.date)} · ${w.sets.length} Sätze · ${de(r0(vol))} kg Volumen</div></div><button class="icon-btn" aria-label="Training entfernen" data-a="delWk" data-id="${w.id}">${I.x}</button></div>`}).join("")}</div>`:`<p class="small muted" style="margin:0">Noch keine Trainings.</p>`}</section></div>`;
+ <section class="card"><h2>Verlauf</h2>${hist.length?`<div class="list">${hist.map(w=>{const vol=w.sets.reduce((a,s)=>a+s.kg*s.reps,0);return`<div class="li"><div class="grow"><div class="t">${w.name}</div><div class="s">${dateLabel(w.date)} · ${w.sets.length} Sätze · ${de(r0(vol))} kg Volumen · ${de(r0(wkKcal(w)))} kcal</div></div><button class="icon-btn" aria-label="Training entfernen" data-a="delWk" data-id="${w.id}">${I.x}</button></div>`}).join("")}</div>`:`<p class="small muted" style="margin:0">Noch keine Trainings.</p>`}</section></div>`;
 }
 
 // Coach
@@ -778,15 +880,15 @@ function viewCoach(){
  <section class="card"><div class="row between"><h2>Wochenplan</h2><span class="pill">${{lose:"Abnehmen",keep:"Halten",gain:"Aufbauen"}[p.goal]}</span></div><div>${plan()}</div></section>
  ${weightCard()}
  <section class="card"><h2>Deine Ziele</h2>
-  <div class="grid2"><div><div class="eyebrow">Kalorien / Tag</div><div class="num" style="font-size:30px;font-weight:700">${de(t.kcal)}</div></div>${t.km?`<div><div class="eyebrow">Laufen / Woche</div><div class="num" style="font-size:30px;font-weight:700">${t.km} km</div></div>`:`<div><div class="eyebrow">Training</div><div class="num" style="font-size:30px;font-weight:700">${TRAINLBL[p.train||"both"]}</div></div>`}</div>
+  <div class="grid2"><div><div class="eyebrow">Kalorien / Tag ohne Training</div><div class="num" style="font-size:30px;font-weight:700">${de(t.kcal)}</div></div>${t.km?`<div><div class="eyebrow">Laufen / Woche</div><div class="num" style="font-size:30px;font-weight:700">${t.km} km</div></div>`:`<div><div class="eyebrow">Training</div><div class="num" style="font-size:30px;font-weight:700">${TRAINLBL[p.train||"both"]}</div></div>`}</div>
   <div class="grid3"><div><div class="eyebrow" style="color:var(--prot)">Protein</div><div class="num" style="font-size:22px;font-weight:700">${t.prot} g</div></div><div><div class="eyebrow" style="color:var(--carb)">KH</div><div class="num" style="font-size:22px;font-weight:700">${t.carb} g</div></div><div><div class="eyebrow" style="color:var(--fat)">Fett</div><div class="num" style="font-size:22px;font-weight:700">${t.fat} g</div></div></div>
-  <p class="small muted" style="margin:0">Grundumsatz ${de(t.bmr)} kcal, Gesamtumsatz ${de(t.tdee)} kcal (Mifflin-St-Jeor). ${p.goal==="lose"?"Minus 500 kcal ergibt etwa 0,5 kg pro Woche.":p.goal==="gain"?"Plus 300 kcal für sauberen Muskelaufbau.":""}</p></section>
+  <p class="small muted" style="margin:0">Grundumsatz ${de(t.bmr)} kcal, Alltagsverbrauch ${de(t.tdee)} kcal (Mifflin-St-Jeor). Dazu kommt an jedem Tag dein Training, berechnet nach Art, Dauer und Intensität. ${p.goal==="lose"?"Minus 500 kcal ergibt etwa 0,5 kg pro Woche.":p.goal==="gain"?"Plus 300 kcal für sauberen Muskelaufbau.":""}</p></section>
  ${accountCard()}
  <section class="card"><h2>Profil</h2>
   <div class="grid2"><label class="f">Name<input id="name" data-p="name" value="${esc(p.name||"")}"></label><label class="f">Zielgewicht (kg)<input id="targetWeight" data-p="targetWeight" inputmode="decimal" value="${p.targetWeight||""}"></label></div>
   <div class="grid2"><label class="f">Geschlecht${sel("sex",[["m","Männlich"],["w","Weiblich"]],p.sex)}</label><label class="f">Alter<input id="age" data-p="age" inputmode="numeric" value="${p.age}"></label>
   <label class="f">Größe (cm)<input id="height" data-p="height" inputmode="numeric" value="${p.height}"></label><label class="f">Gewicht (kg)<input id="weight" data-p="weight" inputmode="decimal" value="${p.weight}"></label></div>
-  <label class="f">Alltag & Training${sel("activity",[[1.2,"Sitzend, kaum Bewegung"],[1.375,"Leicht aktiv, 1–2 × Sport"],[1.55,"Aktiv, 3–5 × Sport"],[1.725,"Sehr aktiv, 6–7 × Sport"]],p.activity)}</label>
+  <label class="f">Alltag (ohne Sport)${sel("activity",[[1.2,"Sitzend, Bürojob"],[1.375,"Leicht aktiv, viel zu Fuss"],[1.55,"Aktiv, Stehberuf / unterwegs"],[1.725,"Sehr aktiv, körperliche Arbeit"]],p.activity)}</label>
   <div class="grid2"><label class="f">Ziel${sel("goal",[["lose","Abnehmen"],["keep","Gewicht halten"],["gain","Muskelaufbau"]],p.goal)}</label><label class="f">Training${sel("train",[["both","Laufen + Kraft"],["run","Nur Laufen"],["strength","Nur Kraft"],["none","Kein festes Training"]],p.train||"both")}</label></div>
   ${trains("run")?`<label class="f">Lauf-Level${sel("level",[["easy","Einsteiger"],["mid","Fortgeschritten"],["pro","Ambitioniert"]],p.level||"easy")}</label>`:""}
   ${trains("strength")?`<div class="f" style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.03em">Equipment<div class="row wrap" style="gap:6px">${EQUIP.map(([k,t])=>`<button class="chip" data-a="equip" data-v="${k}" aria-pressed="${(p.equip||["gym"]).includes(k)}">${t}</button>`).join("")}</div></div>`:""}
@@ -809,7 +911,7 @@ function weightCard(){
 let OB=null;
 const newOB=()=>({step:0,err:"",p:{name:"",sex:"",age:"",height:"",weight:"",targetWeight:"",activity:"",goal:"",level:"",train:"",equip:[]}});
 const TRAINS=[["both","Laufen und Kraft","Die beste Kombination für Ausdauer und Verletzungsschutz"],["run","Nur Laufen","Mit optionaler Kräftigung im Plan"],["strength","Nur Krafttraining","Dazu Bewegung im Alltag statt Laufen"],["none","Kein festes Training","Fokus auf Ernährung und Alltagsbewegung"]];
-const ACTS=[[1.2,"Sitzend","Bürojob, kaum Bewegung"],[1.375,"Leicht aktiv","1–2 × Sport pro Woche"],[1.55,"Aktiv","3–5 × Sport pro Woche"],[1.725,"Sehr aktiv","6–7 × Sport oder körperliche Arbeit"]];
+const ACTS=[[1.2,"Sitzend","Bürojob, wenig Bewegung"],[1.375,"Leicht aktiv","Viel zu Fuss, teils im Stehen"],[1.55,"Aktiv","Stehberuf, viel unterwegs (z. B. Handwerk, Hauswartung)"],[1.725,"Sehr aktiv","Schwere körperliche Arbeit"]];
 const GOALS=[["lose","Abnehmen","Moderates Defizit, Kraft halten"],["keep","Gewicht halten","Fitter werden, Form halten"],["gain","Muskelaufbau","Leichter Überschuss, viel Protein"]];
 const LEVELS=[["easy","Einsteiger","Bis 15 km pro Woche"],["mid","Fortgeschritten","15–30 km pro Woche"],["pro","Ambitioniert","Über 30 km pro Woche"]];
 function choice(k,v,t,d){return`<button class="choice" data-a="obPick" data-k="${k}" data-v="${v}" aria-pressed="${String(OB.p[k])===String(v)}"><span style="font-weight:700">${t}</span>${d?`<span class="small muted">${d}</span>`:""}</button>`}
@@ -820,7 +922,7 @@ function viewOnboarding(){
  if(s===0){title="Lass uns dich kennenlernen";h=`${CLOUD.status==="loading"?'<p class="small muted" style="margin:0">Ich suche nach deinem gespeicherten Fortschritt …</p>':""}<p class="muted" style="margin:0">Mit deinen Angaben berechne ich deinen Kalorienbedarf, deine Nährwert-Ziele und deinen Trainingsplan.</p>${obField("name","Wie heißt du?","","Vorname","text")}<div class="card" style="padding:14px;gap:8px"><div style="font-weight:700">Schon einen Sync-Code?</div><div class="small muted">Dann lade deinen Fortschritt von deinem anderen Gerät.</div><div class="row"><input id="syncin" placeholder="z. B. AB3K-9F2Q-XX7M-2QRT" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn ghost" data-a="syncLoad">Laden</button></div>${CLOUD.msg?`<div class="small" role="alert" style="color:var(--bad);font-weight:600">${esc(CLOUD.msg)}</div>`:""}<button class="link small" style="text-align:left" data-a="restore">Oder Sicherungsdatei wiederherstellen</button></div>`}
  else if(s===1){title="Geschlecht und Alter";h=`<div class="grid2">${choice("sex","m","Männlich")}${choice("sex","w","Weiblich")}</div>${obField("age","Alter","Jahre","z. B. 30","numeric")}<p class="small muted" style="margin:0">Beides brauche ich für deinen Grundumsatz.</p>`}
  else if(s===2){title="Größe und Gewicht";h=`${obField("height","Größe","cm","z. B. 178","numeric")}${obField("weight","Aktuelles Gewicht","kg","z. B. 82,5")}${obField("targetWeight","Zielgewicht (optional)","kg","z. B. 76")}`}
- else if(s===3){title="Wie aktiv bist du?";h=`<div class="stack" style="gap:10px">${ACTS.map(a=>choice("activity",a[0],a[1],a[2])).join("")}</div>`}
+ else if(s===3){title="Wie aktiv ist dein Alltag?";h=`<p class="muted" style="margin:0">Ohne Sport. Dein Training rechnet die App jeden Tag separat dazu, je nach Art und Intensität.</p><div class="stack" style="gap:10px">${ACTS.map(a=>choice("activity",a[0],a[1],a[2])).join("")}</div>`}
  else if(s===4){title="Was ist dein Ziel?";h=`<div class="stack" style="gap:10px">${GOALS.map(g=>choice("goal",g[0],g[1],g[2])).join("")}</div>`}
  else if(s===5){const tr=OB.p.train,run=tr==="both"||tr==="run";title="Was willst du trainieren?";
   h=`<div class="stack" style="gap:10px">${TRAINS.map(x=>choice("train",x[0],x[1],x[2])).join("")}</div>
@@ -885,12 +987,35 @@ function toast(msg){const d=document.createElement("div");d.className="toast";d.
 const num=v=>parseFloat(String(v).replace(",","."));
 function parseTime(s){const p=String(s).trim().split(":").map(Number);if(p.some(isNaN)||!p.length)return NaN;return p.reduce((a,v)=>a*60+v,0)}
 function bindPace(){const k=document.getElementById("rkm"),t=document.getElementById("rtime"),o=document.getElementById("rpace");
- const u=()=>{const km=num(k.value),s=parseTime(t.value);o.textContent="Pace: "+(km>0&&s>0?pace(s,km):"–")};k.oninput=t.oninput=u;u()}
+ const u=()=>{const km=num(k.value),s=parseTime(t.value);o.textContent="Pace: "+(km>0&&s>0?pace(s,km)+" · ca. "+de(r0(runKcal({km,sec:s})))+" kcal":"–")};k.oninput=t.oninput=u;u()}
 
 // Essen-Sheet
 let SHEET=null;
 function openFood(meal){SHEET={meal,q:"",pick:null,g:100,custom:false};drawSheet()}
-const allFoods=()=>[...Object.entries((S&&S.products)||{}).map(([k,v])=>({...v,key:"p:"+k,mine:true})),...FOODS.map(f=>({...f,key:"f:"+f.name}))];
+const normT=t=>String(t).toLowerCase().replace(/ä/g,"a").replace(/ö/g,"o").replace(/ü/g,"u").replace(/ß/g,"ss").replace(/[^a-z0-9 ]/g," ");
+function recentFoods(){const seen=new Set(),out=[];
+ for(const f of [...(S?S.foods:[])].reverse()){if(!(f.g>0)||seen.has(f.name))continue;seen.add(f.name);const k=100/f.g;
+  out.push({name:f.name,kcal:f.kcal*k,p:f.p*k,c:f.c*k,f:f.f*k,fib:(f.fib||0)*k,sug:(f.sug||0)*k,portion:f.g,unit:"",key:"r:"+f.name,recent:true});if(out.length>=8)break}
+ return out}
+let ONLINE={q:"",res:[],busy:false,err:""};
+const allFoods=()=>[...recentFoods(),...Object.entries((S&&S.products)||{}).map(([k,v])=>({...v,key:"p:"+k,mine:true})),...FOODS.map(f=>({...f,key:"f:"+f.name})),...ONLINE.res];
+function searchFoods(q){
+ const all=allFoods(),nq=normT(q).trim();
+ if(!nq)return all.filter(f=>f.recent).concat(all.filter(f=>f.mine)).slice(0,14);
+ const words=nq.split(/\s+/),seen=new Set(),hits=[];
+ for(const f of all){if(f.recent||seen.has(f.name))continue;const n=normT(f.name);if(!words.every(w=>n.includes(w)))continue;seen.add(f.name);
+  const score=(n.startsWith(nq)?0:n.split(" ").some(x=>x.startsWith(words[0]))?1:2)+(f.online?3:0);hits.push([score,f])}
+ return hits.sort((a,b)=>a[0]-b[0]||a[1].name.length-b[1].name.length).map(x=>x[1]).slice(0,40);
+}
+async function onlineSearch(q){
+ ONLINE={q,res:[],busy:true,err:""};drawSheet();
+ try{const r=await fetch("https://world.openfoodfacts.org/cgi/search.pl?search_terms="+encodeURIComponent(q)+"&search_simple=1&action=process&json=1&page_size=24&lc=de&fields=code,product_name,product_name_de,brands,nutriments,serving_quantity");
+  const j=await r.json();
+  const res=(j.products||[]).map(p=>offToProd(p,p.code||"")).filter(p=>p.name&&p.kcal!=="").map(p=>{const z=x=>x===""?0:x;return{name:p.name,kcal:p.kcal,p:z(p.p),c:z(p.c),sug:z(p.sug),f:z(p.f),fib:z(p.fib),portion:z(p.portion),ean:p.ean,src:"off",online:true,key:"o:"+(p.ean||p.name)}});
+  ONLINE={q,res,busy:false,err:res.length?"":"Online nichts gefunden. Versuch einen anderen Begriff."};
+ }catch(e){ONLINE={q,res:[],busy:false,err:"Keine Verbindung zur Online-Datenbank."}}
+ if(SHEET&&!SHEET.pick&&!SHEET.scan)drawSheet();
+}
 
 // ---------- Barcode-Scanner: Live-Kamera + Open Food Facts ----------
 const CAM={stream:null,timer:null};
@@ -992,7 +1117,23 @@ async function handleEan(ean){
  }
 }
 
-function closeSheet(){stopCam();SHEET=null;document.getElementById("overlay").innerHTML=""}
+function closeSheet(){stopCam();SHEET=null;ACT=null;document.getElementById("overlay").innerHTML=""}
+let ACT=null;
+function drawAct(){
+ const a=ACT,est=actKcal({type:a.type,min:num(a.min)||0,int:a.int,kcal:num(a.kcal)||0});
+ document.getElementById("overlay").innerHTML=`<div class="scrim" data-a="sScrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Aktivität eintragen"><div class="grab"></div>
+ <div class="row between"><h2>Aktivität eintragen</h2><button class="icon-btn" aria-label="Schließen" data-a="sClose">${I.x}</button></div>
+ <label class="f">Sportart<select id="act-type">${ACT_TYPES.map(([k,l])=>`<option value="${k}" ${k===a.type?"selected":""}>${l}</option>`).join("")}</select></label>
+ <div class="grid2"><label class="f">Dauer (Minuten)<input id="act-min" inputmode="numeric" value="${esc(a.min)}" placeholder="45"></label><label class="f">Datum<input id="act-date" type="date" value="${a.date}"></label></div>
+ <div class="stack" style="gap:6px"><div class="small" style="font-weight:600">Intensität</div><div class="grid3">${INTS.map(([k,l])=>`<button class="chip" data-a="actInt" data-v="${k}" aria-pressed="${a.int===k}">${l}</button>`).join("")}</div>
+ <div class="small muted">Leicht: Unterhaltung locker möglich. Mittel: etwas ausser Atem. Hart: kaum sprechen möglich.</div></div>
+ <label class="f">Kalorien laut Uhr (optional)<input id="act-kcal" inputmode="numeric" value="${esc(a.kcal)}" placeholder="leer = App rechnet"></label>
+ <div class="card" style="padding:12px;flex-direction:row;justify-content:space-between;align-items:center;background:var(--surface2)"><span>Verbrauch</span><b class="num" style="font-size:24px" id="act-est">${de(r0(est))} kcal</b></div>
+ <button class="btn block" data-a="actSave">Speichern</button></div></div>`;
+ const upd=()=>{ACT.type=document.getElementById("act-type").value;ACT.min=document.getElementById("act-min").value;ACT.kcal=document.getElementById("act-kcal").value;ACT.date=document.getElementById("act-date").value||TODAY();
+  document.getElementById("act-est").textContent=de(r0(actKcal({type:ACT.type,min:num(ACT.min)||0,int:ACT.int,kcal:num(ACT.kcal)||0})))+" kcal"};
+ ["act-type","act-min","act-kcal","act-date"].forEach(id=>{const el=document.getElementById(id);el.oninput=upd;el.onchange=upd});
+}
 function drawSheet(){
  const s=SHEET,ov=document.getElementById("overlay");
  const mealSel=`<label class="f">Mahlzeit<select id="smeal">${MEALS.map(m=>`<option ${m===s.meal?"selected":""}>${m}</option>`).join("")}</select></label>`;
@@ -1004,16 +1145,20 @@ function drawSheet(){
  else if(s.pick){const f=s.pick,k=s.g/100;
   body=`<div class="row between"><h2>${esc(f.name)}</h2><button class="link" data-a="sBack">Zurück</button></div>${f.src==="off"?'<div class="small muted">Nährwerte pro 100 g von Open Food Facts</div>':""}
   <label class="f">Menge (g)<input id="sg" inputmode="decimal" value="${s.g}"></label>
-  <div class="row wrap" style="gap:6px">${[50,100,150,200,250].map(g=>`<button class="chip" data-a="sQuick" data-g="${g}" aria-pressed="${s.g===g}">${g} g</button>`).join("")}</div>
+  <div class="row wrap" style="gap:6px">${f.unit&&f.portion?[.5,1,2,3].map(m=>`<button class="chip" data-a="sPortion" data-g="${f.portion*m}" aria-pressed="${s.g===r1(f.portion*m)}">${String(m).replace(".",",")} ${esc(f.unit)}</button>`).join(""):""}${[50,100,150,200,250].map(g=>`<button class="chip" data-a="sQuick" data-g="${g}" aria-pressed="${s.g===g}">${g} g</button>`).join("")}</div>
+  ${f.unit&&f.portion?`<div class="small muted">1 ${esc(f.unit)} ≈ ${de(f.portion)} g</div>`:""}
   <div class="card" style="padding:12px;gap:6px"><div class="kv"><span>Energie</span><b id="pk">${r0(f.kcal*k)} kcal</b></div><div class="kv"><span style="color:var(--prot)">Protein</span><b id="pp">${r1(f.p*k)} g</b></div><div class="kv"><span style="color:var(--carb)">Kohlenhydrate</span><b id="pc">${r1(f.c*k)} g</b></div><div class="kv"><span style="color:var(--fat)">Fett</span><b id="pf">${r1(f.f*k)} g</b></div><div class="kv muted"><span>Ballaststoffe · Zucker</span><b id="px">${r1(f.fib*k)} · ${r1(f.sug*k)} g</b></div></div>
   ${mealSel}<button class="btn block" data-a="sAdd">Zu ${s.meal} hinzufügen</button>`}
- else{const q=s.q.toLowerCase(),res=allFoods().filter(f=>f.name.toLowerCase().includes(q));
+ else{const res=searchFoods(s.q),qq=s.q.trim();
   body=`<div class="row between"><h2>Lebensmittel suchen</h2><button class="icon-btn" aria-label="Schließen" data-a="sClose">${I.x}</button></div>
-  <div class="row"><input id="sq" placeholder="Suchen, z. B. Quark" value="${esc(s.q)}" autocomplete="off"><button class="btn" data-a="scan">Scannen</button></div>
-  <div class="list" id="sres">${res.map(f=>`<button class="li" style="text-align:left;width:100%" data-a="sPick" data-k="${esc(f.key)}"><div class="grow"><div class="t">${esc(f.name)}${f.mine?' <span class="pill acc">gescannt</span>':""}</div><div class="s">pro 100 g · P ${r1(f.p)} · K ${r1(f.c)} · F ${r1(f.f)}</div></div><span class="num" style="font-size:17px">${r0(f.kcal)}</span></button>`).join("")||`<p class="small muted">Nichts gefunden. Scanne das Produkt oder gib es selbst ein.</p>`}</div>
+  <input id="sq" placeholder="Suchen, z. B. Quark, Rösti, Banane" value="${esc(s.q)}" autocomplete="off">
+  <div class="grid2"><button class="btn ghost" data-a="scan">Barcode</button><button class="btn" data-a="aiPhoto">Foto vom Essen</button></div>
+  ${!qq&&res.length?'<div class="eyebrow">Zuletzt & eigene</div>':""}
+  <div class="list" id="sres">${res.map(f=>`<button class="li" style="text-align:left;width:100%" data-a="sPick" data-k="${esc(f.key)}"><div class="grow"><div class="t">${esc(f.name)}${f.mine?' <span class="pill acc">gespeichert</span>':""}${f.online?' <span class="pill">online</span>':""}</div><div class="s">${f.recent?"zuletzt "+de(r0(f.portion))+" g":f.unit&&f.portion?"1 "+esc(f.unit)+" = "+de(f.portion)+" g":"pro 100 g"} · P ${r1(f.p)} · K ${r1(f.c)} · F ${r1(f.f)}</div></div><span class="num" style="font-size:17px">${r0(f.recent?f.kcal*f.portion/100:f.unit&&f.portion?f.kcal*f.portion/100:f.kcal)}</span></button>`).join("")||(qq?`<p class="small muted">Lokal nichts gefunden.</p>`:`<p class="small muted">Tippe einen Namen ein. Über ${FOODS.length} Lebensmittel sind gespeichert, alles Weitere findest du online.</p>`)}</div>
+  ${qq.length>=3?(ONLINE.busy&&ONLINE.q===qq?`<div class="row" style="justify-content:center;gap:8px"><div class="spin" style="width:20px;height:20px"></div><span class="small muted">Suche online …</span></div>`:ONLINE.q===qq&&ONLINE.err?`<p class="small muted">${esc(ONLINE.err)}</p>`:ONLINE.q===qq?"":`<button class="btn ghost block" data-a="sOnline">Online suchen: „${esc(qq)}“</button>`):""}
   <button class="btn ghost block" data-a="sCustom">Eigenes Lebensmittel eingeben</button>`}
  ov.innerHTML=`<div class="scrim" data-a="sScrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Lebensmittel hinzufügen"><div class="grab"></div>${body}</div></div>`;
- const sq=document.getElementById("sq");if(sq){sq.oninput=()=>{SHEET.q=sq.value;const pos=sq.selectionStart;drawSheet();const n=document.getElementById("sq");n.focus();n.setSelectionRange(pos,pos)}}
+ const sq=document.getElementById("sq");if(sq){sq.oninput=()=>{SHEET.q=sq.value;if(ONLINE.q&&ONLINE.q!==sq.value.trim()&&!ONLINE.busy)ONLINE={q:"",res:[],busy:false,err:""};const pos=sq.selectionStart;drawSheet();const n=document.getElementById("sq");n.focus();n.setSelectionRange(pos,pos)}}
  const sg=document.getElementById("sg");if(sg)sg.oninput=()=>{const g=num(sg.value)||0;SHEET.g=g;const f=SHEET.pick,k=g/100;
   pk.textContent=r0(f.kcal*k)+" kcal";pp.textContent=r1(f.p*k)+" g";pc.textContent=r1(f.c*k)+" g";pf.textContent=r1(f.f*k)+" g";px.textContent=r1(f.fib*k)+" · "+r1(f.sug*k)+" g"};
  const sm=document.getElementById("smeal");if(sm)sm.onchange=()=>{SHEET.meal=sm.value};
@@ -1029,7 +1174,18 @@ document.addEventListener("click",ev=>{
   case"addFood":openFood(d.meal);break;
   case"delFood":S.foods=S.foods.filter(f=>f.id!==d.id);save();render(true);break;
   case"sClose":case"sScrim":closeSheet();break;
-  case"sPick":{const f=allFoods().find(x=>x.key===d.k);if(!f)break;SHEET.pick=f;SHEET.g=f.portion||100;drawSheet();break}
+  case"actOpen":SHEET=null;ACT={type:"rad",min:"",int:"mittel",kcal:"",date:TODAY()};drawAct();break;
+  case"actInt":ACT.int=d.v;drawAct();break;
+  case"actSave":{const m=num(ACT.min);if(!(m>0)){toast("Bitte die Dauer in Minuten eingeben");break}
+   S.acts=S.acts||[];const x={id:uid(),date:ACT.date||TODAY(),type:ACT.type,min:Math.round(m),int:ACT.int,kcal:num(ACT.kcal)>0?Math.round(num(ACT.kcal)):0};S.acts.push(x);
+   save();closeSheet();render(true);toast(actType(x.type)[1]+": +"+de(r0(actKcal(x)))+" kcal");break}
+  case"delAct":S.acts=(S.acts||[]).filter(x=>x.id!==d.id);save();render(true);break;
+  case"wkInt":if(CUR){CUR.int=d.v;render(true)}break;
+  case"sPick":{const f=allFoods().find(x=>x.key===d.k);if(!f)break;
+   if(f.online&&f.ean){S.products=S.products||{};S.products[f.ean]={name:f.name,kcal:f.kcal,p:f.p,c:f.c,sug:f.sug,f:f.f,fib:f.fib,portion:f.portion,ean:f.ean,src:"off"};save()}
+   SHEET.pick=f;SHEET.g=f.portion||100;drawSheet();break}
+  case"sOnline":onlineSearch(SHEET.q.trim());break;
+  case"sPortion":SHEET.g=r1(num(d.g));drawSheet();break;
   case"scan":if(!SHEET)openFood(d.meal||suggestMeal());SHEET.pick=null;SHEET.custom=false;SHEET.scan={stage:"live"};drawSheet();startCam();break;
   case"scanLive":SHEET.scan={stage:"live"};drawSheet();startCam();break;
   case"scanBack":stopCam();SHEET.scan=null;drawSheet();break;
@@ -1064,7 +1220,7 @@ document.addEventListener("click",ev=>{
   case"rest":REST.left?stopRest():startRest();render(true);break;
   case"saveWk":{const sets=[];CUR.ex.forEach(x=>x.sets.forEach(s=>{if(s.done&&num(s.reps)>0)sets.push({e:x.e,kg:num(s.kg)||0,reps:num(s.reps)})}));
    if(!sets.length){toast("Hake mindestens einen Satz ab");break}
-   S.workouts.push({id:uid(),date:TODAY(),name:CUR.name,min:Math.max(10,Math.round((Date.now()-CUR.start)/60000)),sets});CUR=null;stopRest();save();render();toast("Training gespeichert");break}
+   S.workouts.push({id:uid(),date:TODAY(),name:CUR.name,min:Math.max(10,Math.round((Date.now()-CUR.start)/60000)),int:CUR.int||"mittel",sets});CUR=null;stopRest();save();render();toast("Training gespeichert");break}
   case"delWk":S.workouts=S.workouts.filter(w=>w.id!==d.id);save();render(true);break;
   case"obEquip":OB.p.equip=toggleEquip(OB.p.equip,d.v);OB.err="";render(true);break;
   case"equip":{const n=toggleEquip(S.profile.equip||["gym"],d.v);if(!n.length){toast("Wähle mindestens eine Option");break}S.profile.equip=n;save();render(true);break}
@@ -1134,5 +1290,6 @@ cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
 <script src="guide.js"></script>
+<script src="ai.js"></script>
 </body>
 </html>

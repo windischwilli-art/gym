@@ -44,14 +44,22 @@
 - Zusätzlich kannst du weiterhin eine Sicherungsdatei in iCloud Drive speichern.
 - Gespeichert wird im selben Firebase-Projekt wie die Spanisch-App (Sammlung `syncStates`, Einträge beginnen mit `formwerk_`).
 
-## 6. Updates einspielen
+## 6. KI-Foto-Analyse einrichten (optional)
+
+- Coach → Daten & Verbindungen → **KI-Foto-Analyse einrichten**
+- **Google Gemini (kostenlos):** aistudio.google.com/apikey → API-Schlüssel erstellen → einfügen
+- **Claude (Anthropic):** console.anthropic.com → Guthaben aufladen → API Keys → Schlüssel einfügen
+- Danach unter Ernährung auf **Foto** tippen, Teller fotografieren, Werte prüfen, hinzufügen.
+
+## 7. Updates einspielen
 
 Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` die Zeile
-`const VERSION = "formwerk-v6";` hochzählen (v2, v3, …). Die App holt sich das Update beim nächsten Öffnen.
+`const VERSION = "formwerk-v7";` hochzählen (v2, v3, …). Die App holt sich das Update beim nächsten Öffnen.
 
 ## Was die App kann
 
-- Kalorien & Nährwerte mit Live-Barcode-Scanner (Produktdaten von Open Food Facts)
+- Kalorien & Nährwerte: über 200 Lebensmittel mit Portionsgrössen, Online-Suche, Live-Barcode-Scanner, KI-Foto-Schätzung
+- Kalorienziel passt sich täglich an Training, Sportart und Intensität an
 - Lauf-Tracker mit GPS, Pace, Wochenziel, automatischem Strava-Abgleich und Datei-Import (TCX/GPX)
 - Geführtes Krafttraining: passendes Aufwärmen, animierte Übungsanleitungen, Satz-für-Satz-Führung mit Pausentimer
 - Übungen passend zum eigenen Equipment, Bestleistungen und Verlauf
