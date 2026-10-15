@@ -371,7 +371,7 @@ function buildSteps(){
  return steps;
 }
 function open(mode){
- if(mode==="wk"&&!CUR)return;
+ if(mode==="wk"&&(!CUR||!CUR.ex.length)){if(CUR&&typeof toast==="function")toast("Füge zuerst Übungen hinzu");return}
  G2={mode,steps:mode==="run"?[...RUNWARM,{k:"rundone"}]:buildSteps(),i:0,start:Date.now()};
  if(typeof wakeOn==="function")wakeOn();
  beep(660,.01);// Audio freischalten
@@ -463,7 +463,8 @@ function readSet(){const st=G2.steps[G2.i],s=CUR.ex[st.x].sets[st.s];const kg=do
 function saveWorkout(){
  const sets=[];CUR.ex.forEach(x=>x.sets.forEach(s=>{if(s.done&&num(s.reps)>0)sets.push({e:x.e,kg:num(s.kg)||0,reps:num(s.reps)})}));
  if(!sets.length){toast("Hake mindestens einen Satz ab");return}
- S.workouts.push({id:uid(),date:TODAY(),name:CUR.name,min:Math.max(10,Math.round((Date.now()-CUR.start)/60000)),int:CUR.int||"mittel",sets});
+ const wd=CUR.date||TODAY(),wm=num(CUR.min)>0?Math.round(num(CUR.min)):wd!==TODAY()?60:Math.max(10,Math.round((Date.now()-CUR.start)/60000));
+ S.workouts.push({id:uid(),date:wd,name:CUR.name,min:wm,int:CUR.int||"mittel",sets});
  CUR=null;save();close();toast("Training gespeichert");
 }
 
@@ -531,7 +532,7 @@ function swList(name,exclude,grouped){
  ${o.other.length?`<details class="swgrp"><summary>Mit anderem Equipment <span class="muted small">${o.other.length}</span></summary><div class="stack" style="gap:8px;margin-top:8px">${o.other.map(n=>swOpt(n)).join("")}</div></details>`:""}`;
 }
 function tplList(name){return(TEMPLATES[name]||[]).slice()}
-function saveTpl(name,list){S.profile.tpl=S.profile.tpl||{};S.profile.tpl[name]=list;save()}
+function saveTpl(name,list){if(S.profile.myTpl&&S.profile.myTpl[name]){S.profile.myTpl[name]=list}else{S.profile.tpl=S.profile.tpl||{};S.profile.tpl[name]=list}save()}
 function drawSwap(){
  stopMini();const h=swHost();if(!SW){h.innerHTML="";return}
  let title="",body="";
@@ -555,7 +556,7 @@ function drawSwap(){
    <div class="stack" style="gap:4px;flex:none;align-items:flex-end"><button class="link small" data-sw="tswap" data-x="${i}">Tauschen</button><button class="link small" style="color:var(--muted)" data-sw="tdel" data-x="${i}">Entfernen</button>
    <span class="row" style="gap:10px">${i?`<button class="link small" data-sw="tup" data-x="${i}" aria-label="Nach oben">▲</button>`:""}${i<list.length-1?`<button class="link small" data-sw="tdown" data-x="${i}" aria-label="Nach unten">▼</button>`:""}</span></div></div>`).join("")}</div>
   <button class="btn ghost block" data-sw="tadd">+ Übung hinzufügen</button>
-  ${changed?`<button class="glink" style="align-self:center;color:var(--muted)" data-sw="treset">Standard wiederherstellen</button>`:""}
+  ${S.profile.myTpl&&S.profile.myTpl[SW.name]?`<button class="glink" style="align-self:center;color:var(--bad)" data-sw="tdelTpl">Eigene Vorlage löschen</button>`:changed?`<button class="glink" style="align-self:center;color:var(--muted)" data-sw="treset">Standard wiederherstellen</button>`:""}
   <button class="btn block" data-sw="close">Fertig</button>`;
  }
  h.innerHTML=`<div class="scrim gsw" data-sw="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc2(title)}"><div class="grab"></div>
@@ -602,6 +603,7 @@ document.addEventListener("click",ev=>{
   case"tadd":SW={kind:"tadd",name:SW.name};drawSwap();break;
   case"tdel":{const l=tplList(SW.name);if(l.length<=1){toast("Eine Vorlage braucht mindestens eine Übung");break}l.splice(+b.dataset.x,1);saveTpl(SW.name,l);drawSwap();if(typeof render==="function")render(true);break}
   case"tup":case"tdown":{const l=tplList(SW.name),i=+b.dataset.x,j=k==="tup"?i-1:i+1;[l[i],l[j]]=[l[j],l[i]];saveTpl(SW.name,l);drawSwap();if(typeof render==="function")render(true);break}
+  case"tdelTpl":{if(S.profile.myTpl){delete S.profile.myTpl[SW.name]}if(S.profile.tpl)delete S.profile.tpl[SW.name];save();SW=null;drawSwap();if(typeof render==="function")render(true);toast("Vorlage gelöscht");break}
   case"treset":{if(S.profile.tpl){delete S.profile.tpl[SW.name];save()}if(typeof render==="function")render(true);drawSwap();toast("Standard wiederhergestellt");break}
  }
 });

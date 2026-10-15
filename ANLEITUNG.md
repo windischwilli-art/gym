@@ -54,7 +54,7 @@
 ## 7. Updates einspielen
 
 Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` die Zeile
-`const VERSION = "formwerk-v9";` hochzählen (v10, v11, …) und in `index.html` die Zahl hinter `guide.js?v=` und `ai.js?v=` erhöhen. Die App holt sich das Update beim nächsten Öffnen.
+`const VERSION = "formwerk-v10";` hochzählen (v10, v11, …) und in `index.html` die Zahl hinter `guide.js?v=` und `ai.js?v=` erhöhen. Die App holt sich das Update beim nächsten Öffnen.
 
 ## Was die App kann
 
@@ -64,6 +64,8 @@ Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` d
 - Geführtes Krafttraining: passendes Aufwärmen, animierte Übungsanleitungen, Satz-für-Satz-Führung mit Pausentimer
 - Übungen passend zum eigenen Equipment, mit Alternativen zum Tauschen, eigenen Übungen und anpassbaren Vorlagen
 - Aufwärmprogramm vor dem Laufen
+- Eigene Trainings frei zusammenstellen, nachtragen und als Vorlage speichern
+- Kalender mit allen Trainings, Nachtragen pro Tag, Wochenplan in den iPhone-Kalender
 - Coach mit persönlichem Plan je nach Ziel und Trainingswahl, Gewichtsverlauf
 - Funktioniert offline (außer der Produktsuche beim ersten Scan eines neuen Produkts)
 
