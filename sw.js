@@ -1,11 +1,12 @@
 // Formwerk Service Worker: macht die App offline nutzbar.
 // Bei einem Update der App diese Versionsnummer erhöhen.
-const VERSION = "formwerk-v10";
+const VERSION = "formwerk-v11";
 const SHELL = [
   "./",
   "./index.html",
   "./guide.js",
   "./ai.js",
+  "./brief.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

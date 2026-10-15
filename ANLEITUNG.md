@@ -54,7 +54,7 @@
 ## 7. Updates einspielen
 
 Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` die Zeile
-`const VERSION = "formwerk-v10";` hochzählen (v10, v11, …) und in `index.html` die Zahl hinter `guide.js?v=` und `ai.js?v=` erhöhen. Die App holt sich das Update beim nächsten Öffnen.
+`const VERSION = "formwerk-v11";` hochzählen (v10, v11, …) und in `index.html` die Zahl hinter `guide.js?v=` und `ai.js?v=` erhöhen. Die App holt sich das Update beim nächsten Öffnen.
 
 ## Was die App kann
 
@@ -65,6 +65,7 @@ Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` d
 - Übungen passend zum eigenen Equipment, mit Alternativen zum Tauschen, eigenen Übungen und anpassbaren Vorlagen
 - Aufwärmprogramm vor dem Laufen
 - Eigene Trainings frei zusammenstellen, nachtragen und als Vorlage speichern
+- Tagesbericht beim ersten Öffnen: Plan für heute, Wochenziel, Ernährung der letzten 7 Tage, Tipps (optional mit KI)
 - Kalender mit allen Trainings, Nachtragen pro Tag, Wochenplan in den iPhone-Kalender
 - Coach mit persönlichem Plan je nach Ziel und Trainingswahl, Gewichtsverlauf
 - Funktioniert offline (außer der Produktsuche beim ersten Scan eines neuen Produkts)

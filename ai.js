@@ -193,4 +193,8 @@ css.textContent=`
 document.head.appendChild(css);
 try{if(typeof S!=="undefined"&&S&&typeof render==="function")render(true)}catch(e){}
 window.aiOpen=open;
+window.aiReady=ready;
+window.aiText=prompt=>callAI(CFG.prov,CFG.key,null,prompt);
+window.aiErr=errText;
+window.aiProvName=()=>CFG.prov?PROV[CFG.prov].name:"KI";
 })();

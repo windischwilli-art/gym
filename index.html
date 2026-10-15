@@ -732,6 +732,7 @@ function viewHeute(){
   <div class="stack" style="gap:8px"><div class="kv"><span class="muted">Grundziel</span><b>${de(t.base)}</b></div><div class="kv"><span class="muted">+ Training</span><b>${de(r0(burn))}</b></div><div class="kv"><span class="muted">Gegessen</span><b>${de(r0(s.kcal))}</b></div></div></div>
   ${macroBar("Protein",s.p,t.prot,"var(--prot)")}${macroBar("Kohlenhydrate",s.c,t.carb,"var(--carb)")}${macroBar("Fett",s.f,t.fat,"var(--fat)")}
   <div class="grid2"><button class="btn" data-a="addFood" data-meal="${suggestMeal()}">Essen erfassen</button><button class="btn ghost" data-a="scan" data-meal="${suggestMeal()}">Scannen</button></div></section>
+ ${window.briefCardHTML?window.briefCardHTML():""}
  ${tip?`<section class="card"><div class="row between"><h2>Coach</h2><button class="link" data-go="coach">Alle Hinweise</button></div><div class="tip ${tip.k}"><i></i><div><div style="font-weight:600">${tip.t}</div><div class="small muted">${tip.d}</div></div></div></section>`:""}
  <section class="card"><div class="row between"><h2>Heute im Plan</h2>${td.opt?'<span class="pill">optional</span>':""}</div><div><div style="font-weight:600">${td.t}</div><div class="small muted">${td.d}</div></div></section>
  ${tiles.length?`<section class="card"><div class="row between"><h2>Diese Woche</h2><span class="small muted">seit Montag</span></div><div class="${tiles.length>1?"grid2":"stack"}">${tiles.join("")}</div></section>`:""}
@@ -1406,7 +1407,8 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=10"></script>
-<script src="ai.js?v=10"></script>
+<script src="guide.js?v=11"></script>
+<script src="ai.js?v=11"></script>
+<script src="brief.js?v=11"></script>
 </body>
 </html>
