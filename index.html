@@ -346,7 +346,7 @@ function buildTemplates(eq){
 }
 const equipLabel=eq=>(eq&&eq.length?eq:["gym"]).map(k=>(EQUIP.find(e=>e[0]===k)||[k,k])[1]).join(", ");
 let TEMPLATES=buildTemplates(["gym"]);
-const RUNTYPES=["Locker","Tempo","Intervalle","Langer Lauf"];
+const RUNTYPES=["Locker","Tempo","Intervalle","Langer Lauf","Wettkampf"];
 
 const iso=d=>{const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
 const daysAgo=n=>{const d=new Date();d.setDate(d.getDate()-n);return iso(d)};
@@ -1414,9 +1414,9 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=14"></script>
-<script src="ai.js?v=14"></script>
-<script src="brief.js?v=14"></script>
-<script src="run.js?v=14"></script>
+<script src="guide.js?v=15"></script>
+<script src="ai.js?v=15"></script>
+<script src="brief.js?v=15"></script>
+<script src="run.js?v=15"></script>
 </body>
 </html>
