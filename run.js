@@ -7,7 +7,7 @@ const TYPES={iv:{name:"Intervalle",short:"INT",save:"Intervalle",color:"var(--ho
 const cfg=()=>(typeof S!=="undefined"&&S&&S.profile&&S.profile.runCfg)||null;
 const lvl=()=>(S.profile.level||"mid");
 const fmtP=s=>{s=Math.round(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
-const parseT=v=>{const p=String(v||"").trim().split(":").map(Number);if(!p.length||p.some(isNaN))return 0;return p.reduce((a,x)=>a*60+x,0)};
+const parseT=v=>{let t=String(v||"").trim().replace(/[.,\s]+/g,":");if(t&&!t.includes(":")&&window.timeMask)t=window.timeMask(t);const p=t.split(":").map(Number);if(!p.length||p.some(isNaN))return 0;return p.reduce((a,x)=>a*60+x,0)};
 const dIso=d=>iso(d);
 
 // ---------- Pace-Zonen ----------
@@ -97,7 +97,7 @@ function drawSetup(){
  <div><div class="rlab" style="--rc:${TYPES.easy.color}">Easy Run</div>${chips("easy")}</div>
  <div><div class="rlab" style="--rc:${TYPES.long.color}">Long Run</div>${chips("long")}</div>
  ${Math.abs(c.iv-c.long)===1||Math.abs(c.iv-c.long)===6?`<div class="tip warn"><i></i><div class="small">Intervalle direkt neben dem Long Run sind hart. Wenn möglich einen Tag Abstand lassen.</div></div>`:""}
- <div class="grid2"><label class="f">5-km-Bestzeit (optional)<input id="r-ref" inputmode="numeric" placeholder="z. B. 25:30" value="${c.ref5?fmtP(c.ref5):""}"></label><label class="f">Aktueller Long Run (km)<input id="r-long" inputmode="decimal" placeholder="${{easy:8,mid:12,pro:16}[lvl()]}" value="${c.longKm||""}"></label></div>
+ <div class="grid2"><label class="f">5-km-Bestzeit (optional)<input id="r-ref" inputmode="numeric" data-time placeholder="z. B. 25:30" value="${c.ref5?fmtP(c.ref5):""}"></label><label class="f">Aktueller Long Run (km)<input id="r-long" inputmode="decimal" placeholder="${{easy:8,mid:12,pro:16}[lvl()]}" value="${c.longKm||""}"></label></div>
  <label class="f">Dein Level<select id="r-lvl"><option value="easy" ${lvl()==="easy"?"selected":""}>Einsteiger</option><option value="mid" ${lvl()==="mid"?"selected":""}>Fortgeschritten</option><option value="pro" ${lvl()==="pro"?"selected":""}>Ambitioniert</option></select></label>
  <button class="btn block" data-r="save">Plan speichern</button>
  ${cfg()?`<button class="glink" style="align-self:center;color:var(--muted)" data-r="restart">Plan neu bei Woche 1 beginnen</button>`:""}</div></div>`;
@@ -159,7 +159,7 @@ function finishRun(){
  const h=host("rrun");
  h.innerHTML=`<div class="rp done" style="--rc:${TYPES[RUN.type].color}"><div class="rptop"><span></span><div class="eyebrow" style="color:#fff">Geschafft</div><span></span></div>
  <div class="rpname" style="margin-top:24px">${E(RUN.ses.title)}</div><div class="rpinfo">${RUN.result.gps?"Distanz per GPS gemessen":"Ohne GPS: Distanz aus deinem Plan geschätzt. Bitte prüfen."}</div>
- <div class="grid2" style="width:100%;max-width:360px"><label class="f" style="color:#fff">Distanz (km)<input id="rf-km" inputmode="decimal" value="${km>0?String(km).replace(".",","):""}" placeholder="z. B. 6,2"></label><label class="f" style="color:#fff">Dauer<input id="rf-t" value="${fmtP(sec)}"></label></div>
+ <div class="grid2" style="width:100%;max-width:360px"><label class="f" style="color:#fff">Distanz (km)<input id="rf-km" inputmode="decimal" value="${km>0?String(km).replace(".",","):""}" placeholder="z. B. 6,2"></label><label class="f" style="color:#fff">Dauer<input id="rf-t" inputmode="numeric" data-time value="${fmtP(sec)}"></label></div>
  <div class="rpbtns"><button class="btn ghost" data-r="discard">Verwerfen</button><button class="btn" data-r="saverun">Lauf speichern</button></div></div>`;
  beep(990,.25,2);
 }
@@ -174,7 +174,7 @@ document.addEventListener("click",ev=>{
   case"close":case"scrim":host("rsetup").innerHTML="";SET=null;break;
   case"day":{const i=+b.dataset.i,key=b.dataset.k;SET.ref5=parseT(document.getElementById("r-ref").value)||0;SET.longKm=parseFloat(String(document.getElementById("r-long").value).replace(",","."))||"";SET[key]=i;drawSetup();break}
   case"save":case"restart":{const ref=parseT(document.getElementById("r-ref").value),lk=parseFloat(String(document.getElementById("r-long").value).replace(",","."));
-   if(document.getElementById("r-ref").value.trim()&&!(ref>600&&ref<3600)){toast("Bitte die 5-km-Zeit als mm:ss eingeben, z. B. 25:30");break}
+   if(document.getElementById("r-ref").value.trim()&&!(ref>600&&ref<3600)){toast("Bitte die 5-km-Zeit eingeben, z. B. 2530 für 25:30");break}
    const old=cfg();S.profile.level=document.getElementById("r-lvl").value;
    S.profile.runCfg={iv:SET.iv,easy:SET.easy,long:SET.long,ref5:ref||0,longKm:lk>0?lk:0,start:k==="restart"||!old?weekStart():old.start};
    if(S.profile.train==="strength"||S.profile.train==="none")S.profile.train=S.profile.train==="strength"?"both":"run";

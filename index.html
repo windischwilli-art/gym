@@ -859,7 +859,7 @@ function viewLaufen(){
   <div class="gps"><div><div class="eyebrow">Distanz</div><div class="num" style="font-size:26px;font-weight:700"><span id="gkm">${de(r1(G.m/1000))}</span><span class="muted" style="font-size:14px"> km</span></div></div><div><div class="eyebrow">Pace</div><div class="num" style="font-size:26px;font-weight:700" id="gpace">${G.m>50?fmtTime(el/(G.m/1000)):"–"}</div></div><div><div class="eyebrow">GPS</div><div class="num" style="font-size:20px;font-weight:700;margin-top:4px" id="gsig">${gpsLabel()}</div></div></div>
   <p class="small muted" style="margin:0">Lass die App beim Laufen geöffnet, das Display bleibt an. Wird das iPhone gesperrt, pausiert die GPS-Messung.</p></section>
  <section class="card"><h2>Lauf speichern</h2>
-  <div class="grid2"><label class="f">Distanz (km)<input id="rkm" inputmode="decimal" placeholder="z. B. 5,4"></label><label class="f">Dauer (mm:ss)<input id="rtime" inputmode="numeric" placeholder="28:30" value="${el?fmtTime(el):""}"></label></div>
+  <div class="grid2"><label class="f">Distanz (km)<input id="rkm" inputmode="decimal" placeholder="z. B. 5,4"></label><label class="f">Dauer (mm:ss)<input id="rtime" inputmode="numeric" data-time placeholder="28:30" value="${el?fmtTime(el):""}"></label></div>
   <div class="grid2"><label class="f">Art<select id="rtype">${RUNTYPES.map(x=>`<option>${x}</option>`).join("")}</select></label><label class="f">Datum<input id="rdate" type="date" value="${TODAY()}"></label></div>
   <div class="row between"><span class="small muted" id="rpace">Pace: –</span><button class="btn" data-a="saveRun">Speichern</button></div>
   <button class="link" style="text-align:left" data-a="import">Oder aus Garmin bzw. Strava importieren</button></section>
@@ -1071,7 +1071,11 @@ function go(t){tab=t;try{history.replaceState(null,"","#"+t)}catch(e){}render();
 function selectCode(){const el=document.getElementById("hcode");if(!el)return;const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}
 function toast(msg){const d=document.createElement("div");d.className="toast";d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),1800)}
 const num=v=>parseFloat(String(v).replace(",","."));
-function parseTime(s){const p=String(s).trim().split(":").map(Number);if(p.some(isNaN)||!p.length)return NaN;return p.reduce((a,v)=>a*60+v,0)}
+// Zeitfelder: iPhone-Ziffernblock hat keinen Doppelpunkt, darum wird er automatisch gesetzt (2530 -> 25:30, 13000 -> 1:30:00)
+function timeMask(v){const d=String(v||"").replace(/\D/g,"").replace(/^0+(?=\d{3})/,"").slice(0,6);if(d.length<=2)return d;if(d.length<=4)return d.slice(0,-2)+":"+d.slice(-2);return d.slice(0,-4)+":"+d.slice(-4,-2)+":"+d.slice(-2)}
+window.timeMask=timeMask;
+document.addEventListener("input",e=>{const el=e.target;if(!el||!el.matches||!el.matches("input[data-time]"))return;const m=timeMask(el.value);if(m!==el.value){el.value=m;try{el.setSelectionRange(m.length,m.length)}catch(_){}}},true);
+function parseTime(s){s=String(s||"").trim().replace(/[.,\s]+/g,":");if(s&&!s.includes(":"))s=timeMask(s);const p=s.split(":").map(Number);if(p.some(isNaN)||!p.length)return NaN;return p.reduce((a,v)=>a*60+v,0)}
 function bindPace(){const k=document.getElementById("rkm"),t=document.getElementById("rtime"),o=document.getElementById("rpace");
  const u=()=>{const km=num(k.value),s=parseTime(t.value);o.textContent="Pace: "+(km>0&&s>0?pace(s,km)+" · ca. "+de(r0(runKcal({km,sec:s})))+" kcal":"–")};k.oninput=t.oninput=u;u()}
 
@@ -1410,9 +1414,9 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=12"></script>
-<script src="ai.js?v=12"></script>
-<script src="brief.js?v=12"></script>
-<script src="run.js?v=12"></script>
+<script src="guide.js?v=13"></script>
+<script src="ai.js?v=13"></script>
+<script src="brief.js?v=13"></script>
+<script src="run.js?v=13"></script>
 </body>
 </html>
