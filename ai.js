@@ -19,38 +19,57 @@ let UI={setup:false,prov:"gemini",msg:"",busy:false};
 const PROMPT=note=>`Du bist Ernährungsexperte. Analysiere das Foto einer Mahlzeit.
 Erkenne jede sichtbare Komponente einzeln (z. B. Reis, Poulet, Sauce, Salat) und schätze die Menge in Gramm anhand von Teller- und Besteckgrössen (Standardteller ca. 26 cm).
 Berücksichtige versteckte Fette wie Öl, Butter oder Rahmsauce realistisch.
-Gib pro Komponente die Werte für die geschätzte Menge an: kcal, Protein, Kohlenhydrate, Fett (Gramm).
+Gehe so vor: 1. Komponenten erkennen. 2. Menge in Gramm schätzen (z. B. 1 Ei ca. 55 g ohne Schale, 1 Tasse gekochter Reis ca. 160 g, eine typische Beilagen-Portion Reis 150–250 g). 3. Nährwerte pro 100 g aus Standardtabellen nehmen (z. B. gekochter Reis 130 kcal, 2,7 g Protein, 28 g KH, 0,3 g Fett; Spiegelei in Öl ca. 195 kcal, 13,6 g Protein, 0,8 g KH, 15 g Fett; gekochtes Ei 155 kcal).
+Gib pro Komponente die geschätzte Menge und die Werte pro 100 g an. Rechne nicht selbst hoch.
 ${note?`Hinweis vom Nutzer: ${note}\n`:""}Antworte nur mit JSON in genau dieser Form:
-{"erkannt":true,"gericht":"kurzer Name auf Deutsch","komponenten":[{"name":"Name auf Deutsch","gramm":0,"kcal":0,"protein":0,"kh":0,"fett":0}],"sicherheit":"hoch|mittel|niedrig","hinweis":"ein kurzer Satz"}
+{"erkannt":true,"gericht":"kurzer Name auf Deutsch","komponenten":[{"name":"Name auf Deutsch","gramm":0,"pro100":{"kcal":0,"protein":0,"kh":0,"fett":0}}],"sicherheit":"hoch|mittel|niedrig","hinweis":"ein kurzer Satz"}
 Wenn kein Essen zu sehen ist: {"erkannt":false}`;
 
+// fetch mit Zeitlimit, damit nichts endlos „analysiert“
+async function tfetch(url,opt,ms){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),ms||60000);
+ try{return await fetch(url,{...opt,signal:ac.signal})}catch(e){throw{code:e&&e.name==="AbortError"?"timeout":"net"}}finally{clearTimeout(t)}}
+const GEM_MODELS=["gemini-flash-latest","gemini-2.5-flash","gemini-2.0-flash"];
 async function callAI(prov,key,b64,text){
  if(prov==="gemini"){
   const parts=b64?[{inline_data:{mime_type:"image/jpeg",data:b64}},{text}]:[{text}];
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${PROV.gemini.model}:generateContent`,{method:"POST",
-   headers:{"Content-Type":"application/json","x-goog-api-key":key},
-   body:JSON.stringify({contents:[{parts}],generationConfig:{temperature:.2,...(b64?{responseMimeType:"application/json"}:{})}})});
-  const j=await r.json().catch(()=>({}));
-  if(!r.ok){const m=(j.error&&j.error.message)||"";throw{code:r.status===429?"quota":/API key|API_KEY|permission/i.test(m)||r.status===403?"key":"api",msg:m}}
-  return((j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts)||[]).map(p=>p.text||"").join("");
+  let last=null;
+  for(const model of GEM_MODELS){
+   const r=await tfetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{method:"POST",
+    headers:{"Content-Type":"application/json","x-goog-api-key":key},
+    body:JSON.stringify({contents:[{parts}],generationConfig:{temperature:.2,maxOutputTokens:4096,...(b64?{responseMimeType:"application/json"}:{})}})});
+   const j=await r.json().catch(()=>({}));
+   if(r.ok){
+    const c=j.candidates&&j.candidates[0];
+    const out=((c&&c.content&&c.content.parts)||[]).filter(p=>!p.thought).map(p=>p.text||"").join("");
+    if(out.trim())return out;
+    last={code:"api",msg:"Leere Antwort"+(c&&c.finishReason?" ("+c.finishReason+")":"")+(j.promptFeedback&&j.promptFeedback.blockReason?" ("+j.promptFeedback.blockReason+")":"")};continue;
+   }
+   const m=(j.error&&j.error.message)||"HTTP "+r.status;
+   if(r.status===400&&/API key|API_KEY/i.test(m)||r.status===401||r.status===403)throw{code:"key",msg:m};
+   last={code:r.status===429?"quota":"api",msg:m};
+   // anderes Modell probieren, wenn dieses fehlt, überlastet oder ausgeschöpft ist
+   if(![404,429,500,503].includes(r.status)&&!/not found|not supported/i.test(m))break;
+  }
+  throw last||{code:"api"};
  }
  const content=b64?[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64}},{type:"text",text}]:text;
- const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+ const r=await tfetch("https://api.anthropic.com/v1/messages",{method:"POST",
   headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
   body:JSON.stringify({model:PROV.claude.model,max_tokens:1200,messages:[{role:"user",content}]})});
  const j=await r.json().catch(()=>({}));
  if(!r.ok){const m=(j.error&&j.error.message)||"";throw{code:r.status===401?"key":r.status===429?"quota":/credit|balance|billing/i.test(m)?"credit":"api",msg:m}}
  return(j.content||[]).filter(c=>c.type==="text").map(c=>c.text).join("");
 }
-function parseJSON(t){const a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0||b<a)throw{code:"parse"};return JSON.parse(t.slice(a,b+1))}
+function parseJSON(t){const a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0||b<a)throw{code:"parse"};try{return JSON.parse(t.slice(a,b+1))}catch(e){throw{code:"parse"}}}
 function errText(e){
  const c=e&&e.code;
  if(c==="key")return"Der API-Schlüssel wird nicht akzeptiert. Prüfe ihn in den Einstellungen (Coach → Daten & Verbindungen).";
  if(c==="quota")return"Das Limit ist für den Moment erreicht. Versuch es in ein paar Minuten nochmal.";
  if(c==="credit")return"Dein Anthropic-Guthaben ist aufgebraucht. Lade unter console.anthropic.com → Billing etwas auf.";
  if(c==="parse")return"Die Antwort der KI war unvollständig. Versuch es nochmal.";
+ if(c==="timeout")return"Die KI hat zu lange gebraucht (über 60 Sekunden). Versuch es nochmal, am besten mit gutem Empfang.";
  if(c==="api")return"Die KI hat einen Fehler gemeldet"+(e.msg?": "+e.msg:".");
- return"Keine Verbindung. Prüfe dein Internet und versuch es nochmal.";
+ return"Keine Verbindung zur KI. Prüfe dein Internet und versuch es nochmal."+(e&&e.message?" ("+e.message+")":"");
 }
 
 // ---------- Einstellungen (Karte im Coach) ----------
@@ -110,12 +129,14 @@ function draw(){
  const m=document.getElementById("aimeal");if(m)m.onchange=()=>{AV.meal=m.value;const btn=h.querySelector('[data-ai="add"]');if(btn)btn.textContent="Zu "+AV.meal+" hinzufügen"};
 }
 function pickFile(capture){
- const inp=document.createElement("input");inp.type="file";inp.accept="image/*";if(capture)inp.setAttribute("capture","environment");
- inp.onchange=async()=>{const f=inp.files&&inp.files[0];if(!f||!AV)return;try{const{url,b64}=await shrink(f);AV.img=url;AV.b64=b64;AV.err="";AV.stage="pick";draw()}catch(e){AV.err="Dieses Bild kann ich nicht öffnen. Versuch ein anderes.";draw()}};
+ document.querySelectorAll("input.aifile").forEach(x=>x.remove());
+ const inp=document.createElement("input");inp.type="file";inp.accept="image/*";inp.className="aifile";inp.style.cssText="position:fixed;left:-9999px;opacity:0;width:1px;height:1px";if(capture)inp.setAttribute("capture","environment");
+ document.body.appendChild(inp);
+ inp.onchange=async()=>{const f=inp.files&&inp.files[0];inp.remove();if(!f||!AV)return;try{const{url,b64}=await shrink(f);AV.img=url;AV.b64=b64;AV.err="";AV.stage="pick";draw()}catch(e){AV.err="Dieses Bild kann ich nicht öffnen. Versuch ein anderes.";draw()}};
  inp.click();
 }
 function shrink(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),img=new Image();
- img.onload=()=>{URL.revokeObjectURL(u);const m=1024,s=Math.min(1,m/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement("canvas");
+ img.onload=()=>{URL.revokeObjectURL(u);if(!img.naturalWidth){rej(new Error("leer"));return}const m=1280,s=Math.min(1,m/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement("canvas");
   c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);c.getContext("2d").drawImage(img,0,0,c.width,c.height);
   const url=c.toDataURL("image/jpeg",.82);res({url,b64:url.split(",")[1]})};
  img.onerror=e=>{URL.revokeObjectURL(u);rej(e)};img.src=u})}
@@ -127,7 +148,10 @@ async function analyze(){
   if(!AV||AV.run!==run)return;
   const r=parseJSON(txt);
   if(r.erkannt===false||!Array.isArray(r.komponenten)||!r.komponenten.length){AV.stage="pick";AV.err="Auf dem Foto konnte ich kein Essen erkennen. Versuch es mit einem näheren Foto.";draw();return}
-  AV.res=r;AV.items=r.komponenten.map(k=>({name:String(k.name||"Essen"),g0:N(k.gramm),g:N(k.gramm),kcal:N(k.kcal),p:N(k.protein),c:N(k.kh),f:N(k.fett),on:true}));
+  AV.res=r;AV.items=r.komponenten.map(k=>{const g=N(k.gramm),h=k.pro100||k.pro_100g;
+   if(h&&g>0){const f=g/100;return{name:String(k.name||"Essen"),g0:g,g,kcal:N(h.kcal)*f,p:N(h.protein)*f,c:N(h.kh)*f,f:N(h.fett)*f,on:true}}
+   return{name:String(k.name||"Essen"),g0:g,g,kcal:N(k.kcal),p:N(k.protein),c:N(k.kh),f:N(k.fett),on:true}}).filter(i=>i.kcal>0||i.g>0);
+  if(!AV.items.length)throw{code:"parse"};
   AV.stage="result";draw();
  }catch(e){if(!AV||AV.run!==run)return;AV.stage="pick";AV.err=errText(e);draw()}
 }
