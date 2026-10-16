@@ -448,6 +448,19 @@ async function cloudLoad(code){
  }catch(e){CLOUD.status="error";CLOUD.msg="Keine Verbindung. Prüfe dein Internet und versuch es nochmal.";paintCloud();if(!S)render(true)}
 }
 function cloudWipe(){/* Cloud-Daten bleiben beim Zurücksetzen erhalten, damit der Sync-Code weiter funktioniert */}
+// Alle Daten endgültig löschen: Cloud-Dokumente dieses Sync-Codes + alles auf dem Gerät
+async function deleteEverything(){
+ const code=S&&S.syncCode;let cloudOk=true;
+ if(code){try{const db=cloudDb();if(!db)throw 0;const col=db.collection("syncStates"),main=await col.doc(docId(code)).get();
+   const years=main.exists?(main.data().foodYears||[]):Object.keys(foodYears());
+   for(const y of years)await col.doc(docId(code,"food"+y)).delete();await col.doc(docId(code)).delete()}catch(e){cloudOk=false}}
+ clearTimeout(CLOUD.timer);
+ for(const k of["formwerk-v2","formwerk-ai","formwerk-strava"])try{localStorage.removeItem(k)}catch(e){}
+ S=null;OB=null;CUR=null;tab="heute";DELARM=false;render();window.scrollTo(0,0);
+ toast(cloudOk?"Alle Daten wurden gelöscht":"Gerät gelöscht. Cloud nicht erreichbar, bitte später mit dem Code erneut löschen oder mich kontaktieren.");
+ setTimeout(()=>location.reload(),1500);
+}
+let DELARM=false;
 function cloudStatusHTML(){
  const has=S&&S.syncCode;
  const pill={local:["","aus"],saving:["acc","speichert …"],saved:["good","gespeichert"],loading:["acc","lädt …"],error:["warn","Fehler"],offline:["warn","offline"]}[has?CLOUD.status==="local"?"saved":CLOUD.status:CLOUD.status==="loading"||CLOUD.status==="error"?CLOUD.status:"local"]||["",""];
@@ -979,7 +992,9 @@ function viewCoach(){
   ${trains("run")?`<label class="f">Lauf-Level${sel("level",[["easy","Einsteiger"],["mid","Fortgeschritten"],["pro","Ambitioniert"]],p.level||"easy")}</label>`:""}
   ${trains("strength")?`<div class="f" style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.03em">Equipment<div class="row wrap" style="gap:6px">${EQUIP.map(([k,t])=>`<button class="chip" data-a="equip" data-v="${k}" aria-pressed="${(p.equip||["gym"]).includes(k)}">${t}</button>`).join("")}</div></div>`:""}
   <p class="small muted" style="margin:0">Die Werte sind Richtwerte. Bei Vorerkrankungen sprich Ziele mit Ärztin oder Arzt ab.</p>
-  ${RESETARM?`<div class="small" style="font-weight:600">Profil und alle Einträge werden gelöscht. Danach startet die Einrichtung neu.</div><div class="grid2"><button class="btn ghost" data-a="resetNo">Abbrechen</button><button class="btn" style="background:var(--bad);color:var(--bg)" data-a="resetYes">Ja, neu starten</button></div>`:`<button class="link" style="text-align:left;color:var(--bad)" data-a="resetArm">Profil neu einrichten</button>`}</section></div>`;
+  ${RESETARM?`<div class="small" style="font-weight:600">Profil und alle Einträge werden gelöscht. Danach startet die Einrichtung neu.</div><div class="grid2"><button class="btn ghost" data-a="resetNo">Abbrechen</button><button class="btn" style="background:var(--bad);color:var(--bg)" data-a="resetYes">Ja, neu starten</button></div>`:`<button class="link" style="text-align:left;color:var(--bad)" data-a="resetArm">Profil neu einrichten</button>`}
+  ${DELARM?`<div class="small" style="font-weight:600">Wirklich alles löschen? Profil, Ernährung, Trainings, Läufe und Einstellungen werden auf diesem Gerät${S.syncCode?" und in der Cloud":""} endgültig entfernt. Das lässt sich nicht rückgängig machen.</div><div class="grid2"><button class="btn ghost" data-a="delNo">Abbrechen</button><button class="btn" style="background:var(--bad);color:var(--bg)" data-a="delYes">Endgültig löschen</button></div>`:`<button class="link" style="text-align:left;color:var(--bad)" data-a="delArm">Alle Daten löschen</button>`}
+  <a class="link small" style="text-align:left" href="datenschutz.html">Datenschutzerklärung</a></section></div>`;
 }
 let RESETARM=false;
 function weightCard(){
@@ -1029,7 +1044,8 @@ function viewOnboarding(){
  return`<div class="obwrap"><div class="bar" aria-hidden="true"><i style="width:${(s+1)/N*100}%;background:var(--accent)"></i></div>
  <div><div class="eyebrow">${s===0?"Willkommen bei Formwerk":"Schritt "+(s+1)+" von "+N}</div><h1 style="font-size:38px;margin-top:6px">${title}</h1></div>
  ${h}${OB.err?`<p class="small" role="alert" style="color:var(--bad);margin:0;font-weight:600">${OB.err}</p>`:""}
- <div class="row" style="margin-top:auto">${s>0?`<button class="btn ghost" data-a="obBack">Zurück</button>`:""}<button class="btn grow" data-a="${s===N-1?"obFinish":"obNext"}">${s===N-1?"Los geht's":"Weiter"}</button></div></div>`;
+ <div class="row" style="margin-top:auto">${s>0?`<button class="btn ghost" data-a="obBack">Zurück</button>`:""}<button class="btn grow" data-a="${s===N-1?"obFinish":"obNext"}">${s===N-1?"Los geht's":"Weiter"}</button></div>
+ ${s===0?`<p class="small muted" style="margin:0;text-align:center">Deine Daten bleiben auf deinem Gerät. Mit „Weiter“ stimmst du der <a href="datenschutz.html">Datenschutzerklärung</a> zu.</p>`:""}</div>`;
 }
 function obValidate(){const p=OB.p,n=k=>num(p[k]);
  switch(OB.step){
@@ -1354,6 +1370,9 @@ document.addEventListener("click",ev=>{
   case"saveWeight":{const kg=num(wkg.value);if(!(kg>=35&&kg<=250)){toast("Bitte ein Gewicht zwischen 35 und 250 kg eingeben");break}
    S.weights=(S.weights||[]).filter(w=>w.date!==TODAY());S.weights.push({date:TODAY(),kg:r1(kg)});S.profile.weight=r1(kg);save();render(true);toast("Gewicht eingetragen, Ziele aktualisiert");break}
   case"resetArm":RESETARM=true;render(true);break;
+  case"delArm":DELARM=true;render(true);break;
+  case"delNo":DELARM=false;render(true);break;
+  case"delYes":deleteEverything();break;
   case"resetNo":RESETARM=false;render(true);break;
   case"import":document.getElementById("impfile").click();break;
   case"svSetup":SVUI.setup=true;SVUI.msg="";paintStrava();break;
@@ -1414,9 +1433,9 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=15"></script>
-<script src="ai.js?v=15"></script>
-<script src="brief.js?v=15"></script>
-<script src="run.js?v=15"></script>
+<script src="guide.js?v=16"></script>
+<script src="ai.js?v=16"></script>
+<script src="brief.js?v=16"></script>
+<script src="run.js?v=16"></script>
 </body>
 </html>

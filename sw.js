@@ -1,6 +1,6 @@
 // Formwerk Service Worker: macht die App offline nutzbar.
 // Bei einem Update der App diese Versionsnummer erhöhen.
-const VERSION = "formwerk-v15";
+const VERSION = "formwerk-v16";
 const SHELL = [
   "./",
   "./index.html",
@@ -8,6 +8,7 @@ const SHELL = [
   "./ai.js",
   "./brief.js",
   "./run.js",
+  "./datenschutz.html",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -56,7 +57,10 @@ self.addEventListener("fetch", event => {
   if (url.hostname.endsWith("openfoodfacts.org") || url.hostname.endsWith("googleapis.com") && url.hostname !== "fonts.googleapis.com" || url.hostname.endsWith("anthropic.com") || url.hostname.endsWith("strava.com")) return;
 
   // App-Seite und eigene Skripte: immer zuerst online (damit alle Teile zusammenpassen), sonst aus dem Speicher
-  if (req.mode === "navigate") { event.respondWith(networkFirst(req, "./index.html")); return; }
+  if (req.mode === "navigate") {
+    const page = /\/[^\/]+\.html$/.test(url.pathname) && !url.pathname.endsWith("/index.html") ? "." + url.pathname.slice(url.pathname.lastIndexOf("/")) : "./index.html";
+    event.respondWith(networkFirst(req, page)); return;
+  }
   if (url.origin === self.location.origin && /\.(js|json|webmanifest)$/.test(url.pathname)) {
     event.respondWith(networkFirst(req, "." + url.pathname.slice(url.pathname.lastIndexOf("/"))));
     return;
