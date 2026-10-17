@@ -684,7 +684,7 @@ function wkKcal(w){return Math.max(0,((WK_MET[w.int||"mittel"]||5)-1)*kgNow()*(w
 const ACT_TYPES=[["rad","Radfahren",7.5],["mtb","Mountainbike",8.5],["schwimmen","Schwimmen",7],["wandern","Wandern",6],["gehen","Spazieren / Gehen",3.5],
  ["hiit","HIIT / Zirkeltraining",8],["kraft","Krafttraining (ohne App)",5],["crosstrainer","Crosstrainer",6],["rudern","Rudern / Rudergerät",7],
  ["fussball","Fussball",7],["tennis","Tennis / Padel",7.3],["ski","Skifahren / Langlauf",7.5],["klettern","Klettern / Bouldern",7.5],
- ["yoga","Yoga / Pilates",3],["tanzen","Tanzen",5],["arbeit","Körperliche Arbeit",4.5],["anderes","Andere Sportart",6]];
+ ["yoga","Yoga",3],["pilates","Pilates",3.5],["boxen","Boxen / Kampfsport",7.8],["volley","Volleyball / Basketball",6],["tanzen","Tanzen",5],["arbeit","Körperliche Arbeit",4.5],["anderes","Andere Sportart",6]];
 const actType=k=>ACT_TYPES.find(a=>a[0]===k)||ACT_TYPES[ACT_TYPES.length-1];
 function actKcal(a){if(a.kcal>0)return a.kcal;const met=actType(a.type)[2]*(INTF[a.int||"mittel"]||1);return Math.max(0,(met-1)*kgNow()*(a.min||0)/60)}
 function burnedOn(d){return S.runs.filter(r=>r.date===d).reduce((a,r)=>a+runKcal(r),0)+S.workouts.filter(w=>w.date===d).reduce((a,w)=>a+wkKcal(w),0)+(S.acts||[]).filter(x=>x.date===d).reduce((a,x)=>a+actKcal(x),0)}
@@ -748,7 +748,8 @@ function viewHeute(){
   <div class="grid2"><button class="btn" data-a="addFood" data-meal="${suggestMeal()}">Essen erfassen</button><button class="btn ghost" data-a="scan" data-meal="${suggestMeal()}">Scannen</button></div></section>
  ${window.briefCardHTML?window.briefCardHTML():""}
  ${tip?`<section class="card"><div class="row between"><h2>Coach</h2><button class="link" data-go="coach">Alle Hinweise</button></div><div class="tip ${tip.k}"><i></i><div><div style="font-weight:600">${tip.t}</div><div class="small muted">${tip.d}</div></div></div></section>`:""}
- <section class="card"><div class="row between"><h2>Heute im Plan</h2>${td.opt?'<span class="pill">optional</span>':""}</div><div><div style="font-weight:600">${td.t}</div><div class="small muted">${td.d}</div></div></section>
+ <section class="card"><div class="row between"><h2>Heute im Plan</h2>${td.opt?'<span class="pill">optional</span>':""}</div><div><div style="font-weight:600">${td.t}</div><div class="small muted">${td.d}</div></div>
+  ${td.sport&&!(S.acts||[]).some(x=>x.date===TODAY()&&x.type===td.sport)?`<button class="btn ghost block" data-a="actOpen" data-type="${td.sport}" data-min="${td.min||""}">${esc(td.t)} als erledigt eintragen</button>`:""}</section>
  ${tiles.length?`<section class="card"><div class="row between"><h2>Diese Woche</h2><span class="small muted">seit Montag</span></div><div class="${tiles.length>1?"grid2":"stack"}">${tiles.join("")}</div></section>`:""}
  <section class="card"><div class="row between"><h2>Aktivität heute</h2>${burn?`<span class="pill good">+${de(r0(burn))} kcal</span>`:""}</div>${acts.length?`<div class="list">${acts.join("")}</div>`:`<p class="muted small" style="margin:0">Noch nichts eingetragen. Jede Aktivität erhöht dein Kalorienziel für heute.</p>`}
   ${btns.length?`<div class="${btns.length>1?"grid2":"stack"}">${btns.join("")}</div>`:""}<button class="btn ghost block" data-a="actOpen">Andere Aktivität eintragen</button></section></div>`;
@@ -964,19 +965,54 @@ function planDays(){
  const home=!TEMPLATES.Push,MAP={Push:"Oberkörper",Pull:"Ganzkörper",Beine:"Unterkörper"};
  const fix=t=>home?t.replace(/\b(Push|Pull|Beine)\b/g,m=>MAP[m]):t;
  let out=src.map(x=>({t:x[0],d:fix(x[1]),opt:!!x[2]}));
+ out=applyWeek(out);
  if(window.runPlanOverlay)out=window.runPlanOverlay(out);
  return out;
 }
+// ---------- Meine Woche: feste Termine, andere Sportarten, keine Zeit ----------
+// Eintrag pro Tag: null = App plant | {k:"kraft"|"lauf"|"frei"|"sport", act, name, min}
+let WKPREVIEW=null;
+function weekPrefs(ws){
+ if(WKPREVIEW)return WKPREVIEW;const p=S&&S.profile;if(!p)return null;
+ ws=ws||weekStart();if(p.weekOv&&p.weekOv.ws===ws)return p.weekOv.days;return p.week||null;
+}
+window.weekPrefs=weekPrefs;
+// Tage, an denen kein Lauf aus dem Lauftrainer liegen soll
+window.weekBlocked=ws=>{const w=weekPrefs(ws),b=new Set();if(w)w.forEach((x,i)=>{if(x&&(x.k==="frei"||x.k==="sport"||x.k==="kraft"))b.add(i)});return b};
+const sportName=x=>x.name||actType(x.act||"anderes")[1];
+function applyWeek(out){
+ const W=weekPrefs();if(!W||!W.some(Boolean))return out;
+ const isS=x=>x.t==="Kraft"||x.t==="Lauf";
+ const kr=[],la=[];out.forEach((x,i)=>{if(x.t==="Kraft")kr.push({...x,i});else if(x.t==="Lauf")la.push({...x,i})});
+ const res=Array(7).fill(null);
+ W.forEach((w,i)=>{if(!w)return;
+  if(w.k==="sport")res[i]={t:sportName(w),d:"Dein Training"+(w.min?", "+w.min+" Min.":""),opt:false,fixed:1,sport:w.act||"anderes",min:w.min||0};
+  else if(w.k==="frei")res[i]={t:"Ruhetag",d:"Keine Zeit, andere Termine",opt:false,fixed:1};
+  else if(w.k==="kraft"){const x=kr.shift();res[i]={...(x||{t:"Kraft",d:"Ganzkörper, 45 Min."}),i:undefined,fixed:1,opt:false}}
+  else if(w.k==="lauf"){const x=la.shift();res[i]={...(x||{t:"Lauf",d:"Locker 30 Min."}),i:undefined,fixed:1,opt:false}}});
+ // Restliche Einheiten auf freie Tage verteilen, möglichst nah am ursprünglichen Tag
+ const rest=[...kr,...la].sort((a,b)=>a.i-b.i);let dropped=0;
+ for(const x of rest){let best=-1,bs=1e9;
+  for(let j=0;j<7;j++){if(res[j]||W[j])continue;let sc=Math.abs(j-x.i)*2;
+   const nb=[res[j-1],res[j+1]];if(nb.some(n=>n&&n.t===x.t))sc+=3; // gleiche Art nicht direkt hintereinander
+   if(sc<bs){bs=sc;best=j}}
+  if(best>=0){const{i,...y}=x;res[best]=y}else dropped++}
+ for(let j=0;j<7;j++)if(!res[j]){const o=out[j];res[j]=isS(o)?{t:"Ruhetag",d:"Regeneration",opt:false}:{...o}}
+ if(dropped)res.dropped=dropped;
+ return res;
+}
 function plan(){
- const P=planDays().map(x=>[x.t,x.d,x.opt]),today=(new Date().getDay()+6)%7;
- return["Mo","Di","Mi","Do","Fr","Sa","So"].map((d,i)=>`<div class="day ${i===today?"today":""}"><span class="d">${d}</span><div><div style="font-weight:600">${P[i][0]}${P[i][2]?' <span class="pill">optional</span>':""}${i===today?' <span class="pill acc">heute</span>':""}</div><div class="small muted">${P[i][1]}</div></div></div>`).join("");
+ const PD=planDays(),P=PD.map(x=>[x.t,x.d,x.opt]),today=(new Date().getDay()+6)%7;
+ return["Mo","Di","Mi","Do","Fr","Sa","So"].map((d,i)=>`<div class="day ${i===today?"today":""}"><span class="d">${d}</span><div><div style="font-weight:600">${P[i][0]}${PD[i].fixed?' <span class="pill">fix</span>':""}${P[i][2]?' <span class="pill">optional</span>':""}${i===today?' <span class="pill acc">heute</span>':""}</div><div class="small muted">${P[i][1]}</div></div></div>`).join("");
 }
 function viewCoach(){
  const p=S.profile,t=targets();
  const sel=(id,opts,v)=>`<select id="${id}" data-p="${id}">${opts.map(([k,l])=>`<option value="${k}" ${String(k)===String(v)?"selected":""}>${l}</option>`).join("")}</select>`;
  return header("Coach","Dein Plan")+`<div class="stack">
  <section class="card"><h2>Hinweise</h2>${tips().map(x=>`<div class="tip ${x.k}"><i></i><div><div style="font-weight:600">${x.t}</div><div class="small muted">${x.d}</div></div></div>`).join("")}</section>
- <section class="card"><div class="row between"><h2>Wochenplan</h2><span class="pill">${{lose:"Abnehmen",keep:"Halten",gain:"Aufbauen"}[p.goal]}</span></div><div>${plan()}</div></section>
+ <section class="card"><div class="row between"><h2>Wochenplan</h2><span class="pill">${{lose:"Abnehmen",keep:"Halten",gain:"Aufbauen"}[p.goal]}</span></div><div>${plan()}</div>
+  ${(()=>{const pd=planDays();return pd.dropped?`<div class="tip warn"><i></i><div class="small">${pd.dropped} ${pd.dropped===1?"Einheit passt":"Einheiten passen"} diese Woche nicht in deine freien Tage. Kein Problem, deine anderen Trainings zählen auch.</div></div>`:""})()}
+  <button class="btn ghost block" data-a="wkOpen">${weekPrefs()&&weekPrefs().some(Boolean)?"Meine Woche anpassen":"Trainingstage selbst festlegen"}</button></section>
  ${weightCard()}
  <section class="card"><h2>Deine Ziele</h2>
   <div class="grid2"><div><div class="eyebrow">Kalorien / Tag ohne Training</div><div class="num" style="font-size:30px;font-weight:700">${de(t.kcal)}</div></div>${t.km?`<div><div class="eyebrow">Laufen / Woche</div><div class="num" style="font-size:30px;font-weight:700">${t.km} km</div></div>`:`<div><div class="eyebrow">Training</div><div class="num" style="font-size:30px;font-weight:700">${TRAINLBL[p.train||"both"]}</div></div>`}</div>
@@ -1311,7 +1347,8 @@ document.addEventListener("click",ev=>{
   case"kalToday":{const t=new Date();KAL={y:t.getFullYear(),m:t.getMonth(),sel:TODAY()};render(true);break}
   case"runFor":{const dd=d.d;tab="laufen";render();window.scrollTo(0,0);setTimeout(()=>{const r=document.getElementById("rdate");if(r)r.value=dd;const k=document.getElementById("rkm");if(k){k.scrollIntoView({block:"center"});k.focus()}},60);break}
   case"icsWeek":icsWeek();break;
-  case"actOpen":SHEET=null;ACT={type:"rad",min:"",int:"mittel",kcal:"",date:d.d||TODAY()};drawAct();break;
+  case"actOpen":SHEET=null;ACT={type:d.type||"rad",min:d.min||"",int:"mittel",kcal:"",date:d.d||TODAY()};drawAct();break;
+  case"wkOpen":wkOpen();break;
   case"actInt":ACT.int=d.v;drawAct();break;
   case"actSave":{const m=num(ACT.min);if(!(m>0)){toast("Bitte die Dauer in Minuten eingeben");break}
    S.acts=S.acts||[];const x={id:uid(),date:ACT.date||TODAY(),type:ACT.type,min:Math.round(m),int:ACT.int,kcal:num(ACT.kcal)>0?Math.round(num(ACT.kcal)):0};S.acts.push(x);
@@ -1433,9 +1470,10 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=16"></script>
-<script src="ai.js?v=16"></script>
-<script src="brief.js?v=16"></script>
-<script src="run.js?v=16"></script>
+<script src="guide.js?v=17"></script>
+<script src="ai.js?v=17"></script>
+<script src="brief.js?v=17"></script>
+<script src="run.js?v=17"></script>
+<script src="week.js?v=17"></script>
 </body>
 </html>

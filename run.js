@@ -123,6 +123,14 @@ function raceSession(type,inf){
  if(ph==="spec"&&!deload&&i%2===0){if(key==="hm")rp=Math.min(6,Math.round(km*.3));if(key==="m")rp=Math.min(12,Math.round(km*.35));if(key==="10")rp=0}
  return longSes(km,rp,z,deload);
 }
+// Läufe von Tagen mit anderen Terminen (Meine Woche) auf den nächsten freien Tag schieben
+function relocate(m,ws,maxDay){
+ const bl=window.weekBlocked?window.weekBlocked(ws):new Set();if(!bl.size)return m;
+ const out={};Object.keys(m).forEach(d=>{if(m[d].type==="race"||!bl.has(+d))out[d]=m[d]});
+ for(const d of Object.keys(m).map(Number)){if(m[d].type==="race"||!bl.has(d))continue;
+  for(const off of[1,-1,2,-2,3,-3]){const j=d+off;if(j<0||j>6||j>(maxDay==null?6:maxDay)||bl.has(j)||out[j])continue;out[j]=m[d];break}}
+ return out;
+}
 function weekPlan(ws){
  const c=cfg();if(!c)return null;ws=ws||weekStart();ZW=ws;
  try{
@@ -132,10 +140,10 @@ function weekPlan(ws){
     if(inf.ph==="race"){if(t==="long"||d>=inf.rd)return;if(t==="iv"&&d>inf.rd-2)return}
     m[d]=raceSession(t,inf)});
    if(inf.ph==="race")m[inf.rd]=raceSession("race",inf);
-   return{w:inf.i,days:m,deload:inf.deload,inf};
+   return{w:inf.i,days:relocate(m,ws,inf.ph==="race"?inf.rd:null),deload:inf.deload,inf};
   }
   const w=ws===weekStart()?weekIdx():Math.max(0,wkBetween(c.start,ws));
-  [["iv",c.iv],["easy",c.easy],["long",c.long]].forEach(([t,d])=>{if(d!=null&&d>=0)m[d]=session(t,w)});return{w,days:m,deload:isDeload(w)};
+  [["iv",c.iv],["easy",c.easy],["long",c.long]].forEach(([t,d])=>{if(d!=null&&d>=0)m[d]=session(t,w)});return{w,days:relocate(m,ws),deload:isDeload(w)};
  }finally{ZW=null}
 }
 window.runWeekKm=function(){const p=weekPlan();if(!p)return 0;return Math.round(Object.values(p.days).reduce((a,s)=>a+s.km,0))};
@@ -143,10 +151,11 @@ window.runPlanOverlay=function(out){
  const p=weekPlan();if(!p||!(typeof trains==="function"&&trains("run")))return out;
  const res=out.map(x=>({...x})),displaced=[],c=cfg();
  for(let i=0;i<7;i++){if(p.days[i]){if(res[i].t==="Kraft")displaced.push(res[i]);res[i]={t:"Lauf",d:(p.days[i].type==="race"?"🏁 ":"")+p.days[i].title,opt:false,run:p.days[i].type}}
-  else if(res[i].t==="Lauf")res[i]={t:"Ruhetag",d:"Regeneration",opt:false}}
+  else if(res[i].t==="Lauf")res[i]=res[i].fixed?{t:"Lauf",d:"Lockerer Lauf nach Gefühl",opt:true,fixed:1}:{t:"Ruhetag",d:"Regeneration",opt:false}}
  // In der Rennwoche keine Kraft mehr kurz vor dem Rennen
  if(p.inf&&p.inf.ph==="race")for(let i=Math.max(0,p.inf.rd-2);i<7;i++)if(res[i].t==="Kraft"){res[i]={t:"Ruhetag",d:i>p.inf.rd?"Erholung nach dem Rennen":"Frisch bleiben fürs Rennen",opt:false}}
- for(const k of displaced){let best=-1;for(const pass of[0,1])for(let i=0;i<7&&best<0;i++){if(p.days[i]||res[i].t==="Kraft"||res[i].t==="Ruhetag"&&p.inf&&p.inf.ph==="race")continue;if(pass===0&&(i===(c.long+6)%7||i===(c.iv+6)%7))continue;best=i}if(best>=0)res[best]=k}
+ for(const k of displaced){let best=-1;for(const pass of[0,1])for(let i=0;i<7&&best<0;i++){if(p.days[i]||res[i].fixed||res[i].t==="Kraft"||res[i].t==="Ruhetag"&&p.inf&&p.inf.ph==="race")continue;if(pass===0&&(i===(c.long+6)%7||i===(c.iv+6)%7))continue;best=i}if(best>=0)res[best]=k}
+ if(out.dropped)res.dropped=out.dropped;
  return res;
 };
 
@@ -218,7 +227,8 @@ function readSet(){
 }
 function drawSetup(){
  const h=host("rsetup"),c=SET,L=c.lvl||lvl();
- const chips=k=>`<div class="rchips">${WD.map((d,i)=>`<button class="chip" data-r="day" data-k="${k}" data-i="${i}" aria-pressed="${c[k]===i}" ${["iv","easy","long"].some(o=>o!==k&&c[o]===i)?"disabled":""}>${d}</button>`).join("")}</div>`;
+ const bl=window.weekBlocked?window.weekBlocked():new Set();
+ const chips=k=>`<div class="rchips">${WD.map((d,i)=>`<button class="chip ${bl.has(i)?"blk":""}" data-r="day" data-k="${k}" data-i="${i}" aria-pressed="${c[k]===i}" ${["iv","easy","long"].some(o=>o!==k&&c[o]===i)?"disabled":""}>${d}</button>`).join("")}</div>`;
  const rk=c.key,pred=c.refSec&&rk?riegel(c.refSec,c.refKm,RD[rk].km):0;
  const minDate=addD(TODAY(),7);
  h.innerHTML=`<div class="scrim" data-r="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Lauftrainer einrichten"><div class="grab"></div>
@@ -232,7 +242,7 @@ function drawSetup(){
  <div><div class="small" style="font-weight:700;margin-bottom:6px">Aktuelle Bestzeit (für deine Tempos)</div>
   <div class="row" style="gap:8px;align-items:stretch"><div class="seg2">${[5,10].map(k=>`<button class="chip" data-r="refkm" data-v="${k}" aria-pressed="${c.refKm===k}">${k} km</button>`).join("")}</div>
   <input id="r-ref" class="grow" inputmode="numeric" data-time placeholder="${c.refKm===10?"z. B. 52:30":"z. B. 25:30"}" value="${c.refSec?fmtH(c.refSec):""}" aria-label="Zeit"></div></div>
- <p class="small muted" style="margin:0">Wähle die Tage für deine drei Läufe. Zwischen Intervallen und Long Run sollte mindestens ein Tag liegen.</p>
+ <p class="small muted" style="margin:0">Wähle die Tage für deine drei Läufe. Zwischen Intervallen und Long Run sollte mindestens ein Tag liegen.${bl.size?" Gestrichelte Tage sind unter „Meine Woche“ belegt. Läufe dort werden automatisch verschoben.":""}</p>
  <div><div class="rlab" style="--rc:${TYPES.iv.color}">Intervalle / Tempo</div>${chips("iv")}</div>
  <div><div class="rlab" style="--rc:${TYPES.easy.color}">Easy Run</div>${chips("easy")}</div>
  <div><div class="rlab" style="--rc:${TYPES.long.color}">Long Run</div>${chips("long")}</div>
@@ -358,6 +368,7 @@ css.textContent=`
 .rtitle{font-family:var(--display);font-size:26px;font-weight:700;line-height:1.1}
 .rsegs{margin:4px 0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:14px}
 .rchips{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px}.rchips .chip{padding:8px 0;text-align:center}.rchips .chip:disabled{opacity:.3}
+.rchips .chip.blk{border:1.5px dashed var(--muted);background:transparent}
 .rlab{font-weight:700;display:flex;align-items:center;gap:8px}.rlab::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--rc)}
 .rp{position:fixed;inset:0;z-index:48;background:linear-gradient(170deg,var(--rc),color-mix(in srgb,var(--rc) 55%,#0b0f1a));color:#fff;display:flex;flex-direction:column;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 12px) 18px calc(env(safe-area-inset-bottom,0px) + 18px);overflow:auto;transition:background .4s}
 .rptop{width:100%;max-width:440px;display:grid;grid-template-columns:36px 1fr 36px;align-items:center;text-align:center}.rptop .icon-btn{color:#fff}
