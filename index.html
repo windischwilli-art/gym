@@ -1018,6 +1018,7 @@ function viewCoach(){
   <div class="grid2"><div><div class="eyebrow">Kalorien / Tag ohne Training</div><div class="num" style="font-size:30px;font-weight:700">${de(t.kcal)}</div></div>${t.km?`<div><div class="eyebrow">Laufen / Woche</div><div class="num" style="font-size:30px;font-weight:700">${t.km} km</div></div>`:`<div><div class="eyebrow">Training</div><div class="num" style="font-size:30px;font-weight:700">${TRAINLBL[p.train||"both"]}</div></div>`}</div>
   <div class="grid3"><div><div class="eyebrow" style="color:var(--prot)">Protein</div><div class="num" style="font-size:22px;font-weight:700">${t.prot} g</div></div><div><div class="eyebrow" style="color:var(--carb)">KH</div><div class="num" style="font-size:22px;font-weight:700">${t.carb} g</div></div><div><div class="eyebrow" style="color:var(--fat)">Fett</div><div class="num" style="font-size:22px;font-weight:700">${t.fat} g</div></div></div>
   <p class="small muted" style="margin:0">Grundumsatz ${de(t.bmr)} kcal, Alltagsverbrauch ${de(t.tdee)} kcal (Mifflin-St-Jeor). Dazu kommt an jedem Tag dein Training, berechnet nach Art, Dauer und Intensität. ${p.goal==="lose"?"Minus 500 kcal ergibt etwa 0,5 kg pro Woche.":p.goal==="gain"?"Plus 300 kcal für sauberen Muskelaufbau.":""}</p></section>
+ ${window.remCardHTML?window.remCardHTML():""}
  ${accountCard()}
  <section class="card"><h2>Profil</h2>
   <div class="grid2"><label class="f">Name<input id="name" data-p="name" value="${esc(p.name||"")}"></label><label class="f">Zielgewicht (kg)<input id="targetWeight" data-p="targetWeight" inputmode="decimal" value="${p.targetWeight||""}"></label></div>
@@ -1470,10 +1471,11 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=17"></script>
-<script src="ai.js?v=17"></script>
-<script src="brief.js?v=17"></script>
-<script src="run.js?v=17"></script>
-<script src="week.js?v=17"></script>
+<script src="guide.js?v=18"></script>
+<script src="ai.js?v=18"></script>
+<script src="brief.js?v=18"></script>
+<script src="run.js?v=18"></script>
+<script src="week.js?v=18"></script>
+<script src="reminders.js?v=18"></script>
 </body>
 </html>

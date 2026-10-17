@@ -1,6 +1,6 @@
 // Formwerk Service Worker: macht die App offline nutzbar.
 // Bei einem Update der App diese Versionsnummer erhöhen.
-const VERSION = "formwerk-v17";
+const VERSION = "formwerk-v18";
 const SHELL = [
   "./",
   "./index.html",
@@ -9,6 +9,7 @@ const SHELL = [
   "./brief.js",
   "./run.js",
   "./week.js",
+  "./reminders.js",
   "./datenschutz.html",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
@@ -83,5 +84,16 @@ self.addEventListener("fetch", event => {
       return res;
     }).catch(() => null);
     return hit || (await net) || new Response("", { status: 504 });
+  })());
+});
+
+// Tipp auf eine Erinnerung: App öffnen bzw. nach vorne holen, passenden Bereich zeigen
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  const go = (event.notification.data && event.notification.data.go) || "heute";
+  event.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const c of all) { if ("focus" in c) { try { await c.navigate("./#" + go); } catch (e) {} return c.focus(); } }
+    return self.clients.openWindow("./#" + go);
   })());
 });
