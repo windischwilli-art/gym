@@ -909,19 +909,21 @@ function viewKraft(){
   ${CUR.ex.length?"":`<div class="tip"><i></i><div class="small">Füge deine Übungen hinzu. Tippe unten auf „+ Übung hinzufügen“.</div></div>`}
   ${CUR.ex.length&&(!CUR.date||CUR.date===TODAY())?`<button class="btn block" data-a="guideResume">Geführt ${CUR.ex.some(e=>e.sets.some(s=>s.done))?"weitermachen":"starten"}</button>`:""}
   ${CUR.ex.map((x,xi)=>`<div class="ex"><div class="row between"><button class="exname" data-a="gInfo" data-n="${esc(x.e)}">${esc(x.e)}<span class="q" aria-hidden="true">?</span></button><span class="row" style="gap:14px;flex:none"><button class="link small" data-a="exSwap" data-x="${xi}">Tauschen</button><button class="link small" data-a="addSet" data-x="${xi}">+ Satz</button></span></div>
+   ${window.exHistLine?window.exHistLine(x.e):""}
    <div class="sethead"><span>Satz</span><span>kg</span><span>Wdh.</span><span></span></div>
    ${x.sets.map((s,si)=>`<div class="setrow"><span class="setno">${si+1}</span><input inputmode="decimal" aria-label="${x.e} Satz ${si+1} kg" data-set="${xi}-${si}-kg" value="${s.kg}"><input inputmode="numeric" aria-label="${x.e} Satz ${si+1} Wiederholungen" data-set="${xi}-${si}-reps" value="${s.reps}"><button class="check" aria-pressed="${s.done}" aria-label="Satz erledigt" data-a="doneSet" data-x="${xi}" data-s="${si}">${I.ok}</button></div>`).join("")}</div>`).join("")}
   <button class="btn ghost block" data-a="exAdd">+ Übung hinzufügen</button>
   ${CUR.ex.length&&(CUR.own||!TEMPLATES[CUR.name])?`<button class="link" style="text-align:left" data-a="saveMyTpl">Als eigene Vorlage „${esc(CUR.name)}“ speichern</button>`:""}
-  <div class="row between" style="background:var(--surface2);border-radius:12px;padding:10px 12px"><span>Satzpause <span class="num" style="font-size:22px;font-weight:700" id="rest">${REST.left?fmtTime(REST.left):"1:30"}</span></span><button class="btn sm ghost" style="background:var(--surface)" data-a="rest">${REST.left?"Stopp":"Start"}</button></div>
+  ${window.restBarHTML?window.restBarHTML():`<div class="row between" style="background:var(--surface2);border-radius:12px;padding:10px 12px"><span>Satzpause <span class="num" style="font-size:22px;font-weight:700" id="rest">${REST.left?fmtTime(REST.left):"1:30"}</span></span><button class="btn sm ghost" style="background:var(--surface)" data-a="rest">${REST.left?"Stopp":"Start"}</button></div>`}
   <div class="stack" style="gap:6px"><div class="small" style="font-weight:600">Wie anstrengend war es?</div><div class="grid3">${INTS.map(([k,l])=>`<button class="chip" data-a="wkInt" data-v="${k}" aria-pressed="${(CUR.int||"mittel")===k}">${l}</button>`).join("")}</div></div>
   <button class="btn block" data-a="saveWk">Training speichern</button></section>`
  :`<section class="card"><h2>Training starten</h2><p class="small muted" style="margin:0">Wähle eine Vorlage. Du startest mit einem passenden Aufwärmprogramm und wirst mit Animationen durch jede Übung geführt.</p><div class="row between" style="gap:8px"><span class="small"><span class="muted">Passend zu:</span> ${esc(equipLabel(S.profile.equip))}</span><button class="link small" data-go="coach">Ändern</button></div>
   <div class="grid2">${Object.keys(TEMPLATES).map(n=>`<button class="card tile lift" data-a="startWk" data-n="${esc(n)}"><span class="num" style="font-size:22px;font-weight:700">${esc(n)}</span><span class="small muted">${TEMPLATES[n].slice(0,2).join(", ")} …</span>${S.profile.tpl&&S.profile.tpl[n]?'<span class="pill acc" style="align-self:flex-start">angepasst</span>':""}${S.profile.myTpl&&S.profile.myTpl[n]?'<span class="pill good" style="align-self:flex-start">eigene</span>':""}</button>`).join("")}<button class="card tile owntile" data-a="ownOpen"><span class="num" style="font-size:22px;font-weight:700">+ Eigenes</span><span class="small muted">Training frei zusammenstellen oder nachtragen</span></button></div>
   <div class="row wrap" style="gap:6px;align-items:center"><span class="small muted">Vorlage bearbeiten:</span>${Object.keys(TEMPLATES).map(n=>`<button class="chip" data-a="tplEdit" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div></section>`;
  return header("Krafttraining","Kraft-Tracker")+`<div class="stack">${cur}
- <section class="card"><h2>Bestleistungen</h2><p class="small muted" style="margin:0">Geschätztes Maximalgewicht für 1 Wiederholung (Epley-Formel).</p>
- ${Object.keys(pr).length?`<div class="list">${Object.entries(pr).sort((a,b)=>b[1].v-a[1].v).map(([e,p])=>`<div class="li"><div class="grow"><div class="t">${e}</div><div class="s">bester Satz ${de(p.kg)} kg × ${p.reps}</div></div><span class="num" style="font-size:20px;font-weight:700">${de(r0(p.v))} <span class="muted" style="font-size:14px">kg</span></span></div>`).join("")}</div>`:`<p class="small muted">Noch keine Daten.</p>`}</section>
+ ${window.toolsCardHTML?window.toolsCardHTML():""}
+ <section class="card"><h2>Bestleistungen</h2><p class="small muted" style="margin:0">Geschätztes Maximalgewicht für 1 Wiederholung. Tippe auf eine Übung für den Verlauf.</p>
+ ${Object.keys(pr).length?`<div class="list">${Object.entries(pr).sort((a,b)=>b[1].v-a[1].v).map(([e,p])=>`<div class="li" role="button" tabindex="0" style="cursor:pointer" data-st="hist" data-n="${esc(e)}"><div class="grow"><div class="t">${e}</div><div class="s">bester Satz ${de(p.kg)} kg × ${p.reps}</div></div><span class="num" style="font-size:20px;font-weight:700">${de(r0(p.v))} <span class="muted" style="font-size:14px">kg</span></span></div>`).join("")}</div>`:`<p class="small muted">Noch keine Daten.</p>`}</section>
  <section class="card"><h2>Verlauf</h2>${hist.length?`<div class="list">${hist.map(w=>{const vol=w.sets.reduce((a,s)=>a+s.kg*s.reps,0);return`<div class="li"><div class="grow"><div class="t">${w.name}</div><div class="s">${dateLabel(w.date)} · ${w.sets.length} Sätze · ${de(r0(vol))} kg Volumen · ${de(r0(wkKcal(w)))} kcal</div></div><button class="icon-btn" aria-label="Training entfernen" data-a="delWk" data-id="${w.id}">${I.x}</button></div>`}).join("")}</div>`:`<p class="small muted" style="margin:0">Noch keine Trainings.</p>`}</section></div>`;
 }
 
@@ -1392,7 +1394,7 @@ document.addEventListener("click",ev=>{
   case"startWk":startWorkout(d.n);if(window.guideStart)window.guideStart();break;
   case"cancelWk":CUR=null;render();break;
   case"addSet":{const x=CUR.ex[+d.x],l=x.sets[x.sets.length-1];x.sets.push({kg:l.kg,reps:l.reps,done:false});render(true);break}
-  case"doneSet":{const s=CUR.ex[+d.x].sets[+d.s];s.done=!s.done;if(s.done)startRest();render(true);break}
+  case"doneSet":{const s=CUR.ex[+d.x].sets[+d.s];s.done=!s.done;if(s.done&&(!window.restAuto||window.restAuto()))startRest();render(true);break}
   case"rest":REST.left?stopRest():startRest();render(true);break;
   case"saveWk":{const sets=[];CUR.ex.forEach(x=>x.sets.forEach(s=>{if(s.done&&num(s.reps)>0)sets.push({e:x.e,kg:num(s.kg)||0,reps:num(s.reps)})}));
    if(!sets.length){toast("Hake mindestens einen Satz ab");break}
@@ -1461,7 +1463,9 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&SHEET)closeSheet();
  if(e.key==="Enter"&&e.target.id==="syncin"){e.preventDefault();document.querySelector('[data-a="syncLoad"]').click()}
  if(e.key==="Enter"&&e.target.id==="eanin"){e.preventDefault();document.querySelector('[data-a="scanManual"]').click()}});
 function tick(){const w=document.getElementById("watch");if(w)w.textContent=fmtTime(wElapsed());paintLive()}
-function startRest(){stopRest();REST.left=90;REST.iv=setInterval(()=>{REST.left--;const r=document.getElementById("rest");if(r)r.textContent=fmtTime(Math.max(0,REST.left));if(REST.left<=0){stopRest();toast("Pause vorbei, nächster Satz");if(tab==="kraft")render(true)}},1000)}
+function startRest(){stopRest();REST.left=REST.total=window.restSec?window.restSec():90;REST.iv=setInterval(()=>{REST.left--;const r=document.getElementById("rest");if(r)r.textContent=fmtTime(Math.max(0,REST.left));const p=document.getElementById("restprog");if(p)p.style.width=Math.max(0,REST.left/REST.total*100)+"%";
+ if(REST.left>0&&REST.left<=3&&window.stBeep)window.stBeep(520,.08);
+ if(REST.left<=0){stopRest();if(window.stBeep)window.stBeep(990,.3,2);toast("Pause vorbei, nächster Satz");if(tab==="kraft")render(true)}},1000)}
 function stopRest(){clearInterval(REST.iv);REST.left=0}
 
 let LASTPULL=0;
@@ -1471,11 +1475,12 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=18"></script>
-<script src="ai.js?v=18"></script>
-<script src="brief.js?v=18"></script>
-<script src="run.js?v=18"></script>
-<script src="week.js?v=18"></script>
-<script src="reminders.js?v=18"></script>
+<script src="guide.js?v=19"></script>
+<script src="ai.js?v=19"></script>
+<script src="brief.js?v=19"></script>
+<script src="run.js?v=19"></script>
+<script src="week.js?v=19"></script>
+<script src="reminders.js?v=19"></script>
+<script src="strength.js?v=19"></script>
 </body>
 </html>

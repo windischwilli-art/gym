@@ -366,7 +366,7 @@ const host=()=>{let h=document.getElementById("gplayer");if(!h){h=document.creat
 function buildSteps(){
  const steps=[...warmupFor(CUR.name)];
  const sets=[];CUR.ex.forEach((x,xi)=>x.sets.forEach((s,si)=>{if(!s.done)sets.push({k:"set",x:xi,s:si})}));
- sets.forEach((st,i)=>{steps.push(st);if(i<sets.length-1){const bw=isBW(CUR.ex[st.x].e);steps.push({k:"rest",sec:bw?60:90})}});
+ sets.forEach((st,i)=>{steps.push(st);if(i<sets.length-1){const bw=isBW(CUR.ex[st.x].e);const rs=window.restSec?window.restSec():90;steps.push({k:"rest",sec:bw?Math.min(60,rs):rs})}});
  steps.push({k:"done"});
  return steps;
 }
