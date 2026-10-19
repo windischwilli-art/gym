@@ -77,10 +77,19 @@ window.restBarHTML=function(){
  return`<div class="restbar ${on?"on":""}"><div class="row between"><span>Satzpause <span class="num" style="font-size:24px;font-weight:700" id="rest">${on?fmtTime(REST.left):fmt(sec)}</span></span>
   <span class="row" style="gap:6px">${on?`<button class="btn sm ghost" data-st="rplus">+15</button>`:""}<button class="btn sm ${on?"":"ghost"}" data-a="rest">${on?"Stopp":"Start"}</button></span></div>
   <div class="restprog"><i id="restprog" style="width:${pct}%"></i></div>
+  ${on?nextHTML():""}
   <div class="row between" style="gap:6px;flex-wrap:wrap"><div class="restchips">${RS.map(s=>`<button class="chip" data-st="rsec" data-v="${s}" aria-pressed="${s===sec}">${s<60?s+"s":fmt(s)}</button>`).join("")}</div>
   <label class="small row" style="gap:6px;align-items:center"><input type="checkbox" data-st="rauto" ${window.restAuto()?"checked":""}> nach Satz automatisch</label></div></div>`;
 };
 
+function nextHTML(){
+ if(!CUR)return"";let nx=null;CUR.ex.some((x,xi)=>x.sets.some((st,si)=>{if(!st.done){nx={x,xi,si,st};return true}return false}));
+ if(!nx)return`<div class="restnext small">Alle Sätze erledigt. Speichere dein Training.</div>`;
+ const done=CUR.ex.flatMap(x=>x.sets.map(st=>({x,st}))).filter(o=>o.st.done),lastX=done.length?done[done.length-1].x:null,isNew=lastX!==nx.x;
+ return`<div class="restnext"><div class="eyebrow">${isNew?"Nächste Übung · vorbereiten":"Als Nächstes"}</div>
+  <div class="row between" style="gap:8px"><div><b>${E(nx.x.e)}</b><div class="small muted">Satz ${nx.si+1} von ${nx.x.sets.length}${nx.st.kg!==""&&nx.st.kg!=null?" · "+D(N(nx.st.kg))+" kg":""}${nx.st.reps?" × "+E(nx.st.reps):""}</div></div>
+  <button class="btn sm ghost" data-a="gInfo" data-n="${E(nx.x.e)}">So geht's</button></div></div>`;
+}
 // ---------- Werkzeuge-Karte ----------
 window.toolsCardHTML=function(){
  return`<section class="card"><h2>Werkzeuge</h2><div class="grid2">
@@ -221,6 +230,7 @@ css.textContent=`
 .restbar{display:flex;flex-direction:column;gap:8px;background:var(--surface2);border-radius:12px;padding:10px 12px}
 .restbar.on{background:color-mix(in srgb,var(--c-lift,var(--accent)) 14%,var(--surface))}
 .restprog{height:5px;border-radius:9px;background:color-mix(in srgb,var(--muted) 25%,transparent);overflow:hidden}.restprog i{display:block;height:100%;background:var(--c-lift,var(--accent));transition:width 1s linear}
+.restnext{display:flex;flex-direction:column;gap:4px;padding:8px 10px;border-radius:10px;background:var(--surface)}
 .restchips{display:flex;gap:4px;flex-wrap:wrap}.restchips .chip{padding:5px 9px;font-size:12px}
 .tooltile{text-align:left;gap:4px}
 .rmres{padding:14px;border-radius:14px;background:color-mix(in srgb,var(--c-lift,var(--accent)) 10%,var(--surface))}

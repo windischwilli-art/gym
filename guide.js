@@ -432,9 +432,22 @@ function show(){
   <div class="row" style="justify-content:center;gap:22px"><button class="glink" data-a="exSwap" data-x="${st.x}">Übung tauschen</button><button class="glink" style="color:var(--muted)" data-g="list">Zur Übersicht</button></div>`;
  }else if(st.k==="rest"){
   const nx=G2.steps.slice(G2.i+1).find(s=>s.k==="set"),nxe=nx?CUR.ex[nx.x]:null;
-  body=top("Pause")+`<div class="grest">${ringTimer(st.sec)}
-  <div class="grid2"><button class="btn ghost" data-g="plus">+15 Sek.</button><button class="btn" data-g="next">Weiter</button></div></div>
-  ${nxe?`<div class="card gnext"><div class="eyebrow">Als Nächstes</div><div class="row" style="gap:12px;align-items:center"><div class="gfig gsmall" id="gfig"></div><div class="grow"><div style="font-weight:700">${esc2(nxe.e)}</div><div class="small muted">Satz ${nx.s+1} von ${nxe.sets.length}${nxe.sets[nx.s].kg!==""&&!isBW(nxe.e)?" · "+String(nxe.sets[nx.s].kg).replace(".",",")+" kg":""}</div></div></div></div>`:""}`;
+  const prev=G2.steps.slice(0,G2.i).reverse().find(s=>s.k==="set"),isNew=!!(nxe&&(!prev||prev.x!==nx.x));
+  let prep="";
+  if(nxe&&!isNew&&prev){const ps=CUR.ex[prev.x].sets[prev.s],ns0=nxe.sets[nx.s];if(ns0.kg===""&&ps.kg!=="")ns0.kg=ps.kg;if(ns0.reps===""&&ps.reps!=="")ns0.reps=ps.reps}
+  if(nxe){const ns=nxe.sets[nx.s],inf=info(nxe.e),bw=isBW(nxe.e),hold=holdSec(nxe.e),last=typeof lastFor==="function"?lastFor(nxe.e):null,ls=last&&(last[nx.s]||last[0]);
+   const exI=CUR.ex.indexOf(nxe)+1;
+   prep=`<div class="card gnext ${isNew?"gnew":""}"><div class="row between"><div class="eyebrow">${isNew?"Nächste Übung · jetzt vorbereiten":"Als Nächstes"}</div><span class="small muted">Übung ${exI} von ${CUR.ex.length}</span></div>
+    <div class="gfig ${isNew?"":"gmed"}" id="gfig"></div>
+    <div><div style="font-weight:800;font-size:20px;line-height:1.2">${esc2(nxe.e)}</div><div class="small muted">Satz ${nx.s+1} von ${nxe.sets.length} · Trainiert: ${esc2(inf[2])}</div></div>
+    <div class="${bw?"":"grid2"}">${bw?"":`<label class="f">Gewicht (kg)<input id="gnkg" data-gn="kg" inputmode="decimal" value="${ns.kg===""?"":esc2(ns.kg)}" placeholder="0"></label>`}
+     <label class="f">${hold?"Sekunden":"Wiederholungen"}<input id="gnreps" data-gn="reps" inputmode="numeric" value="${ns.reps===""?(hold||""):esc2(ns.reps)}" placeholder="${hold?hold:"10"}"></label></div>
+    ${ls?`<div class="small muted">Letztes Mal: ${ls.kg?String(ls.kg).replace(".",",")+" kg × ":""}${ls.reps}${hold?" Sek.":""}</div>`:""}
+    ${isNew?`<div class="small" style="font-weight:700">So geht's</div><ul class="gcues">${inf[3].map(c=>`<li>${esc2(c)}</li>`).join("")}</ul>
+     <div class="tip"><i></i><div class="small">${bw?"Platz frei machen und Position einnehmen.":"Gerät einstellen und Gewicht bereitlegen, dann bist du startklar, wenn die Pause vorbei ist."}</div></div>`:""}
+   </div>`}
+  body=top("Pause")+`<div class="grest grestc"><div class="grow">${ringTimer(st.sec)}</div>
+  <div class="gcol"><button class="btn ghost" data-g="plus">+15 Sek.</button><button class="btn" data-g="next">Weiter</button></div></div>${prep}`;
  }else if(st.k==="done"){
   const sets=CUR.ex.reduce((a,x)=>a+x.sets.filter(s=>s.done).length,0),vol=CUR.ex.reduce((a,x)=>a+x.sets.filter(s=>s.done).reduce((b,s)=>b+(num(s.kg)||0)*(num(s.reps)||0),0),0);
   const min=Math.max(1,Math.round((Date.now()-CUR.start)/60000));
@@ -457,6 +470,7 @@ function show(){
  if(st.k==="warm"&&st.sec)startTimer(st.sec,next);
  if(st.k==="rest")startTimer(st.sec,next);
 }
+document.addEventListener("input",ev=>{const t=ev.target;if(!t.dataset||!t.dataset.gn||!G2||!CUR)return;const nx=G2.steps.slice(G2.i+1).find(s=>s.k==="set");if(!nx)return;CUR.ex[nx.x].sets[nx.s][t.dataset.gn]=t.value});
 function readSet(){const st=G2.steps[G2.i],s=CUR.ex[st.x].sets[st.s];const kg=document.getElementById("gkg"),rp=document.getElementById("greps");
  if(kg)s.kg=kg.value.trim();if(rp)s.reps=rp.value.trim();return s}
 
@@ -676,7 +690,12 @@ css.textContent=`
 .grest{display:flex;flex-direction:column;gap:16px;padding-top:12px}
 .gbig{padding:15px 18px;font-size:17px}
 .gp .btn:not(.ghost){background:linear-gradient(135deg,var(--c-lift),var(--hero3))}
-.gnext{gap:8px}
+.gnext{gap:10px}
+.gnext.gnew{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--c-lift) 55%,transparent)}
+.gfig.gmed{max-height:190px;aspect-ratio:auto;height:190px}
+.grestc{flex-direction:row;align-items:center;gap:14px;padding-top:4px}
+.grestc .gtimer{width:130px;height:130px}.grestc .gtimer #gtime{font-size:36px}
+.gcol{display:flex;flex-direction:column;gap:8px;flex:1}
 .gdone{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-top:24px}
 .gbadge{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--c-lift),var(--hero3));box-shadow:0 14px 30px -14px var(--c-lift)}
 .gbadge svg{width:42px;height:42px}
