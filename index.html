@@ -210,6 +210,7 @@ details summary{cursor:pointer;font-weight:600;color:var(--fg)}
 .unit span{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;font-weight:500;letter-spacing:0}
 .toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:16px;font-weight:600;font-size:14px;z-index:30;width:max-content;max-width:calc(100% - 32px);text-align:center}
 @media (prefers-reduced-motion:no-preference){.sheet{animation:up .22s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.6}}}
+.tile.rec{box-shadow:inset 0 0 0 2px var(--good,#22a06b)}
 </style>
 
 </head>
@@ -748,7 +749,7 @@ function viewHeute(){
   <div class="grid2"><button class="btn" data-a="addFood" data-meal="${suggestMeal()}">Essen erfassen</button><button class="btn ghost" data-a="scan" data-meal="${suggestMeal()}">Scannen</button></div></section>
  ${window.briefCardHTML?window.briefCardHTML():""}
  ${tip?`<section class="card"><div class="row between"><h2>Coach</h2><button class="link" data-go="coach">Alle Hinweise</button></div><div class="tip ${tip.k}"><i></i><div><div style="font-weight:600">${tip.t}</div><div class="small muted">${tip.d}</div></div></div></section>`:""}
- <section class="card"><div class="row between"><h2>Heute im Plan</h2>${td.opt?'<span class="pill">optional</span>':""}</div><div><div style="font-weight:600">${td.t}</div><div class="small muted">${td.d}</div></div>
+ <section class="card"><div class="row between"><h2>Heute im Plan</h2>${td.opt?'<span class="pill">optional</span>':""}</div><div><div style="font-weight:600">${td.t}${td.smart?' <span class="pill acc">empfohlen</span>':""}</div><div class="small muted">${td.d}</div>${td.why?`<div class="small" style="margin-top:4px">${esc(td.why)}</div>`:""}</div>
   ${td.sport&&!(S.acts||[]).some(x=>x.date===TODAY()&&x.type===td.sport)?`<button class="btn ghost block" data-a="actOpen" data-type="${td.sport}" data-min="${td.min||""}">${esc(td.t)} als erledigt eintragen</button>`:""}</section>
  ${tiles.length?`<section class="card"><div class="row between"><h2>Diese Woche</h2><span class="small muted">seit Montag</span></div><div class="${tiles.length>1?"grid2":"stack"}">${tiles.join("")}</div></section>`:""}
  <section class="card"><div class="row between"><h2>Aktivität heute</h2>${burn?`<span class="pill good">+${de(r0(burn))} kcal</span>`:""}</div>${acts.length?`<div class="list">${acts.join("")}</div>`:`<p class="muted small" style="margin:0">Noch nichts eingetragen. Jede Aktivität erhöht dein Kalorienziel für heute.</p>`}
@@ -918,7 +919,8 @@ function viewKraft(){
   <div class="stack" style="gap:6px"><div class="small" style="font-weight:600">Wie anstrengend war es?</div><div class="grid3">${INTS.map(([k,l])=>`<button class="chip" data-a="wkInt" data-v="${k}" aria-pressed="${(CUR.int||"mittel")===k}">${l}</button>`).join("")}</div></div>
   <button class="btn block" data-a="saveWk">Training speichern</button></section>`
  :`<section class="card"><h2>Training starten</h2><p class="small muted" style="margin:0">Wähle eine Vorlage. Du startest mit einem passenden Aufwärmprogramm und wirst mit Animationen durch jede Übung geführt.</p><div class="row between" style="gap:8px"><span class="small"><span class="muted">Passend zu:</span> ${esc(equipLabel(S.profile.equip))}</span><button class="link small" data-go="coach">Ändern</button></div>
-  <div class="grid2">${Object.keys(TEMPLATES).map(n=>`<button class="card tile lift" data-a="startWk" data-n="${esc(n)}"><span class="num" style="font-size:22px;font-weight:700">${esc(n)}</span><span class="small muted">${TEMPLATES[n].slice(0,2).join(", ")} …</span>${S.profile.tpl&&S.profile.tpl[n]?'<span class="pill acc" style="align-self:flex-start">angepasst</span>':""}${S.profile.myTpl&&S.profile.myTpl[n]?'<span class="pill good" style="align-self:flex-start">eigene</span>':""}</button>`).join("")}<button class="card tile owntile" data-a="ownOpen"><span class="num" style="font-size:22px;font-weight:700">+ Eigenes</span><span class="small muted">Training frei zusammenstellen oder nachtragen</span></button></div>
+  ${(()=>{const r=window.smartRec&&window.smartRec();return r?`<div class="tip good"><i></i><div><div style="font-weight:600">Empfohlen: ${esc(r.name)}</div><div class="small muted">${esc(r.reason)}</div></div></div>`:""})()}
+  <div class="grid2">${(()=>{const r=window.smartRec&&window.smartRec(),ks=Object.keys(TEMPLATES);return r?[r.name,...ks.filter(k=>k!==r.name)]:ks})().map(n=>`<button class="card tile lift ${window.smartRec&&window.smartRec()&&window.smartRec().name===n?"rec":""}" data-a="startWk" data-n="${esc(n)}"><span class="num" style="font-size:22px;font-weight:700">${esc(n)}${window.smartRec&&window.smartRec()&&window.smartRec().name===n?' <span class="pill good" style="font-size:10px;vertical-align:middle">empfohlen</span>':""}</span><span class="small muted">${TEMPLATES[n].slice(0,2).join(", ")} …</span>${S.profile.tpl&&S.profile.tpl[n]?'<span class="pill acc" style="align-self:flex-start">angepasst</span>':""}${S.profile.myTpl&&S.profile.myTpl[n]?'<span class="pill good" style="align-self:flex-start">eigene</span>':""}</button>`).join("")}<button class="card tile owntile" data-a="ownOpen"><span class="num" style="font-size:22px;font-weight:700">+ Eigenes</span><span class="small muted">Training frei zusammenstellen oder nachtragen</span></button></div>
   <div class="row wrap" style="gap:6px;align-items:center"><span class="small muted">Vorlage bearbeiten:</span>${Object.keys(TEMPLATES).map(n=>`<button class="chip" data-a="tplEdit" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div></section>`;
  return header("Krafttraining","Kraft-Tracker")+`<div class="stack">${cur}
  ${window.toolsCardHTML?window.toolsCardHTML():""}
@@ -934,6 +936,7 @@ function tips(){
  const lastWk=[...S.workouts].sort((a,b)=>b.date.localeCompare(a.date))[0];
  const daysSince=lastWk?Math.round((new Date(TODAY())-new Date(lastWk.date))/864e5):99;
  const pMiss=t.prot-s.p;
+ {const st=window.smartTip&&window.smartTip();if(st)out.push(st)}
  if(pMiss>25&&h>=12)out.push({k:"warn",t:`Dir fehlen noch ${r0(pMiss)} g Protein`,d:`Zum Beispiel ${r0(Math.min(500,pMiss/12*100)/50)*50} g Magerquark oder eine Portion Hähnchen mit Linsen.`});
  if(s.kcal>t.kcal+burnedOn(TODAY()))out.push({k:"warn",t:"Tagesziel überschritten",d:"Kein Problem für einen Tag. Über die Woche zählt der Durchschnitt."});
  if(lkm&&wkm>lkm*1.1)out.push({k:"warn",t:"Umfang steigt schnell",d:`Du bist ${r0((wkm/lkm-1)*100)} % über der Vorwoche. Mehr als 10 % Steigerung erhöht das Verletzungsrisiko.`});
@@ -969,6 +972,7 @@ function planDays(){
  let out=src.map(x=>({t:x[0],d:fix(x[1]),opt:!!x[2]}));
  out=applyWeek(out);
  if(window.runPlanOverlay)out=window.runPlanOverlay(out);
+ if(window.smartPlan){const dr=out.dropped;out=window.smartPlan(out);if(dr)out.dropped=dr}
  return out;
 }
 // ---------- Meine Woche: feste Termine, andere Sportarten, keine Zeit ----------
@@ -1475,12 +1479,13 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=19"></script>
-<script src="ai.js?v=19"></script>
-<script src="brief.js?v=19"></script>
-<script src="run.js?v=19"></script>
-<script src="week.js?v=19"></script>
-<script src="reminders.js?v=19"></script>
-<script src="strength.js?v=19"></script>
+<script src="guide.js?v=20"></script>
+<script src="ai.js?v=20"></script>
+<script src="brief.js?v=20"></script>
+<script src="run.js?v=20"></script>
+<script src="week.js?v=20"></script>
+<script src="reminders.js?v=20"></script>
+<script src="strength.js?v=20"></script>
+<script src="smart.js?v=20"></script>
 </body>
 </html>
