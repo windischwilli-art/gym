@@ -32,7 +32,7 @@ function nutrition(){
  if(!n)return{n,rows};
  const avg=k=>L.reduce((a,r)=>a+r.s[k],0)/n,avgT=k=>L.reduce((a,r)=>a+r.t[k],0)/n;
  const inRange=L.filter(r=>Math.abs(r.s.kcal-r.t.kcal)<=r.t.kcal*.1).length;
- return{n,rows,kcal:avg("kcal"),kcalT:avgT("kcal"),p:avg("p"),pT:avgT("prot"),c:avg("c"),cT:avgT("carb"),f:avg("f"),fT:avgT("fat"),sug:avg("sug"),fib:avg("fib"),inRange};
+ return{n,rows,kcal:avg("kcal"),kcalT:avgT("kcal"),p:avg("p"),pT:avgT("prot"),c:avg("c"),cT:avgT("carb"),f:avg("f"),fT:avgT("fat"),sug:avg("sug"),fib:avg("fib"),salt:avg("salt"),sat:avg("sat"),inRange};
 }
 function weightTrend(){
  const w=[...(S.weights||[])].sort((a,b)=>a.date.localeCompare(b.date));if(w.length<2)return null;
@@ -59,6 +59,8 @@ function tips(ws,nu,wt){
   else if(diff<-nu.kcalT*.25)out.push([1,"warn","Zu wenig gegessen",`Im Schnitt ${de(r0(-diff))} kcal unter Ziel. Das bremst Leistung und Regeneration. Iss vor allem an Trainingstagen genug.`]);
   else if(g!=="gain"&&diff>nu.kcalT*.15)out.push([2,"warn","Kalorien im Blick behalten",`Im Schnitt ${de(r0(diff))} kcal über deinem Ziel.`]);
   if(nu.fib<20)out.push([3,"","Mehr Ballaststoffe",`Nur ${r0(nu.fib)} g pro Tag (Ziel 30 g). Gemüse, Linsen, Vollkornbrot oder Haferflocken einbauen.`]);
+  if(nu.salt>6)out.push([2,"","Weniger Salz",`Im Schnitt ${r1(nu.salt)} g Salz pro Tag (Empfehlung höchstens 5 g). Wurst, Käse, Brot und Fertiggerichte sind die grössten Quellen.`]);
+  if(nu.kcal&&nu.sat*9>nu.kcal*.12)out.push([2,"","Weniger gesättigte Fette",`${r0(nu.sat*9/nu.kcal*100)} % deiner Kalorien kommen aus gesättigten Fetten (Ziel unter 10 %). Tausche Butter, Rahm und Wurst öfter gegen Olivenöl, Nüsse oder Fisch.`]);
   if(nu.sug>t.sug*1.2)out.push([2,"","Weniger Zucker",`Im Schnitt ${r0(nu.sug)} g Zucker pro Tag. Süssgetränke und Süssigkeiten sind die schnellsten Hebel.`]);
  }
  if(nu.n<4)out.push([2,"","Essen regelmässiger eintragen",`Nur an ${nu.n} der letzten 7 Tage eingetragen. Je vollständiger, desto genauer werden Ziele und Tipps. Tipp: Foto oder Barcode geht am schnellsten.`]);
@@ -153,7 +155,7 @@ async function aiReport(){
  const ws=weekStatus(),nu=nutrition(),wt=weightTrend(),tp=todayPlan(),p=S.profile;
  const data={ziel:{lose:"abnehmen",keep:"halten",gain:"Muskelaufbau"}[p.goal],gewicht:p.weight,zielgewicht:p.targetWeight||null,alter:p.age,training:p.train,
   heuteGeplant:tp.pd.t+": "+tp.pd.d,woche:{laufKm:r1(ws.km),laufZielKm:ws.t.km,kraftEinheiten:ws.wkW,kraftGeplant:ws.wkPlanned,trainingstage:ws.trainDays},
-  ernaehrung7Tage:nu.n?{tageErfasst:nu.n,kcalSchnitt:r0(nu.kcal),kcalZiel:r0(nu.kcalT),proteinSchnitt:r0(nu.p),proteinZiel:r0(nu.pT),ballaststoffe:r0(nu.fib),zucker:r0(nu.sug)}:"keine Daten",
+  ernaehrung7Tage:nu.n?{tageErfasst:nu.n,kcalSchnitt:r0(nu.kcal),kcalZiel:r0(nu.kcalT),proteinSchnitt:r0(nu.p),proteinZiel:r0(nu.pT),ballaststoffe:r0(nu.fib),zucker:r0(nu.sug),salzG:r1(nu.salt),gesFettG:r0(nu.sat)}:"keine Daten",
   gewichtstrendProWoche:wt?r1(wt.perWeek):null,letzteTrainings:[...S.workouts].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3).map(w=>w.date+" "+w.name),
   letzteLaeufe:[...S.runs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3).map(r=>r.date+" "+r.km+" km")};
  const prompt=`Du bist ein motivierender, ehrlicher Fitness- und Ernährungscoach. Schreibe auf Deutsch (Schweizer Schreibweise, ss statt ß) einen kurzen Tagesbericht für ${p.name||"den Nutzer"} auf Basis dieser Daten:

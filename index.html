@@ -311,6 +311,9 @@ const FOODS = [ // pro 100 g: kcal, Protein, KH, Fett, Ballaststoffe, Zucker, [P
  ["Cappuccino",40,2,3.5,2,0,3.5,200,"Tasse"],["Latte Macchiato",50,2.6,4,2.6,0,4,300,"Glas"],["Proteinshake mit Milch",80,10,6,1.5,0,5,350,"Shaker"],
  ["Isotonisches Getränk",25,0,6,0,0,6,500,"Flasche"]
 ].map(([name,kcal,p,c,f,fib,sug,portion,unit])=>({name,kcal,p,c,f,fib,sug,portion:portion||0,unit:unit||""}));
+// Gesättigte Fettsäuren und Salz pro 100 g (Richtwerte aus Nährwerttabellen); ungesättigte = Fett − gesättigte
+const SATSALT={"Haferflocken":[1.3,0.01],"Müesli (ungezuckert)":[1.2,0.05],"Knuspermüesli":[4,0.3],"Cornflakes":[0.2,1.1],"Vollkornbrot":[0.3,1.2],"Ruchbrot":[0.3,1.3],"Weissbrot / Toast":[0.8,1.2],"Zopf":[5,1.1],"Gipfeli / Croissant":[12,1],"Brötchen / Semmel":[0.4,1.3],"Laugenbrezel":[0.5,2.5],"Knäckebrot":[0.3,1.1],"Reiswaffel":[0.6,0.3],"Wrap / Tortilla":[2.5,1.3],"Pita":[0.2,1.1],"Reis, gekocht":[0.1,0],"Vollkornreis, gekocht":[0.2,0],"Nudeln, gekocht":[0.2,0],"Vollkornnudeln, gekocht":[0.3,0],"Kartoffeln, gekocht":[0,0],"Süsskartoffel, gekocht":[0,0.1],"Pommes frites":[1.5,0.8],"Rösti":[2.5,0.7],"Kartoffelstock / Püree":[2,0.6],"Couscous, gekocht":[0,0],"Bulgur, gekocht":[0,0],"Quinoa, gekocht":[0.2,0],"Polenta, gekocht":[0,0.2],"Spätzli / Knöpfli":[0.7,0.6],"Gnocchi":[0.1,0.9],"Hähnchenbrust":[0.4,0.15],"Poulet-Schenkel":[3.3,0.2],"Trutenbrust":[0.3,0.15],"Rindsplätzli / Steak":[1.9,0.15],"Rinderhack 5 %":[2.2,0.2],"Hackfleisch gemischt":[8,0.2],"Schweinsfilet":[1.2,0.15],"Schweinskotelett":[5.5,0.15],"Kalbfleisch":[0.7,0.2],"Cervelat":[9,2.2],"Bratwurst":[10,1.8],"Wienerli":[8.5,2],"Schinken (gekocht)":[1.4,2.3],"Rohschinken":[5.5,5.5],"Salami":[12,4.5],"Bündnerfleisch":[2.5,4.8],"Speck":[14,3],"Leberkäse":[10,2],"Döner Kebab":[4,1.4],"Chicken Nuggets":[3,1.3],"Lachs":[2.3,0.15],"Thunfisch in Wasser":[0.3,0.8],"Thunfisch in Öl":[1.8,0.9],"Kabeljau / Dorsch":[0.1,0.2],"Forelle":[1,0.15],"Crevetten":[0.2,0.6],"Fischstäbchen":[0.9,0.8],"Ei":[3.3,0.35],"Rührei":[4.5,0.6],"Milch 1,5 %":[1,0.1],"Vollmilch 3,5 %":[2.3,0.1],"Hafermilch":[0.2,0.1],"Sojamilch":[0.3,0.1],"Mandelmilch (ungesüsst)":[0.1,0.1],"Naturjoghurt 3,5 %":[2.2,0.1],"Fruchtjoghurt":[1.8,0.1],"Griechischer Joghurt 10 %":[6.8,0.1],"Skyr":[0.1,0.1],"Magerquark":[0.1,0.1],"Rahmquark":[7.5,0.1],"Hüttenkäse":[2.8,1],"Protein-Pudding":[1,0.2],"Proteinjoghurt / High Protein":[0.2,0.1],"Gouda":[18,1.8],"Emmentaler":[19,0.4],"Gruyère":[20,1.5],"Appenzeller":[20,1.6],"Mozzarella":[12,0.5],"Feta":[14,2.8],"Raclettekäse":[17,1.6],"Parmesan":[18,1.6],"Frischkäse":[15,0.8],"Butter":[55,0.02],"Rahm / Sahne 35 %":[22,0.1],"Kaffeerahm":[6.5,0.1],"Brokkoli":[0.1,0.05],"Blumenkohl":[0.1,0.04],"Karotten":[0,0.1],"Tomaten":[0,0],"Gurke":[0,0],"Paprika":[0.1,0],"Zucchini":[0.1,0],"Aubergine":[0,0],"Spinat":[0.1,0.2],"Blattsalat":[0,0],"Rucola":[0.1,0.07],"Zwiebel":[0,0],"Champignons":[0,0],"Erbsen":[0.1,0],"Mais":[0.2,0.5],"Grüne Bohnen":[0,0],"Kichererbsen, gekocht":[0.3,0.3],"Linsen, gekocht":[0.1,0],"Kidneybohnen, gekocht":[0.1,0.3],"Avocado":[2.1,0],"Rotkohl":[0,0.1],"Sauerkraut":[0,1.5],"Gemischter Salat mit Dressing":[0.9,0.6],"Apfel":[0,0],"Banane":[0.1,0],"Birne":[0,0],"Orange":[0,0],"Mandarine":[0,0],"Kiwi":[0,0],"Erdbeeren":[0,0],"Heidelbeeren":[0,0],"Himbeeren":[0,0],"Trauben":[0,0],"Ananas":[0,0],"Mango":[0.1,0],"Wassermelone":[0,0],"Pfirsich / Nektarine":[0,0],"Datteln (getrocknet)":[0,0],"Rosinen":[0.1,0],"Apfelmus":[0,0],"Mandeln":[3.8,0],"Baumnüsse / Walnüsse":[6,0],"Cashewkerne":[8,0],"Erdnüsse":[7,0],"Haselnüsse":[4.5,0],"Studentenfutter":[3.5,0],"Chiasamen":[3.3,0],"Leinsamen":[3.7,0.1],"Kürbiskerne":[8.7,0],"Erdnussbutter":[10,0.4],"Olivenöl":[14,0],"Rapsöl":[7,0],"Whey-Proteinpulver":[3,0.5],"Proteinriegel":[5,0.6],"Tofu natur":[1.1,0],"Tempeh":[2.2,0],"Seitan":[0.3,1.2],"Veggie-Burger":[2,1.3],"Falafel":[2,1.2],"Hummus":[2.3,1],"Pizza Margherita":[4,1.3],"Pizza Salami":[5,1.6],"Spaghetti Bolognese":[1.8,0.6],"Lasagne":[4,0.8],"Älplermagronen":[5,0.8],"Zürcher Geschnetzeltes mit Rösti":[5,0.8],"Käsefondue (pro Person)":[12,1.1],"Raclette (mit Kartoffeln)":[8,0.9],"Wienerschnitzel":[4,0.9],"Cordon bleu":[7,1.4],"Hamburger":[4.5,1.1],"Cheeseburger":[6,1.3],"Sandwich Schinken-Käse":[5,1.6],"Sushi (Maki)":[0.4,1],"Curry mit Reis":[2.5,0.7],"Pad Thai":[1,1.2],"Chili con Carne":[1.8,0.8],"Gemüsesuppe":[0.3,0.8],"Bircher Müesli":[2.3,0.05],"Porridge mit Milch":[1.3,0.1],"Pancakes":[2.5,0.8],"Kebab-Teller mit Pommes":[2.5,1.2],"Schokolade Milch":[18,0.25],"Schokolade dunkel 70 %":[26,0.02],"Schokoriegel (z. B. Snickers)":[9,0.6],"Gummibärchen":[0.1,0.05],"Kekse / Guetzli":[11,0.6],"Croissant mit Schokolade":[12,0.9],"Kuchen (Rührkuchen)":[9,0.5],"Glace / Eis":[7,0.15],"Chips":[3,1.4],"Popcorn (gesalzen)":[3,1.6],"Müsliriegel":[6,0.3],"Honig":[0,0],"Konfitüre / Marmelade":[0,0],"Nutella":[10.6,0.1],"Zucker":[0,0],"Orangensaft":[0,0],"Apfelschorle":[0,0],"Cola":[0,0],"Cola Zero / Light":[0,0.02],"Eistee":[0,0],"Rivella rot":[0,0.02],"Energy Drink":[0,0.2],"Bier":[0,0],"Alkoholfreies Bier":[0,0],"Wein rot":[0,0],"Wein weiss":[0,0],"Kaffee schwarz":[0,0],"Cappuccino":[1.3,0.1],"Latte Macchiato":[1.7,0.1],"Proteinshake mit Milch":[1,0.2],"Isotonisches Getränk":[0,0.3]};
+FOODS.forEach(f=>{const x=SATSALT[f.name]||[f.f*.35,0];f.sat=x[0];f.salt=x[1]});
 const MEALS=["Frühstück","Mittagessen","Abendessen","Snacks"];
 // Equipment: gym = Fitnessstudio (alles), bb = Langhantel + Ständer, db = Kurzhanteln, kb = Kettlebell,
 // bench = Hantelbank, bar = Klimmzugstange, band = Widerstandsbänder. Körpergewicht geht immer.
@@ -356,7 +359,7 @@ const uid=()=>Math.random().toString(36).slice(2,9);
 const r0=n=>Math.round(n), r1=n=>Math.round(n*10)/10;
 
 function food(name,g,meal,date){const f=FOODS.find(x=>x.name===name),k=g/100;
- return{id:uid(),date,meal,name,g,kcal:f.kcal*k,p:f.p*k,c:f.c*k,f:f.f*k,fib:f.fib*k,sug:f.sug*k,ex:true}}
+ return{id:uid(),date,meal,name,g,kcal:f.kcal*k,p:f.p*k,c:f.c*k,f:f.f*k,fib:f.fib*k,sug:f.sug*k,sat:f.sat*k,salt:f.salt*k,ex:true}}
 function seed(){
  const t=TODAY();
  return{v:1,example:true,
@@ -665,10 +668,11 @@ function targets(p=S.profile){
  const carb=Math.max(0,Math.round((kcal-prot*4-fat*9)/4));
  const tr=p.train||"both";let km=(tr==="both"||tr==="run")?{easy:12,mid:25,pro:40}[p.level||"easy"]:0;
  try{if(km&&window.runWeekKm&&S&&p===S.profile&&S.profile.runCfg){const k=window.runWeekKm();if(k)km=k}}catch(e){}
- return{bmr:r0(bmr),tdee:r0(tdee),kcal,prot,fat,carb,fib:30,sug:50,km};
+ return{bmr:r0(bmr),tdee:r0(tdee),kcal,prot,fat,carb,fib:30,sug:50,sat:Math.round(kcal*.1/9),salt:5,km};
 }
 const foodsOn=d=>S.foods.filter(f=>f.date===d);
-function sum(list){return list.reduce((a,f)=>({kcal:a.kcal+f.kcal,p:a.p+f.p,c:a.c+f.c,f:a.f+f.f,fib:a.fib+f.fib,sug:a.sug+f.sug}),{kcal:0,p:0,c:0,f:0,fib:0,sug:0})}
+const fz=(f,k)=>(f.sat!=null?de(r1(f.sat*k))+" · "+de(r1(Math.max(0,f.f-f.sat)*k)):"– · –")+" · "+(f.salt!=null?de(r1(f.salt*k)):"–")+" g";
+function sum(list){return list.reduce((a,f)=>({kcal:a.kcal+f.kcal,p:a.p+f.p,c:a.c+f.c,f:a.f+f.f,fib:a.fib+f.fib,sug:a.sug+f.sug,sat:a.sat+(f.sat||0),satF:a.satF+(f.sat!=null?f.f:0),salt:a.salt+(f.salt||0),saltN:a.saltN+(f.salt!=null?1:0),n:a.n+1}),{kcal:0,p:0,c:0,f:0,fib:0,sug:0,sat:0,satF:0,salt:0,saltN:0,n:0})}
 // Verbrauch nach MET (Compendium of Physical Activities). Gezählt wird nur der Mehrverbrauch über Ruhe (MET − 1),
 // weil der Grundumsatz schon im Tagesziel steckt.
 const INTS=[["leicht","Leicht"],["mittel","Mittel"],["hart","Hart"]];
@@ -833,8 +837,11 @@ function viewEssen(){
  ${macroBar("Protein",s.p,t.prot,"var(--prot)")}${macroBar("Kohlenhydrate",s.c,t.carb,"var(--carb)")}${macroBar("Fett",s.f,t.fat,"var(--fat)")}${t.burn?`<div class="small muted">Inklusive ${de(r0(t.burn))} kcal aus deinem Training heute.</div>`:""}<div class="grid3"><button class="btn ghost" data-a="addFood" data-meal="${suggestMeal()}">Suchen</button><button class="btn ghost" data-a="scan" data-meal="${suggestMeal()}">Scannen</button><button class="btn" data-a="aiPhoto" data-meal="${suggestMeal()}">Foto</button></div></section>
  ${meals}
  <section class="card"><h2>Nährwerte im Detail</h2><div class="list">
- ${row("Energie",s.kcal,t.kcal,"kcal",true)}${row("Protein",s.p,t.prot,"g")}${row("Kohlenhydrate",s.c,t.carb,"g")}${row("davon Zucker",s.sug,t.sug,"g",true)}${row("Fett",s.f,t.fat,"g")}${row("Ballaststoffe",s.fib,t.fib,"g")}
- </div><p class="small muted" style="margin:0">Makro-Verteilung: ${s.kcal?`${r0(s.p*4/s.kcal*100)} % Protein · ${r0(s.c*4/s.kcal*100)} % KH · ${r0(s.f*9/s.kcal*100)} % Fett`:"noch keine Einträge"}</p></section></div>`;
+ ${row("Energie",s.kcal,t.kcal,"kcal",true)}${row("Protein",s.p,t.prot,"g")}${row("Kohlenhydrate",s.c,t.carb,"g")}${row("davon Zucker",s.sug,t.sug,"g",true)}${row("Fett",s.f,t.fat,"g")}${row("davon gesättigt",s.sat,t.sat||Math.round(t.kcal*.1/9),"g",true)}
+ <div class="li"><div class="grow t" style="font-weight:500">davon ungesättigt</div><span class="num" style="font-size:17px">${de(r1(Math.max(0,s.satF-s.sat)))} <span class="muted">g</span></span>${s.satF?`<span class="pill good">${r0(Math.max(0,s.satF-s.sat)/s.satF*100)} %</span>`:'<span class="pill">offen</span>'}</div>
+ ${row("Ballaststoffe",s.fib,t.fib,"g")}${row("Salz",s.salt,t.salt||5,"g",true)}
+ </div>${s.n&&(s.saltN<s.n)?`<p class="small muted" style="margin:0">Salz und Fettsäuren fehlen bei ${s.n-s.saltN} ${s.n-s.saltN===1?"Eintrag":"Einträgen"} (z. B. schnell erfasst oder ältere Einträge). Die Werte sind deshalb eher zu tief.</p>`:""}
+ <p class="small muted" style="margin:0">Empfehlung: höchstens 5 g Salz pro Tag und höchstens 10 % der Kalorien aus gesättigten Fetten. Ungesättigte Fette (Nüsse, Olivenöl, Fisch, Avocado) sind die gesünderen.</p><p class="small muted" style="margin:0">Makro-Verteilung: ${s.kcal?`${r0(s.p*4/s.kcal*100)} % Protein · ${r0(s.c*4/s.kcal*100)} % KH · ${r0(s.f*9/s.kcal*100)} % Fett`:"noch keine Einträge"}</p></section></div>`;
 }
 
 // Stoppuhr + GPS
@@ -1144,7 +1151,7 @@ function openFood(meal){SHEET={meal,q:"",pick:null,g:100,custom:false};drawSheet
 const normT=t=>String(t).toLowerCase().replace(/ä/g,"a").replace(/ö/g,"o").replace(/ü/g,"u").replace(/ß/g,"ss").replace(/[^a-z0-9 ]/g," ");
 function recentFoods(){const seen=new Set(),out=[];
  for(const f of [...(S?S.foods:[])].reverse()){if(!(f.g>0)||seen.has(f.name))continue;seen.add(f.name);const k=100/f.g;
-  out.push({name:f.name,kcal:f.kcal*k,p:f.p*k,c:f.c*k,f:f.f*k,fib:(f.fib||0)*k,sug:(f.sug||0)*k,portion:f.g,unit:"",key:"r:"+f.name,recent:true});if(out.length>=8)break}
+  out.push({name:f.name,kcal:f.kcal*k,p:f.p*k,c:f.c*k,f:f.f*k,fib:(f.fib||0)*k,sug:(f.sug||0)*k,sat:f.sat!=null?f.sat*k:null,salt:f.salt!=null?f.salt*k:null,portion:f.g,unit:"",key:"r:"+f.name,recent:true});if(out.length>=8)break}
  return out}
 let ONLINE={q:"",res:[],busy:false,err:""};
 const allFoods=()=>[...recentFoods(),...Object.entries((S&&S.products)||{}).map(([k,v])=>({...v,key:"p:"+k,mine:true})),...FOODS.map(f=>({...f,key:"f:"+f.name})),...ONLINE.res];
@@ -1160,7 +1167,7 @@ async function onlineSearch(q){
  ONLINE={q,res:[],busy:true,err:""};drawSheet();
  try{const r=await fetch("https://world.openfoodfacts.org/cgi/search.pl?search_terms="+encodeURIComponent(q)+"&search_simple=1&action=process&json=1&page_size=24&lc=de&fields=code,product_name,product_name_de,brands,nutriments,serving_quantity");
   const j=await r.json();
-  const res=(j.products||[]).map(p=>offToProd(p,p.code||"")).filter(p=>p.name&&p.kcal!=="").map(p=>{const z=x=>x===""?0:x;return{name:p.name,kcal:p.kcal,p:z(p.p),c:z(p.c),sug:z(p.sug),f:z(p.f),fib:z(p.fib),portion:z(p.portion),ean:p.ean,src:"off",online:true,key:"o:"+(p.ean||p.name)}});
+  const res=(j.products||[]).map(p=>offToProd(p,p.code||"")).filter(p=>p.name&&p.kcal!=="").map(p=>{const z=x=>x===""?0:x;return{name:p.name,kcal:p.kcal,p:z(p.p),c:z(p.c),sug:z(p.sug),f:z(p.f),sat:p.sat===""?null:p.sat,salt:p.salt===""?null:p.salt,fib:z(p.fib),portion:z(p.portion),ean:p.ean,src:"off",online:true,key:"o:"+(p.ean||p.name)}});
   ONLINE={q,res,busy:false,err:res.length?"":"Online nichts gefunden. Versuch einen anderen Begriff."};
  }catch(e){ONLINE={q,res:[],busy:false,err:"Keine Verbindung zur Online-Datenbank."}}
  if(SHEET&&!SHEET.pick&&!SHEET.scan)drawSheet();
@@ -1178,7 +1185,7 @@ function scanBody(){
  if(sc.stage==="form"){const v=sc.vals||{},fld=(id,l,val,mode="decimal")=>`<label class="f">${l}<input id="n-${id}" inputmode="${mode}" value="${val===undefined||val===null?"":esc(val)}"></label>`;
   return head(sc.ean?"Neues Produkt":"Eigenes Produkt")+`${sc.ean?`<div class="small muted">Strichcode <span class="num" style="font-size:16px">${esc(sc.ean)}</span></div>`:""}${err}
   ${fld("name","Produktname",v.name,"text")}<div class="eyebrow">Nährwerte pro 100 g (steht auf der Packung)</div>
-  <div class="grid2">${fld("kcal","Kalorien (kcal)",v.kcal)}${fld("p","Protein (g)",v.p)}${fld("c","Kohlenhydrate (g)",v.c)}${fld("sug","davon Zucker (g)",v.sug)}${fld("f","Fett (g)",v.f)}${fld("fib","Ballaststoffe (g)",v.fib)}</div>
+  <div class="grid2">${fld("kcal","Kalorien (kcal)",v.kcal)}${fld("p","Protein (g)",v.p)}${fld("c","Kohlenhydrate (g)",v.c)}${fld("sug","davon Zucker (g)",v.sug)}${fld("f","Fett (g)",v.f)}${fld("sat","davon gesättigt (g)",v.sat)}${fld("fib","Ballaststoffe (g)",v.fib)}${fld("salt","Salz (g)",v.salt)}</div>
   ${fld("por","Portionsgröße in g (optional)",v.portion)}
   <button class="btn block" data-a="scanSave">Speichern und weiter</button>
   <p class="small muted" style="margin:0">Du erfasst jedes Produkt nur einmal. Beim nächsten Scan ist es sofort da.</p>`}
@@ -1240,7 +1247,8 @@ function offToProd(p,ean){
  let kcal=n(nu["energy-kcal_100g"]);if(kcal===""&&n(nu["energy_100g"])!=="")kcal=Math.round(Number(nu["energy_100g"])/4.184);
  const brand=String(p.brands||"").split(",")[0].trim(),base=String(p.product_name_de||p.product_name||"").trim();
  const name=base?(brand&&!base.toLowerCase().includes(brand.toLowerCase())?base+" ("+brand+")":base):brand;
- return{name,kcal,p:n(nu.proteins_100g),c:n(nu.carbohydrates_100g),sug:n(nu.sugars_100g),f:n(nu.fat_100g),fib:n(nu.fiber_100g),portion:n(p.serving_quantity),ean};
+ const salt=n(nu.salt_100g)!==""?n(nu.salt_100g):n(nu.sodium_100g)!==""?Math.round(n(nu.sodium_100g)*2.5*100)/100:"";
+ return{name,kcal,p:n(nu.proteins_100g),c:n(nu.carbohydrates_100g),sug:n(nu.sugars_100g),f:n(nu.fat_100g),sat:n(nu["saturated-fat_100g"]),salt,fib:n(nu.fiber_100g),portion:n(p.serving_quantity),ean};
 }
 async function handleEan(ean){
  stopCam();if(!SHEET)return;
@@ -1254,7 +1262,7 @@ async function handleEan(ean){
  catch(e){net=true}
  if(!SHEET||SHEET.scan!==sc)return;
  if(prod&&prod.name&&prod.kcal!==""){
-  const z=x=>x===""?0:x,item={name:prod.name,kcal:prod.kcal,p:z(prod.p),c:z(prod.c),sug:z(prod.sug),f:z(prod.f),fib:z(prod.fib),portion:z(prod.portion),ean,src:"off"};
+  const z=x=>x===""?0:x,item={name:prod.name,kcal:prod.kcal,p:z(prod.p),c:z(prod.c),sug:z(prod.sug),f:z(prod.f),sat:prod.sat===""||prod.sat==null?null:prod.sat,salt:prod.salt===""||prod.salt==null?null:prod.salt,fib:z(prod.fib),portion:z(prod.portion),ean,src:"off"};
   S.products=S.products||{};S.products[ean]=item;save();
   SHEET.scan=null;SHEET.pick={...item};SHEET.g=item.portion||100;drawSheet();toast("Gefunden: "+item.name);
  }else{
@@ -1313,7 +1321,7 @@ function drawSheet(){
   <label class="f">Menge (g)<input id="sg" inputmode="decimal" value="${s.g}"></label>
   <div class="row wrap" style="gap:6px">${f.unit&&f.portion?[.5,1,2,3].map(m=>`<button class="chip" data-a="sPortion" data-g="${f.portion*m}" aria-pressed="${s.g===r1(f.portion*m)}">${String(m).replace(".",",")} ${esc(f.unit)}</button>`).join(""):""}${[50,100,150,200,250].map(g=>`<button class="chip" data-a="sQuick" data-g="${g}" aria-pressed="${s.g===g}">${g} g</button>`).join("")}</div>
   ${f.unit&&f.portion?`<div class="small muted">1 ${esc(f.unit)} ≈ ${de(f.portion)} g</div>`:""}
-  <div class="card" style="padding:12px;gap:6px"><div class="kv"><span>Energie</span><b id="pk">${r0(f.kcal*k)} kcal</b></div><div class="kv"><span style="color:var(--prot)">Protein</span><b id="pp">${r1(f.p*k)} g</b></div><div class="kv"><span style="color:var(--carb)">Kohlenhydrate</span><b id="pc">${r1(f.c*k)} g</b></div><div class="kv"><span style="color:var(--fat)">Fett</span><b id="pf">${r1(f.f*k)} g</b></div><div class="kv muted"><span>Ballaststoffe · Zucker</span><b id="px">${r1(f.fib*k)} · ${r1(f.sug*k)} g</b></div></div>
+  <div class="card" style="padding:12px;gap:6px"><div class="kv"><span>Energie</span><b id="pk">${r0(f.kcal*k)} kcal</b></div><div class="kv"><span style="color:var(--prot)">Protein</span><b id="pp">${r1(f.p*k)} g</b></div><div class="kv"><span style="color:var(--carb)">Kohlenhydrate</span><b id="pc">${r1(f.c*k)} g</b></div><div class="kv"><span style="color:var(--fat)">Fett</span><b id="pf">${r1(f.f*k)} g</b></div><div class="kv muted"><span>Ballaststoffe · Zucker</span><b id="px">${r1(f.fib*k)} · ${r1(f.sug*k)} g</b></div>${f.sat!=null||f.salt!=null?`<div class="kv muted"><span>Ges. Fett · unges. · Salz</span><b id="pz">${fz(f,k)}</b></div>`:""}</div>
   ${mealSel}<button class="btn block" data-a="sAdd">Zu ${s.meal} hinzufügen</button>`}
  else{const res=searchFoods(s.q),qq=s.q.trim();
   body=`<div class="row between"><h2>Lebensmittel suchen</h2><button class="icon-btn" aria-label="Schließen" data-a="sClose">${I.x}</button></div>
@@ -1326,7 +1334,7 @@ function drawSheet(){
  ov.innerHTML=`<div class="scrim" data-a="sScrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Lebensmittel hinzufügen"><div class="grab"></div>${body}</div></div>`;
  const sq=document.getElementById("sq");if(sq){sq.oninput=()=>{SHEET.q=sq.value;if(ONLINE.q&&ONLINE.q!==sq.value.trim()&&!ONLINE.busy)ONLINE={q:"",res:[],busy:false,err:""};const pos=sq.selectionStart;drawSheet();const n=document.getElementById("sq");n.focus();n.setSelectionRange(pos,pos)}}
  const sg=document.getElementById("sg");if(sg)sg.oninput=()=>{const g=num(sg.value)||0;SHEET.g=g;const f=SHEET.pick,k=g/100;
-  pk.textContent=r0(f.kcal*k)+" kcal";pp.textContent=r1(f.p*k)+" g";pc.textContent=r1(f.c*k)+" g";pf.textContent=r1(f.f*k)+" g";px.textContent=r1(f.fib*k)+" · "+r1(f.sug*k)+" g"};
+  pk.textContent=r0(f.kcal*k)+" kcal";pp.textContent=r1(f.p*k)+" g";pc.textContent=r1(f.c*k)+" g";pf.textContent=r1(f.f*k)+" g";px.textContent=r1(f.fib*k)+" · "+r1(f.sug*k)+" g";const pz=document.getElementById("pz");if(pz)pz.textContent=fz(f,k)};
  const sm=document.getElementById("smeal");if(sm)sm.onchange=()=>{SHEET.meal=sm.value};
 }
 
@@ -1364,7 +1372,7 @@ document.addEventListener("click",ev=>{
   case"wkInt":if(CUR){CUR.int=d.v;render(true)}break;
   case"exSwap":case"exAdd":case"tplEdit":if(!window.guideEx2){toast("Bitte App einmal schließen und neu öffnen, damit das Update geladen wird")}break;
   case"sPick":{const f=allFoods().find(x=>x.key===d.k);if(!f)break;
-   if(f.online&&f.ean){S.products=S.products||{};S.products[f.ean]={name:f.name,kcal:f.kcal,p:f.p,c:f.c,sug:f.sug,f:f.f,fib:f.fib,portion:f.portion,ean:f.ean,src:"off"};save()}
+   if(f.online&&f.ean){S.products=S.products||{};S.products[f.ean]={name:f.name,kcal:f.kcal,p:f.p,c:f.c,sug:f.sug,f:f.f,sat:f.sat,salt:f.salt,fib:f.fib,portion:f.portion,ean:f.ean,src:"off"};save()}
    SHEET.pick=f;SHEET.g=f.portion||100;drawSheet();break}
   case"sOnline":onlineSearch(SHEET.q.trim());break;
   case"sPortion":SHEET.g=r1(num(d.g));drawSheet();break;
@@ -1378,14 +1386,14 @@ document.addEventListener("click",ev=>{
   case"scanSave":{const g=id=>document.getElementById("n-"+id).value,name=g("name").trim(),kcal=num(g("kcal"));
    if(!name||!(kcal>=0)){toast("Bitte Produktname und Kalorien ausfüllen");break}
    const key=SHEET.scan.ean||("x"+uid());
-   const prod={name,kcal,p:num(g("p"))||0,c:num(g("c"))||0,sug:num(g("sug"))||0,f:num(g("f"))||0,fib:num(g("fib"))||0,portion:num(g("por"))||0,ean:SHEET.scan.ean||"",src:"me"};
+   const prod={name,kcal,p:num(g("p"))||0,c:num(g("c"))||0,sug:num(g("sug"))||0,f:num(g("f"))||0,sat:g("sat").trim()===""?null:Math.min(num(g("sat"))||0,num(g("f"))||0),salt:g("salt").trim()===""?null:num(g("salt"))||0,fib:num(g("fib"))||0,portion:num(g("por"))||0,ean:SHEET.scan.ean||"",src:"me"};
    S.products=S.products||{};S.products[key]=prod;save();
    SHEET.scan=null;SHEET.pick=prod;SHEET.g=prod.portion||100;drawSheet();toast(name+" gespeichert");break}
   case"sBack":SHEET.pick=null;SHEET.custom=false;drawSheet();break;
   case"sCustom":SHEET.custom=true;drawSheet();break;
   case"sQuick":SHEET.g=+d.g;drawSheet();break;
   case"sAdd":{if(!(SHEET.g>0)){toast("Bitte eine Menge in Gramm eingeben");break}const f=SHEET.pick,k=SHEET.g/100;
-   S.foods.push({id:uid(),date:TODAY(),meal:SHEET.meal,name:f.name,g:SHEET.g,kcal:f.kcal*k,p:f.p*k,c:f.c*k,f:f.f*k,fib:f.fib*k,sug:f.sug*k});save();closeSheet();render(true);toast(f.name+" hinzugefügt");break}
+   S.foods.push({id:uid(),date:TODAY(),meal:SHEET.meal,name:f.name,g:SHEET.g,kcal:f.kcal*k,p:f.p*k,c:f.c*k,f:f.f*k,fib:f.fib*k,sug:f.sug*k,...(f.sat!=null?{sat:f.sat*k}:{}),...(f.salt!=null?{salt:f.salt*k}:{})});save();closeSheet();render(true);toast(f.name+" hinzugefügt");break}
   case"sAddCustom":{const n=cname.value.trim(),kc=num(ckcal.value);if(!n||!(kc>=0)){toast("Name und kcal ausfüllen");break}
    S.foods.push({id:uid(),date:TODAY(),meal:SHEET.meal,name:n,g:0,kcal:kc,p:num(cp.value)||0,c:num(cc.value)||0,f:num(cf.value)||0,fib:0,sug:0});save();closeSheet();render(true);toast(n+" hinzugefügt");break}
   case"wStart":W.running=true;W.start=Date.now();W.iv=setInterval(tick,250);gpsStart();render(true);break;
@@ -1479,13 +1487,13 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=21"></script>
-<script src="ai.js?v=20"></script>
-<script src="brief.js?v=20"></script>
-<script src="run.js?v=20"></script>
-<script src="week.js?v=20"></script>
-<script src="reminders.js?v=20"></script>
-<script src="strength.js?v=21"></script>
-<script src="smart.js?v=20"></script>
+<script src="guide.js?v=22"></script>
+<script src="ai.js?v=22"></script>
+<script src="brief.js?v=22"></script>
+<script src="run.js?v=22"></script>
+<script src="week.js?v=22"></script>
+<script src="reminders.js?v=22"></script>
+<script src="strength.js?v=22"></script>
+<script src="smart.js?v=22"></script>
 </body>
 </html>

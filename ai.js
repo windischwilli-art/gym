@@ -19,10 +19,10 @@ let UI={setup:false,prov:"gemini",msg:"",busy:false};
 const PROMPT=note=>`Du bist Ernährungsexperte. Analysiere das Foto einer Mahlzeit.
 Erkenne jede sichtbare Komponente einzeln (z. B. Reis, Poulet, Sauce, Salat) und schätze die Menge in Gramm anhand von Teller- und Besteckgrössen (Standardteller ca. 26 cm).
 Berücksichtige versteckte Fette wie Öl, Butter oder Rahmsauce realistisch.
-Gehe so vor: 1. Komponenten erkennen. 2. Menge in Gramm schätzen (z. B. 1 Ei ca. 55 g ohne Schale, 1 Tasse gekochter Reis ca. 160 g, eine typische Beilagen-Portion Reis 150–250 g). 3. Nährwerte pro 100 g aus Standardtabellen nehmen (z. B. gekochter Reis 130 kcal, 2,7 g Protein, 28 g KH, 0,3 g Fett; Spiegelei in Öl ca. 195 kcal, 13,6 g Protein, 0,8 g KH, 15 g Fett; gekochtes Ei 155 kcal).
+Gehe so vor: 1. Komponenten erkennen. 2. Menge in Gramm schätzen (z. B. 1 Ei ca. 55 g ohne Schale, 1 Tasse gekochter Reis ca. 160 g, eine typische Beilagen-Portion Reis 150–250 g). 3. Nährwerte pro 100 g aus Standardtabellen nehmen (gesfett = gesättigte Fettsäuren, salz = Salz in g; z. B. gekochter Reis 130 kcal, 2,7 g Protein, 28 g KH, 0,3 g Fett; Spiegelei in Öl ca. 195 kcal, 13,6 g Protein, 0,8 g KH, 15 g Fett; gekochtes Ei 155 kcal).
 Gib pro Komponente die geschätzte Menge und die Werte pro 100 g an. Rechne nicht selbst hoch.
 ${note?`Hinweis vom Nutzer: ${note}\n`:""}Antworte nur mit JSON in genau dieser Form:
-{"erkannt":true,"gericht":"kurzer Name auf Deutsch","komponenten":[{"name":"Name auf Deutsch","gramm":0,"pro100":{"kcal":0,"protein":0,"kh":0,"fett":0}}],"sicherheit":"hoch|mittel|niedrig","hinweis":"ein kurzer Satz"}
+{"erkannt":true,"gericht":"kurzer Name auf Deutsch","komponenten":[{"name":"Name auf Deutsch","gramm":0,"pro100":{"kcal":0,"protein":0,"kh":0,"fett":0,"gesfett":0,"salz":0}}],"sicherheit":"hoch|mittel|niedrig","hinweis":"ein kurzer Satz"}
 Wenn kein Essen zu sehen ist: {"erkannt":false}`;
 
 // fetch mit Zeitlimit, damit nichts endlos „analysiert“
@@ -149,7 +149,7 @@ async function analyze(){
   const r=parseJSON(txt);
   if(r.erkannt===false||!Array.isArray(r.komponenten)||!r.komponenten.length){AV.stage="pick";AV.err="Auf dem Foto konnte ich kein Essen erkennen. Versuch es mit einem näheren Foto.";draw();return}
   AV.res=r;AV.items=r.komponenten.map(k=>{const g=N(k.gramm),h=k.pro100||k.pro_100g;
-   if(h&&g>0){const f=g/100;return{name:String(k.name||"Essen"),g0:g,g,kcal:N(h.kcal)*f,p:N(h.protein)*f,c:N(h.kh)*f,f:N(h.fett)*f,on:true}}
+   if(h&&g>0){const f=g/100,fat=N(h.fett)*f;return{name:String(k.name||"Essen"),g0:g,g,kcal:N(h.kcal)*f,p:N(h.protein)*f,c:N(h.kh)*f,f:fat,sat:h.gesfett!=null?Math.min(fat,N(h.gesfett)*f):null,salt:h.salz!=null?N(h.salz)*f:null,on:true}}
    return{name:String(k.name||"Essen"),g0:g,g,kcal:N(k.kcal),p:N(k.protein),c:N(k.kh),f:N(k.fett),on:true}}).filter(i=>i.kcal>0||i.g>0);
   if(!AV.items.length)throw{code:"parse"};
   AV.stage="result";draw();
@@ -157,7 +157,7 @@ async function analyze(){
 }
 function addFoods(){
  const today=typeof TODAY==="function"?TODAY():new Date().toISOString().slice(0,10);let n=0,kc=0;
- AV.items.filter(i=>i.on&&i.g>0).forEach(i=>{const k=i.g0>0?i.g/i.g0:1;S.foods.push({id:uid(),date:today,meal:AV.meal,name:i.name.trim()||"Essen",g:Math.round(i.g),kcal:i.kcal*k,p:i.p*k,c:i.c*k,f:i.f*k,fib:0,sug:0,ai:true});n++;kc+=i.kcal*k});
+ AV.items.filter(i=>i.on&&i.g>0).forEach(i=>{const k=i.g0>0?i.g/i.g0:1;S.foods.push({id:uid(),date:today,meal:AV.meal,name:i.name.trim()||"Essen",g:Math.round(i.g),kcal:i.kcal*k,p:i.p*k,c:i.c*k,f:i.f*k,fib:0,sug:0,...(i.sat!=null?{sat:i.sat*k}:{}),...(i.salt!=null?{salt:i.salt*k}:{}),ai:true});n++;kc+=i.kcal*k});
  if(!n){toast("Wähle mindestens ein Lebensmittel aus");return}
  save();close();if(typeof go==="function"&&tab!=="essen")go("essen");else render(true);toast(n+(n===1?" Eintrag":" Einträge")+" · "+Math.round(kc)+" kcal hinzugefügt");
 }
