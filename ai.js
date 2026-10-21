@@ -102,7 +102,7 @@ function close(){const h=document.getElementById("aiov");if(h)h.innerHTML="";AV=
 function itemsTotal(){return AV.items.filter(i=>i.on).reduce((a,i)=>{const k=i.g0>0?i.g/i.g0:1;return{kcal:a.kcal+i.kcal*k,p:a.p+i.p*k,c:a.c+i.c*k,f:a.f+i.f*k}},{kcal:0,p:0,c:0,f:0})}
 function draw(){
  if(!AV)return;
- const h=host(),top=t=>`<div class="row between"><h2>${t}</h2><button class="icon-btn" aria-label="Schließen" data-ai="close">${I.x}</button></div>`;
+ const h=host(),top=t=>`<div class="row between"><h2>${t}</h2><button class="icon-btn" aria-label="Schliessen" data-ai="close">${I.x}</button></div>`;
  let b="";
  if(AV.stage==="setup")b=top("KI einrichten")+`<div id="aicard" class="stack" style="gap:10px">${window.aiCardHTML()}</div>`;
  else if(AV.stage==="pick")b=top("Foto vom Essen")+`

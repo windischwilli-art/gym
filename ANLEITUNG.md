@@ -61,7 +61,7 @@ Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` d
 - Kalorien & Nährwerte: über 200 Lebensmittel mit Portionsgrössen, Online-Suche, Live-Barcode-Scanner, KI-Foto-Schätzung
 - Kalorienziel passt sich täglich an Training, Sportart und Intensität an
 - Lauf-Tracker mit GPS, Pace, Wochenziel, automatischem Strava-Abgleich und Datei-Import (TCX/GPX)
-- Geführtes Krafttraining: passendes Aufwärmen, animierte Übungsanleitungen, Satz-für-Satz-Führung mit Pausentimer
+- Geführtes Krafttraining: passendes Aufwärmen, Übungsfotos mit Anleitung, Satz-für-Satz-Führung mit Pausentimer
 - Übungen passend zum eigenen Equipment, mit Alternativen zum Tauschen, eigenen Übungen und anpassbaren Vorlagen
 - Lauftrainer: Intervalle, Easy Run, Long Run mit Pace-Zonen, Steigerung, Entlastungswochen und geführten Einheiten
 - Aufwärmprogramm vor dem Laufen
@@ -69,7 +69,7 @@ Neue `index.html` auf GitHub hochladen (gleiche Datei ersetzen) und in `sw.js` d
 - Tagesbericht beim ersten Öffnen: Plan für heute, Wochenziel, Ernährung der letzten 7 Tage, Tipps (optional mit KI)
 - Kalender mit allen Trainings, Nachtragen pro Tag, Wochenplan in den iPhone-Kalender
 - Coach mit persönlichem Plan je nach Ziel und Trainingswahl, Gewichtsverlauf
-- Funktioniert offline (außer der Produktsuche beim ersten Scan eines neuen Produkts)
+- Funktioniert offline (ausser der Produktsuche beim ersten Scan eines neuen Produkts)
 
 
 ## Quellen

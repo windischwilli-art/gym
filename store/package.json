@@ -1,0 +1,25 @@
+{
+  "name": "formwerk-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Formwerk als App für den App Store und Google Play (Capacitor)",
+  "type": "module",
+  "scripts": {
+    "build": "node build-www.mjs",
+    "sync": "node build-www.mjs && node patch-native.mjs && npx cap sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "latest",
+    "@capacitor/core": "latest",
+    "@capacitor/ios": "latest",
+    "@capacitor/local-notifications": "latest",
+    "@fontsource/barlow-condensed": "^5.0.0",
+    "@fontsource/figtree": "^5.0.0",
+    "@zxing/library": "0.21.3",
+    "firebase": "10.13.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "latest",
+    "@capacitor/cli": "latest"
+  }
+}

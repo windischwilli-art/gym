@@ -1,0 +1,18 @@
+{
+  "appId": "ch.windisch.formwerk",
+  "appName": "Formwerk",
+  "webDir": "www",
+  "backgroundColor": "#EDF0EA",
+  "ios": {
+    "contentInset": "never",
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#2747E0"
+    }
+  }
+}

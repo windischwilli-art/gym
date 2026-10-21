@@ -18,7 +18,7 @@ const IDEAS=[
  ["Rührei mit Vollkornbrot",[["Rührei"],["Vollkornbrot"]],"m"],
  ["Gemüsesuppe mit Brot",[["Gemüsesuppe"],["Vollkornbrot"]],"m"],
  ["Thunfisch-Wrap mit Salat",[["Wrap / Tortilla"],["Thunfisch in Wasser"],["Blattsalat"]],"m"],
- ["Pouletbrust mit Reis und Brokkoli",[["Hähnchenbrust"],["Reis, gekocht"],["Brokkoli"]],"m"],
+ ["Pouletbrust mit Reis und Brokkoli",[["Pouletbrust"],["Reis, gekocht"],["Brokkoli"]],"m"],
  ["Lachs mit Kartoffeln und Spinat",[["Lachs"],["Kartoffeln, gekocht"],["Spinat"]],"m"],
  ["Trutenbrust mit Süsskartoffel und Bohnen",[["Trutenbrust"],["Süsskartoffel, gekocht"],["Grüne Bohnen"]],"m"],
  ["Vollkornnudeln mit Rindshack und Tomaten",[["Vollkornnudeln, gekocht"],["Rinderhack 5 %"],["Tomaten"]],"m"],
@@ -91,13 +91,26 @@ async function check(){
 async function schedule(){
  const LN=NATIVE();if(!LN||!S||!S.profile)return;
  try{
-  await LN.cancel({notifications:[{id:101},{id:102}]});const c=cfg();if(!c.on)return;const list=[];
+  await LN.cancel({notifications:[101,102,111,112,121,122].map(id=>({id}))});const c=cfg();if(!c.on)return;const list=[];
   for(const[kind,fn]of[["train",trainMsg],["food",foodMsg]]){if(!c[kind])continue;const[hh,mm]=c[kind].split(":").map(Number),at=new Date();at.setHours(hh,mm,0,0);
    if(at<=new Date())continue;const m=fn();if(m)list.push({id:m.id,title:m.title,body:m.body,schedule:{at},extra:{go:m.go}})}
+  // Auch die nächsten zwei Tage einplanen, falls die App dann nicht geöffnet wird (wird beim nächsten Öffnen aktualisiert)
+  const pd=typeof planDays==="function"?planDays():[],ti=(new Date().getDay()+6)%7;
+  for(const d of[1,2]){
+   const day=new Date();day.setDate(day.getDate()+d);
+   if(c.train&&ti+d<=6){const x=pd[ti+d];if(x&&!x.opt&&(x.t==="Lauf"||x.t==="Kraft"||x.sport)){const[hh,mm]=c.train.split(":").map(Number),at=new Date(day);at.setHours(hh,mm,0,0);
+     list.push({id:100+d*10+1,title:x.t==="Lauf"?"Heute steht ein Lauf an":x.t==="Kraft"?"Heute steht Krafttraining an":"Heute: "+x.t,body:String(x.d).replace(/^🏁\s*/,""),schedule:{at},extra:{go:x.t==="Lauf"?"laufen":x.t==="Kraft"?"kraft":"heute"}})}}
+   if(c.food){const[hh,mm]=c.food.split(":").map(Number),at=new Date(day);at.setHours(hh,mm,0,0);
+     list.push({id:100+d*10+2,title:"Kalorien-Check",body:"Schau kurz rein: Wie viele Kalorien und wie viel Protein sind heute noch offen?",schedule:{at},extra:{go:"essen"}})}
+  }
   if(list.length)await LN.schedule({notifications:list});
  }catch(e){}
 }
 window.remSchedule=schedule;
+let NATPERM="unknown";
+async function natPerm(ask){const LN=NATIVE();if(!LN)return;try{let r=await LN.checkPermissions();if(ask&&r.display!=="granted")r=await LN.requestPermissions();const v=r.display==="granted"?"granted":r.display==="denied"?"denied":"unknown";if(v!==NATPERM){NATPERM=v;if(typeof render==="function"&&tab==="coach")render(true)}if(v==="granted")schedule()}catch(e){}}
+setTimeout(()=>natPerm(false),1500);
+try{const LN=NATIVE();if(LN&&LN.addListener)LN.addListener("localNotificationActionPerformed",e=>{const g=e&&e.notification&&e.notification.extra&&e.notification.extra.go;if(g&&typeof go==="function")setTimeout(()=>go(g),300)})}catch(e){}
 
 // ---------- Einstellungen (Coach) ----------
 window.remCardHTML=function(){
@@ -106,7 +119,8 @@ window.remCardHTML=function(){
  return`<section class="card"><div class="row between"><h2>Erinnerungen</h2><button class="toggle" role="switch" aria-checked="${c.on}" data-rem="on" aria-label="Erinnerungen ein oder aus"><i></i></button></div>
  <p class="small muted" style="margin:0">Die App erinnert dich an ein offenes Training und sagt dir am Abend, wie viele Kalorien noch offen sind, mit einem passenden Essensvorschlag.</p>
  ${c.on?`<div class="grid2"><label class="f">Training-Erinnerung<input type="time" data-rem="train" value="${c.train||""}"></label><label class="f">Kalorien-Check<input type="time" data-rem="food" value="${c.food||""}"></label></div>
- ${NATIVE()||perm==="granted"?`<div class="small" style="color:var(--good);font-weight:600">Benachrichtigungen sind erlaubt.</div>`
+ ${NATIVE()?(NATPERM==="granted"?`<div class="small" style="color:var(--good);font-weight:600">Mitteilungen sind erlaubt.</div>`:NATPERM==="denied"?`<div class="small muted">Mitteilungen sind blockiert. Erlaube sie in den Einstellungen deines Handys bei Formwerk.</div>`:`<button class="btn ghost block" data-rem="perm">Mitteilungen erlauben</button>`)
+  :perm==="granted"?`<div class="small" style="color:var(--good);font-weight:600">Benachrichtigungen sind erlaubt.</div>`
   :perm==="denied"?`<div class="small muted">Benachrichtigungen sind blockiert. Du kannst sie in den iPhone-Einstellungen bei Formwerk wieder erlauben. Bis dahin erscheinen die Hinweise in der App.</div>`
   :perm==="unsupported"||!standalone?`<div class="small muted">Für Mitteilungen auf dem Sperrbildschirm füge die App zum Home-Bildschirm hinzu. Bis dahin erscheinen die Hinweise oben in der App, sobald du sie öffnest.</div>`
   :`<button class="btn ghost block" data-rem="perm">Mitteilungen erlauben</button>`}
@@ -121,6 +135,7 @@ document.addEventListener("click",async ev=>{
  if(k==="x"){const h=document.getElementById("rembanner");if(h)h.innerHTML=""}
  else if(k==="go"){const h=document.getElementById("rembanner");if(h)h.innerHTML="";if(typeof go==="function")go(b.dataset.go)}
  else if(k==="on")setCfg({on:!cfg().on});
+ else if(k==="perm"&&NATIVE()){await natPerm(true);toast(NATPERM==="granted"?"Mitteilungen sind erlaubt":"Mitteilungen wurden nicht erlaubt")}
  else if(k==="perm"){try{const r=await Notification.requestPermission();toast(r==="granted"?"Mitteilungen sind erlaubt":"Mitteilungen wurden nicht erlaubt");render(true)}catch(e){}}
 });
 document.addEventListener("change",ev=>{const t=ev.target;if(!t.dataset||(t.dataset.rem!=="train"&&t.dataset.rem!=="food"))return;

@@ -242,7 +242,7 @@ const FOODS = [ // pro 100 g: kcal, Protein, KH, Fett, Ballaststoffe, Zucker, [P
  ["Quinoa, gekocht",120,4.4,21,1.9,2.8,0.9,180,"Portion"],["Polenta, gekocht",70,1.6,15,0.3,1,0.2,200,"Portion"],
  ["Spätzli / Knöpfli",165,6,30,2.5,1.5,0.5,200,"Portion"],["Gnocchi",135,3.2,30,0.4,1.5,0.5,200,"Portion"],
  // Fleisch, Fisch, Eier
- ["Hähnchenbrust",110,23,0,1.5,0,0,150,"Portion"],["Poulet-Schenkel",180,18,0,12,0,0,150,"Stück"],["Trutenbrust",105,24,0,1,0,0,150,"Portion"],
+ ["Pouletbrust",110,23,0,1.5,0,0,150,"Portion"],["Poulet-Schenkel",180,18,0,12,0,0,150,"Stück"],["Trutenbrust",105,24,0,1,0,0,150,"Portion"],
  ["Rindsplätzli / Steak",130,22,0,4.5,0,0,180,"Stück"],["Rinderhack 5 %",121,21,0,5,0,0,125,"Portion"],["Hackfleisch gemischt",250,18,0,20,0,0,125,"Portion"],
  ["Schweinsfilet",115,21,0,3.5,0,0,150,"Portion"],["Schweinskotelett",210,19,0,15,0,0,180,"Stück"],["Kalbfleisch",105,21,0,2,0,0,150,"Portion"],
  ["Cervelat",270,12,1,24,0,0.5,100,"Stück"],["Bratwurst",300,13,0.5,27,0,0.5,130,"Stück"],["Wienerli",260,13,1,23,0,0.5,50,"Stück"],
@@ -312,7 +312,7 @@ const FOODS = [ // pro 100 g: kcal, Protein, KH, Fett, Ballaststoffe, Zucker, [P
  ["Isotonisches Getränk",25,0,6,0,0,6,500,"Flasche"]
 ].map(([name,kcal,p,c,f,fib,sug,portion,unit])=>({name,kcal,p,c,f,fib,sug,portion:portion||0,unit:unit||""}));
 // Gesättigte Fettsäuren und Salz pro 100 g (Richtwerte aus Nährwerttabellen); ungesättigte = Fett − gesättigte
-const SATSALT={"Haferflocken":[1.3,0.01],"Müesli (ungezuckert)":[1.2,0.05],"Knuspermüesli":[4,0.3],"Cornflakes":[0.2,1.1],"Vollkornbrot":[0.3,1.2],"Ruchbrot":[0.3,1.3],"Weissbrot / Toast":[0.8,1.2],"Zopf":[5,1.1],"Gipfeli / Croissant":[12,1],"Brötchen / Semmel":[0.4,1.3],"Laugenbrezel":[0.5,2.5],"Knäckebrot":[0.3,1.1],"Reiswaffel":[0.6,0.3],"Wrap / Tortilla":[2.5,1.3],"Pita":[0.2,1.1],"Reis, gekocht":[0.1,0],"Vollkornreis, gekocht":[0.2,0],"Nudeln, gekocht":[0.2,0],"Vollkornnudeln, gekocht":[0.3,0],"Kartoffeln, gekocht":[0,0],"Süsskartoffel, gekocht":[0,0.1],"Pommes frites":[1.5,0.8],"Rösti":[2.5,0.7],"Kartoffelstock / Püree":[2,0.6],"Couscous, gekocht":[0,0],"Bulgur, gekocht":[0,0],"Quinoa, gekocht":[0.2,0],"Polenta, gekocht":[0,0.2],"Spätzli / Knöpfli":[0.7,0.6],"Gnocchi":[0.1,0.9],"Hähnchenbrust":[0.4,0.15],"Poulet-Schenkel":[3.3,0.2],"Trutenbrust":[0.3,0.15],"Rindsplätzli / Steak":[1.9,0.15],"Rinderhack 5 %":[2.2,0.2],"Hackfleisch gemischt":[8,0.2],"Schweinsfilet":[1.2,0.15],"Schweinskotelett":[5.5,0.15],"Kalbfleisch":[0.7,0.2],"Cervelat":[9,2.2],"Bratwurst":[10,1.8],"Wienerli":[8.5,2],"Schinken (gekocht)":[1.4,2.3],"Rohschinken":[5.5,5.5],"Salami":[12,4.5],"Bündnerfleisch":[2.5,4.8],"Speck":[14,3],"Leberkäse":[10,2],"Döner Kebab":[4,1.4],"Chicken Nuggets":[3,1.3],"Lachs":[2.3,0.15],"Thunfisch in Wasser":[0.3,0.8],"Thunfisch in Öl":[1.8,0.9],"Kabeljau / Dorsch":[0.1,0.2],"Forelle":[1,0.15],"Crevetten":[0.2,0.6],"Fischstäbchen":[0.9,0.8],"Ei":[3.3,0.35],"Rührei":[4.5,0.6],"Milch 1,5 %":[1,0.1],"Vollmilch 3,5 %":[2.3,0.1],"Hafermilch":[0.2,0.1],"Sojamilch":[0.3,0.1],"Mandelmilch (ungesüsst)":[0.1,0.1],"Naturjoghurt 3,5 %":[2.2,0.1],"Fruchtjoghurt":[1.8,0.1],"Griechischer Joghurt 10 %":[6.8,0.1],"Skyr":[0.1,0.1],"Magerquark":[0.1,0.1],"Rahmquark":[7.5,0.1],"Hüttenkäse":[2.8,1],"Protein-Pudding":[1,0.2],"Proteinjoghurt / High Protein":[0.2,0.1],"Gouda":[18,1.8],"Emmentaler":[19,0.4],"Gruyère":[20,1.5],"Appenzeller":[20,1.6],"Mozzarella":[12,0.5],"Feta":[14,2.8],"Raclettekäse":[17,1.6],"Parmesan":[18,1.6],"Frischkäse":[15,0.8],"Butter":[55,0.02],"Rahm / Sahne 35 %":[22,0.1],"Kaffeerahm":[6.5,0.1],"Brokkoli":[0.1,0.05],"Blumenkohl":[0.1,0.04],"Karotten":[0,0.1],"Tomaten":[0,0],"Gurke":[0,0],"Paprika":[0.1,0],"Zucchini":[0.1,0],"Aubergine":[0,0],"Spinat":[0.1,0.2],"Blattsalat":[0,0],"Rucola":[0.1,0.07],"Zwiebel":[0,0],"Champignons":[0,0],"Erbsen":[0.1,0],"Mais":[0.2,0.5],"Grüne Bohnen":[0,0],"Kichererbsen, gekocht":[0.3,0.3],"Linsen, gekocht":[0.1,0],"Kidneybohnen, gekocht":[0.1,0.3],"Avocado":[2.1,0],"Rotkohl":[0,0.1],"Sauerkraut":[0,1.5],"Gemischter Salat mit Dressing":[0.9,0.6],"Apfel":[0,0],"Banane":[0.1,0],"Birne":[0,0],"Orange":[0,0],"Mandarine":[0,0],"Kiwi":[0,0],"Erdbeeren":[0,0],"Heidelbeeren":[0,0],"Himbeeren":[0,0],"Trauben":[0,0],"Ananas":[0,0],"Mango":[0.1,0],"Wassermelone":[0,0],"Pfirsich / Nektarine":[0,0],"Datteln (getrocknet)":[0,0],"Rosinen":[0.1,0],"Apfelmus":[0,0],"Mandeln":[3.8,0],"Baumnüsse / Walnüsse":[6,0],"Cashewkerne":[8,0],"Erdnüsse":[7,0],"Haselnüsse":[4.5,0],"Studentenfutter":[3.5,0],"Chiasamen":[3.3,0],"Leinsamen":[3.7,0.1],"Kürbiskerne":[8.7,0],"Erdnussbutter":[10,0.4],"Olivenöl":[14,0],"Rapsöl":[7,0],"Whey-Proteinpulver":[3,0.5],"Proteinriegel":[5,0.6],"Tofu natur":[1.1,0],"Tempeh":[2.2,0],"Seitan":[0.3,1.2],"Veggie-Burger":[2,1.3],"Falafel":[2,1.2],"Hummus":[2.3,1],"Pizza Margherita":[4,1.3],"Pizza Salami":[5,1.6],"Spaghetti Bolognese":[1.8,0.6],"Lasagne":[4,0.8],"Älplermagronen":[5,0.8],"Zürcher Geschnetzeltes mit Rösti":[5,0.8],"Käsefondue (pro Person)":[12,1.1],"Raclette (mit Kartoffeln)":[8,0.9],"Wienerschnitzel":[4,0.9],"Cordon bleu":[7,1.4],"Hamburger":[4.5,1.1],"Cheeseburger":[6,1.3],"Sandwich Schinken-Käse":[5,1.6],"Sushi (Maki)":[0.4,1],"Curry mit Reis":[2.5,0.7],"Pad Thai":[1,1.2],"Chili con Carne":[1.8,0.8],"Gemüsesuppe":[0.3,0.8],"Bircher Müesli":[2.3,0.05],"Porridge mit Milch":[1.3,0.1],"Pancakes":[2.5,0.8],"Kebab-Teller mit Pommes":[2.5,1.2],"Schokolade Milch":[18,0.25],"Schokolade dunkel 70 %":[26,0.02],"Schokoriegel (z. B. Snickers)":[9,0.6],"Gummibärchen":[0.1,0.05],"Kekse / Guetzli":[11,0.6],"Croissant mit Schokolade":[12,0.9],"Kuchen (Rührkuchen)":[9,0.5],"Glace / Eis":[7,0.15],"Chips":[3,1.4],"Popcorn (gesalzen)":[3,1.6],"Müsliriegel":[6,0.3],"Honig":[0,0],"Konfitüre / Marmelade":[0,0],"Nutella":[10.6,0.1],"Zucker":[0,0],"Orangensaft":[0,0],"Apfelschorle":[0,0],"Cola":[0,0],"Cola Zero / Light":[0,0.02],"Eistee":[0,0],"Rivella rot":[0,0.02],"Energy Drink":[0,0.2],"Bier":[0,0],"Alkoholfreies Bier":[0,0],"Wein rot":[0,0],"Wein weiss":[0,0],"Kaffee schwarz":[0,0],"Cappuccino":[1.3,0.1],"Latte Macchiato":[1.7,0.1],"Proteinshake mit Milch":[1,0.2],"Isotonisches Getränk":[0,0.3]};
+const SATSALT={"Haferflocken":[1.3,0.01],"Müesli (ungezuckert)":[1.2,0.05],"Knuspermüesli":[4,0.3],"Cornflakes":[0.2,1.1],"Vollkornbrot":[0.3,1.2],"Ruchbrot":[0.3,1.3],"Weissbrot / Toast":[0.8,1.2],"Zopf":[5,1.1],"Gipfeli / Croissant":[12,1],"Brötchen / Semmel":[0.4,1.3],"Laugenbrezel":[0.5,2.5],"Knäckebrot":[0.3,1.1],"Reiswaffel":[0.6,0.3],"Wrap / Tortilla":[2.5,1.3],"Pita":[0.2,1.1],"Reis, gekocht":[0.1,0],"Vollkornreis, gekocht":[0.2,0],"Nudeln, gekocht":[0.2,0],"Vollkornnudeln, gekocht":[0.3,0],"Kartoffeln, gekocht":[0,0],"Süsskartoffel, gekocht":[0,0.1],"Pommes frites":[1.5,0.8],"Rösti":[2.5,0.7],"Kartoffelstock / Püree":[2,0.6],"Couscous, gekocht":[0,0],"Bulgur, gekocht":[0,0],"Quinoa, gekocht":[0.2,0],"Polenta, gekocht":[0,0.2],"Spätzli / Knöpfli":[0.7,0.6],"Gnocchi":[0.1,0.9],"Pouletbrust":[0.4,0.15],"Poulet-Schenkel":[3.3,0.2],"Trutenbrust":[0.3,0.15],"Rindsplätzli / Steak":[1.9,0.15],"Rinderhack 5 %":[2.2,0.2],"Hackfleisch gemischt":[8,0.2],"Schweinsfilet":[1.2,0.15],"Schweinskotelett":[5.5,0.15],"Kalbfleisch":[0.7,0.2],"Cervelat":[9,2.2],"Bratwurst":[10,1.8],"Wienerli":[8.5,2],"Schinken (gekocht)":[1.4,2.3],"Rohschinken":[5.5,5.5],"Salami":[12,4.5],"Bündnerfleisch":[2.5,4.8],"Speck":[14,3],"Leberkäse":[10,2],"Döner Kebab":[4,1.4],"Chicken Nuggets":[3,1.3],"Lachs":[2.3,0.15],"Thunfisch in Wasser":[0.3,0.8],"Thunfisch in Öl":[1.8,0.9],"Kabeljau / Dorsch":[0.1,0.2],"Forelle":[1,0.15],"Crevetten":[0.2,0.6],"Fischstäbchen":[0.9,0.8],"Ei":[3.3,0.35],"Rührei":[4.5,0.6],"Milch 1,5 %":[1,0.1],"Vollmilch 3,5 %":[2.3,0.1],"Hafermilch":[0.2,0.1],"Sojamilch":[0.3,0.1],"Mandelmilch (ungesüsst)":[0.1,0.1],"Naturjoghurt 3,5 %":[2.2,0.1],"Fruchtjoghurt":[1.8,0.1],"Griechischer Joghurt 10 %":[6.8,0.1],"Skyr":[0.1,0.1],"Magerquark":[0.1,0.1],"Rahmquark":[7.5,0.1],"Hüttenkäse":[2.8,1],"Protein-Pudding":[1,0.2],"Proteinjoghurt / High Protein":[0.2,0.1],"Gouda":[18,1.8],"Emmentaler":[19,0.4],"Gruyère":[20,1.5],"Appenzeller":[20,1.6],"Mozzarella":[12,0.5],"Feta":[14,2.8],"Raclettekäse":[17,1.6],"Parmesan":[18,1.6],"Frischkäse":[15,0.8],"Butter":[55,0.02],"Rahm / Sahne 35 %":[22,0.1],"Kaffeerahm":[6.5,0.1],"Brokkoli":[0.1,0.05],"Blumenkohl":[0.1,0.04],"Karotten":[0,0.1],"Tomaten":[0,0],"Gurke":[0,0],"Paprika":[0.1,0],"Zucchini":[0.1,0],"Aubergine":[0,0],"Spinat":[0.1,0.2],"Blattsalat":[0,0],"Rucola":[0.1,0.07],"Zwiebel":[0,0],"Champignons":[0,0],"Erbsen":[0.1,0],"Mais":[0.2,0.5],"Grüne Bohnen":[0,0],"Kichererbsen, gekocht":[0.3,0.3],"Linsen, gekocht":[0.1,0],"Kidneybohnen, gekocht":[0.1,0.3],"Avocado":[2.1,0],"Rotkohl":[0,0.1],"Sauerkraut":[0,1.5],"Gemischter Salat mit Dressing":[0.9,0.6],"Apfel":[0,0],"Banane":[0.1,0],"Birne":[0,0],"Orange":[0,0],"Mandarine":[0,0],"Kiwi":[0,0],"Erdbeeren":[0,0],"Heidelbeeren":[0,0],"Himbeeren":[0,0],"Trauben":[0,0],"Ananas":[0,0],"Mango":[0.1,0],"Wassermelone":[0,0],"Pfirsich / Nektarine":[0,0],"Datteln (getrocknet)":[0,0],"Rosinen":[0.1,0],"Apfelmus":[0,0],"Mandeln":[3.8,0],"Baumnüsse / Walnüsse":[6,0],"Cashewkerne":[8,0],"Erdnüsse":[7,0],"Haselnüsse":[4.5,0],"Studentenfutter":[3.5,0],"Chiasamen":[3.3,0],"Leinsamen":[3.7,0.1],"Kürbiskerne":[8.7,0],"Erdnussbutter":[10,0.4],"Olivenöl":[14,0],"Rapsöl":[7,0],"Whey-Proteinpulver":[3,0.5],"Proteinriegel":[5,0.6],"Tofu natur":[1.1,0],"Tempeh":[2.2,0],"Seitan":[0.3,1.2],"Veggie-Burger":[2,1.3],"Falafel":[2,1.2],"Hummus":[2.3,1],"Pizza Margherita":[4,1.3],"Pizza Salami":[5,1.6],"Spaghetti Bolognese":[1.8,0.6],"Lasagne":[4,0.8],"Älplermagronen":[5,0.8],"Zürcher Geschnetzeltes mit Rösti":[5,0.8],"Käsefondue (pro Person)":[12,1.1],"Raclette (mit Kartoffeln)":[8,0.9],"Wienerschnitzel":[4,0.9],"Cordon bleu":[7,1.4],"Hamburger":[4.5,1.1],"Cheeseburger":[6,1.3],"Sandwich Schinken-Käse":[5,1.6],"Sushi (Maki)":[0.4,1],"Curry mit Reis":[2.5,0.7],"Pad Thai":[1,1.2],"Chili con Carne":[1.8,0.8],"Gemüsesuppe":[0.3,0.8],"Bircher Müesli":[2.3,0.05],"Porridge mit Milch":[1.3,0.1],"Pancakes":[2.5,0.8],"Kebab-Teller mit Pommes":[2.5,1.2],"Schokolade Milch":[18,0.25],"Schokolade dunkel 70 %":[26,0.02],"Schokoriegel (z. B. Snickers)":[9,0.6],"Gummibärchen":[0.1,0.05],"Kekse / Guetzli":[11,0.6],"Croissant mit Schokolade":[12,0.9],"Kuchen (Rührkuchen)":[9,0.5],"Glace / Eis":[7,0.15],"Chips":[3,1.4],"Popcorn (gesalzen)":[3,1.6],"Müsliriegel":[6,0.3],"Honig":[0,0],"Konfitüre / Marmelade":[0,0],"Nutella":[10.6,0.1],"Zucker":[0,0],"Orangensaft":[0,0],"Apfelschorle":[0,0],"Cola":[0,0],"Cola Zero / Light":[0,0.02],"Eistee":[0,0],"Rivella rot":[0,0.02],"Energy Drink":[0,0.2],"Bier":[0,0],"Alkoholfreies Bier":[0,0],"Wein rot":[0,0],"Wein weiss":[0,0],"Kaffee schwarz":[0,0],"Cappuccino":[1.3,0.1],"Latte Macchiato":[1.7,0.1],"Proteinshake mit Milch":[1,0.2],"Isotonisches Getränk":[0,0.3]};
 FOODS.forEach(f=>{const x=SATSALT[f.name]||[f.f*.35,0];f.sat=x[0];f.salt=x[1]});
 const MEALS=["Frühstück","Mittagessen","Abendessen","Snacks"];
 // Equipment: gym = Fitnessstudio (alles), bb = Langhantel + Ständer, db = Kurzhanteln, kb = Kettlebell,
@@ -365,7 +365,7 @@ function seed(){
  return{v:1,example:true,
   profile:{sex:"m",age:30,height:180,weight:80,activity:1.55,goal:"lose",level:"mid"},
   foods:[food("Haferflocken",60,"Frühstück",t),food("Milch 1,5 %",200,"Frühstück",t),food("Banane",120,"Frühstück",t),
-   food("Hähnchenbrust",150,"Mittagessen",t),food("Reis, gekocht",200,"Mittagessen",t),food("Brokkoli",150,"Mittagessen",t)],
+   food("Pouletbrust",150,"Mittagessen",t),food("Reis, gekocht",200,"Mittagessen",t),food("Brokkoli",150,"Mittagessen",t)],
   runs:[{id:uid(),date:daysAgo(2),km:6.2,sec:2050,type:"Locker",ex:true},{id:uid(),date:daysAgo(5),km:8,sec:2730,type:"Langer Lauf",ex:true},
    {id:uid(),date:daysAgo(9),km:5,sec:1530,type:"Tempo",ex:true},{id:uid(),date:daysAgo(12),km:10,sec:3480,type:"Langer Lauf",ex:true}],
   workouts:[
@@ -401,7 +401,7 @@ function save(){if(S)S.updated=Date.now();
  try{localStorage.setItem("formwerk-v2",JSON.stringify(S))}catch(e){toast("Speicher voll. Lösche alte Einträge.")}
  if(S&&S.syncCode){clearTimeout(CLOUD.timer);CLOUD.timer=setTimeout(cloudPush,1500)}}
 function saveLocalOnly(){try{localStorage.setItem("formwerk-v2",JSON.stringify(S))}catch(e){}}
-// Ernährung nach Jahr aufteilen, damit kein Dokument zu groß wird
+// Ernährung nach Jahr aufteilen, damit kein Dokument zu gross wird
 function foodYears(){const by={};(S.foods||[]).forEach(f=>{const y=String(f.date).slice(0,4);(by[y]=by[y]||[]).push(f)});return by}
 async function cloudPush(force){
  CLOUD.timer=null;if(!S||!S.syncCode)return;
@@ -557,14 +557,16 @@ function accountCard(){
 }
 
 // ---------- Strava ----------
-const SV_KEY="formwerk-strava",SV_REDIRECT=location.origin+location.pathname;
+// In der App-Store-Version (Capacitor) kommt Strava über die Web-Adresse zurück, dort gibt es den Code zum Einfügen
+const IS_NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
+const SV_KEY="formwerk-strava",SV_REDIRECT=IS_NATIVE?"https://windischwilli-art.github.io/gym/":location.origin+location.pathname;
 let SV={};try{SV=JSON.parse(localStorage.getItem(SV_KEY))||{}}catch(e){}
 let SVUI={setup:false,busy:false,msg:""},HANDOFF=null;
 function svSave(){try{localStorage.setItem(SV_KEY,JSON.stringify(SV))}catch(e){}}
 const svConnected=()=>!!SV.refresh;
 const isStandalone=()=>{try{return navigator.standalone===true||matchMedia("(display-mode: standalone)").matches}catch(e){return false}};
 function svAuthorize(){
- location.href="https://www.strava.com/oauth/authorize?client_id="+encodeURIComponent(SV.cid)+"&response_type=code&redirect_uri="+encodeURIComponent(SV_REDIRECT)+"&approval_prompt=auto&scope="+encodeURIComponent("read,activity:read_all")+"&state=formwerk";
+ location.href="https://www.strava.com/oauth/authorize?client_id="+encodeURIComponent(SV.cid)+"&response_type=code&redirect_uri="+encodeURIComponent(SV_REDIRECT)+"&approval_prompt=auto&scope="+encodeURIComponent("read,activity:read_all")+"&state="+(IS_NATIVE?"formwerk-app":"formwerk");
 }
 async function svToken(params){
  const r=await fetch("https://www.strava.com/oauth/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({client_id:SV.cid,client_secret:SV.secret,...params})});
@@ -620,17 +622,17 @@ async function svExchange(code){
  catch(e){SVUI.busy=false;SVUI.msg=e.status===400||e.status===401?"Das hat nicht geklappt. Prüfe Client-ID und Secret, oder der Code ist abgelaufen. Melde dich nochmal bei Strava an.":"Strava nicht erreichbar. Prüfe deine Internetverbindung.";paintStrava();return false}
 }
 async function svCallback(){
- const q=new URLSearchParams(location.search);if(q.get("state")!=="formwerk")return false;
+ const q=new URLSearchParams(location.search),stt=q.get("state");if(stt!=="formwerk"&&stt!=="formwerk-app")return false;
  const code=q.get("code"),err=q.get("error"),scope=q.get("scope")||"";
  try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}
  if(err||!code){toast("Strava-Verbindung abgebrochen");return true}
  if(!/activity:read/.test(scope)){SVUI.msg="Bitte erlaube Strava, deine Aktivitäten zu lesen (Häkchen nicht entfernen).";paintStrava();toast(SVUI.msg);return true}
- if(SV.cid&&SV.secret){await svExchange(code);return true}
+ if(stt==="formwerk"&&SV.cid&&SV.secret){await svExchange(code);return true}
  HANDOFF=code;render();return true;
 }
 function viewHandoff(){
  return`<div class="obwrap"><div><div class="eyebrow" style="color:#FC4C02">Strava</div><h1 style="font-size:38px;margin-top:6px">Fast geschafft</h1></div>
- <p class="muted" style="margin:0">Strava hat dich hier in Safari statt in der Formwerk-App zurückgebracht. Kopiere diesen Code, öffne Formwerk vom Homescreen und füge ihn im Coach bei Strava ein.</p>
+ <p class="muted" style="margin:0">Strava hat dich hier in Safari statt in der Formwerk-App zurückgebracht. Kopiere diesen Code, öffne die Formwerk-App und füge ihn im Coach bei Strava ein.</p>
  <div class="card"><div class="mono" id="hcode" style="font-size:15px;word-break:break-all;user-select:all;-webkit-user-select:all">${esc(HANDOFF)}</div><button class="btn sv block" data-a="copyCode">Code kopieren</button></div>
  <p class="small muted" style="margin:0">Der Code ist nur kurz gültig. Füge ihn am besten gleich ein.</p></div>`;
 }
@@ -925,7 +927,7 @@ function viewKraft(){
   ${window.restBarHTML?window.restBarHTML():`<div class="row between" style="background:var(--surface2);border-radius:12px;padding:10px 12px"><span>Satzpause <span class="num" style="font-size:22px;font-weight:700" id="rest">${REST.left?fmtTime(REST.left):"1:30"}</span></span><button class="btn sm ghost" style="background:var(--surface)" data-a="rest">${REST.left?"Stopp":"Start"}</button></div>`}
   <div class="stack" style="gap:6px"><div class="small" style="font-weight:600">Wie anstrengend war es?</div><div class="grid3">${INTS.map(([k,l])=>`<button class="chip" data-a="wkInt" data-v="${k}" aria-pressed="${(CUR.int||"mittel")===k}">${l}</button>`).join("")}</div></div>
   <button class="btn block" data-a="saveWk">Training speichern</button></section>`
- :`<section class="card"><h2>Training starten</h2><p class="small muted" style="margin:0">Wähle eine Vorlage. Du startest mit einem passenden Aufwärmprogramm und wirst mit Animationen durch jede Übung geführt.</p><div class="row between" style="gap:8px"><span class="small"><span class="muted">Passend zu:</span> ${esc(equipLabel(S.profile.equip))}</span><button class="link small" data-go="coach">Ändern</button></div>
+ :`<section class="card"><h2>Training starten</h2><p class="small muted" style="margin:0">Wähle eine Vorlage. Du startest mit einem passenden Aufwärmprogramm und wirst mit Fotos und Anleitung durch jede Übung geführt.</p><div class="row between" style="gap:8px"><span class="small"><span class="muted">Passend zu:</span> ${esc(equipLabel(S.profile.equip))}</span><button class="link small" data-go="coach">Ändern</button></div>
   ${(()=>{const r=window.smartRec&&window.smartRec();return r?`<div class="tip good"><i></i><div><div style="font-weight:600">Empfohlen: ${esc(r.name)}</div><div class="small muted">${esc(r.reason)}</div></div></div>`:""})()}
   <div class="grid2">${(()=>{const r=window.smartRec&&window.smartRec(),ks=Object.keys(TEMPLATES);return r?[r.name,...ks.filter(k=>k!==r.name)]:ks})().map(n=>`<button class="card tile lift ${window.smartRec&&window.smartRec()&&window.smartRec().name===n?"rec":""}" data-a="startWk" data-n="${esc(n)}"><span class="num" style="font-size:22px;font-weight:700">${esc(n)}${window.smartRec&&window.smartRec()&&window.smartRec().name===n?' <span class="pill good" style="font-size:10px;vertical-align:middle">empfohlen</span>':""}</span><span class="small muted">${TEMPLATES[n].slice(0,2).join(", ")} …</span>${S.profile.tpl&&S.profile.tpl[n]?'<span class="pill acc" style="align-self:flex-start">angepasst</span>':""}${S.profile.myTpl&&S.profile.myTpl[n]?'<span class="pill good" style="align-self:flex-start">eigene</span>':""}</button>`).join("")}<button class="card tile owntile" data-a="ownOpen"><span class="num" style="font-size:22px;font-weight:700">+ Eigenes</span><span class="small muted">Training frei zusammenstellen oder nachtragen</span></button></div>
   <div class="row wrap" style="gap:6px;align-items:center"><span class="small muted">Vorlage bearbeiten:</span>${Object.keys(TEMPLATES).map(n=>`<button class="chip" data-a="tplEdit" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div></section>`;
@@ -944,7 +946,7 @@ function tips(){
  const daysSince=lastWk?Math.round((new Date(TODAY())-new Date(lastWk.date))/864e5):99;
  const pMiss=t.prot-s.p;
  {const st=window.smartTip&&window.smartTip();if(st)out.push(st)}
- if(pMiss>25&&h>=12)out.push({k:"warn",t:`Dir fehlen noch ${r0(pMiss)} g Protein`,d:`Zum Beispiel ${r0(Math.min(500,pMiss/12*100)/50)*50} g Magerquark oder eine Portion Hähnchen mit Linsen.`});
+ if(pMiss>25&&h>=12)out.push({k:"warn",t:`Dir fehlen noch ${r0(pMiss)} g Protein`,d:`Zum Beispiel ${r0(Math.min(500,pMiss/12*100)/50)*50} g Magerquark oder eine Portion Poulet mit Linsen.`});
  if(s.kcal>t.kcal+burnedOn(TODAY()))out.push({k:"warn",t:"Tagesziel überschritten",d:"Kein Problem für einen Tag. Über die Woche zählt der Durchschnitt."});
  if(lkm&&wkm>lkm*1.1)out.push({k:"warn",t:"Umfang steigt schnell",d:`Du bist ${r0((wkm/lkm-1)*100)} % über der Vorwoche. Mehr als 10 % Steigerung erhöht das Verletzungsrisiko.`});
  if(trains("strength")&&daysSince>=3&&daysSince<99)out.push({k:"",t:`Letztes Krafttraining vor ${daysSince} Tagen`,d:`Heute passt ${(()=>{const k=Object.keys(TEMPLATES),i=k.indexOf(lastWk.name);return k[(i+1)%k.length]})()} gut in den Rhythmus.`});
@@ -1036,7 +1038,7 @@ function viewCoach(){
  <section class="card"><h2>Profil</h2>
   <div class="grid2"><label class="f">Name<input id="name" data-p="name" value="${esc(p.name||"")}"></label><label class="f">Zielgewicht (kg)<input id="targetWeight" data-p="targetWeight" inputmode="decimal" value="${p.targetWeight||""}"></label></div>
   <div class="grid2"><label class="f">Geschlecht${sel("sex",[["m","Männlich"],["w","Weiblich"]],p.sex)}</label><label class="f">Alter<input id="age" data-p="age" inputmode="numeric" value="${p.age}"></label>
-  <label class="f">Größe (cm)<input id="height" data-p="height" inputmode="numeric" value="${p.height}"></label><label class="f">Gewicht (kg)<input id="weight" data-p="weight" inputmode="decimal" value="${p.weight}"></label></div>
+  <label class="f">Grösse (cm)<input id="height" data-p="height" inputmode="numeric" value="${p.height}"></label><label class="f">Gewicht (kg)<input id="weight" data-p="weight" inputmode="decimal" value="${p.weight}"></label></div>
   <label class="f">Alltag (ohne Sport)${sel("activity",[[1.2,"Sitzend, Bürojob"],[1.375,"Leicht aktiv, viel zu Fuss"],[1.55,"Aktiv, Stehberuf / unterwegs"],[1.725,"Sehr aktiv, körperliche Arbeit"]],p.activity)}</label>
   <div class="grid2"><label class="f">Ziel${sel("goal",[["lose","Abnehmen"],["keep","Gewicht halten"],["gain","Muskelaufbau"]],p.goal)}</label><label class="f">Training${sel("train",[["both","Laufen + Kraft"],["run","Nur Laufen"],["strength","Nur Kraft"],["none","Kein festes Training"]],p.train||"both")}</label></div>
   ${trains("run")?`<label class="f">Lauf-Level${sel("level",[["easy","Einsteiger"],["mid","Fortgeschritten"],["pro","Ambitioniert"]],p.level||"easy")}</label>`:""}
@@ -1044,7 +1046,7 @@ function viewCoach(){
   <p class="small muted" style="margin:0">Die Werte sind Richtwerte. Bei Vorerkrankungen sprich Ziele mit Ärztin oder Arzt ab.</p>
   ${RESETARM?`<div class="small" style="font-weight:600">Profil und alle Einträge werden gelöscht. Danach startet die Einrichtung neu.</div><div class="grid2"><button class="btn ghost" data-a="resetNo">Abbrechen</button><button class="btn" style="background:var(--bad);color:var(--bg)" data-a="resetYes">Ja, neu starten</button></div>`:`<button class="link" style="text-align:left;color:var(--bad)" data-a="resetArm">Profil neu einrichten</button>`}
   ${DELARM?`<div class="small" style="font-weight:600">Wirklich alles löschen? Profil, Ernährung, Trainings, Läufe und Einstellungen werden auf diesem Gerät${S.syncCode?" und in der Cloud":""} endgültig entfernt. Das lässt sich nicht rückgängig machen.</div><div class="grid2"><button class="btn ghost" data-a="delNo">Abbrechen</button><button class="btn" style="background:var(--bad);color:var(--bg)" data-a="delYes">Endgültig löschen</button></div>`:`<button class="link" style="text-align:left;color:var(--bad)" data-a="delArm">Alle Daten löschen</button>`}
-  <a class="link small" style="text-align:left" href="datenschutz.html">Datenschutzerklärung</a></section></div>`;
+  <span class="row" style="gap:16px"><a class="link small" href="datenschutz.html">Datenschutzerklärung</a><a class="link small" href="support.html">Hilfe &amp; Kontakt</a></span></section></div>`;
 }
 let RESETARM=false;
 function weightCard(){
@@ -1070,9 +1072,9 @@ function obField(k,label,unit,ph,mode="decimal"){return`<label class="f">${label
 function obProfile(){const p=OB.p;return{name:p.name.trim(),sex:p.sex,age:num(p.age),height:num(p.height),weight:num(p.weight),targetWeight:p.targetWeight===""?"":num(p.targetWeight),activity:num(p.activity),goal:p.goal,level:p.level||"easy",train:p.train,equip:(p.train==="both"||p.train==="strength")?(p.equip.length?p.equip:["gym"]):(p.equip.length?p.equip:["none"])}}
 function viewOnboarding(){
  const s=OB.step,N=8;let h="",title="";
- if(s===0){title="Lass uns dich kennenlernen";h=`${CLOUD.status==="loading"?'<p class="small muted" style="margin:0">Ich suche nach deinem gespeicherten Fortschritt …</p>':""}<p class="muted" style="margin:0">Mit deinen Angaben berechne ich deinen Kalorienbedarf, deine Nährwert-Ziele und deinen Trainingsplan.</p>${obField("name","Wie heißt du?","","Vorname","text")}<div class="card" style="padding:14px;gap:8px"><div style="font-weight:700">Schon einen Sync-Code?</div><div class="small muted">Dann lade deinen Fortschritt von deinem anderen Gerät.</div><div class="row"><input id="syncin" placeholder="z. B. AB3K-9F2Q-XX7M-2QRT" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn ghost" data-a="syncLoad">Laden</button></div>${CLOUD.msg?`<div class="small" role="alert" style="color:var(--bad);font-weight:600">${esc(CLOUD.msg)}</div>`:""}<button class="link small" style="text-align:left" data-a="restore">Oder Sicherungsdatei wiederherstellen</button></div>`}
+ if(s===0){title="Lass uns dich kennenlernen";h=`${CLOUD.status==="loading"?'<p class="small muted" style="margin:0">Ich suche nach deinem gespeicherten Fortschritt …</p>':""}<p class="muted" style="margin:0">Mit deinen Angaben berechne ich deinen Kalorienbedarf, deine Nährwert-Ziele und deinen Trainingsplan.</p>${obField("name","Wie heisst du?","","Vorname","text")}<div class="card" style="padding:14px;gap:8px"><div style="font-weight:700">Schon einen Sync-Code?</div><div class="small muted">Dann lade deinen Fortschritt von deinem anderen Gerät.</div><div class="row"><input id="syncin" placeholder="z. B. AB3K-9F2Q-XX7M-2QRT" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn ghost" data-a="syncLoad">Laden</button></div>${CLOUD.msg?`<div class="small" role="alert" style="color:var(--bad);font-weight:600">${esc(CLOUD.msg)}</div>`:""}<button class="link small" style="text-align:left" data-a="restore">Oder Sicherungsdatei wiederherstellen</button></div>`}
  else if(s===1){title="Geschlecht und Alter";h=`<div class="grid2">${choice("sex","m","Männlich")}${choice("sex","w","Weiblich")}</div>${obField("age","Alter","Jahre","z. B. 30","numeric")}<p class="small muted" style="margin:0">Beides brauche ich für deinen Grundumsatz.</p>`}
- else if(s===2){title="Größe und Gewicht";h=`${obField("height","Größe","cm","z. B. 178","numeric")}${obField("weight","Aktuelles Gewicht","kg","z. B. 82,5")}${obField("targetWeight","Zielgewicht (optional)","kg","z. B. 76")}`}
+ else if(s===2){title="Grösse und Gewicht";h=`${obField("height","Grösse","cm","z. B. 178","numeric")}${obField("weight","Aktuelles Gewicht","kg","z. B. 82,5")}${obField("targetWeight","Zielgewicht (optional)","kg","z. B. 76")}`}
  else if(s===3){title="Wie aktiv ist dein Alltag?";h=`<p class="muted" style="margin:0">Ohne Sport. Dein Training rechnet die App jeden Tag separat dazu, je nach Art und Intensität.</p><div class="stack" style="gap:10px">${ACTS.map(a=>choice("activity",a[0],a[1],a[2])).join("")}</div>`}
  else if(s===4){title="Was ist dein Ziel?";h=`<div class="stack" style="gap:10px">${GOALS.map(g=>choice("goal",g[0],g[1],g[2])).join("")}</div>`}
  else if(s===5){const tr=OB.p.train,run=tr==="both"||tr==="run";title="Was willst du trainieren?";
@@ -1101,7 +1103,7 @@ function obValidate(){const p=OB.p,n=k=>num(p[k]);
  switch(OB.step){
   case 0:return p.name.trim()?"":"Bitte gib deinen Vornamen ein.";
   case 1:if(!p.sex)return"Bitte wähle dein Geschlecht.";return n("age")>=14&&n("age")<=100?"":"Bitte gib ein Alter zwischen 14 und 100 ein.";
-  case 2:if(!(n("height")>=120&&n("height")<=230))return"Bitte gib deine Größe in Zentimetern ein (120–230).";
+  case 2:if(!(n("height")>=120&&n("height")<=230))return"Bitte gib deine Grösse in Zentimetern ein (120–230).";
    if(!(n("weight")>=35&&n("weight")<=250))return"Bitte gib dein Gewicht in Kilogramm ein (35–250).";
    if(p.targetWeight!==""&&!(n("targetWeight")>=35&&n("targetWeight")<=250))return"Zielgewicht bitte zwischen 35 und 250 kg, oder das Feld leer lassen.";return"";
   case 3:return p.activity?"":"Bitte wähle aus, wie aktiv du bist.";
@@ -1186,7 +1188,7 @@ function scanBody(){
   return head(sc.ean?"Neues Produkt":"Eigenes Produkt")+`${sc.ean?`<div class="small muted">Strichcode <span class="num" style="font-size:16px">${esc(sc.ean)}</span></div>`:""}${err}
   ${fld("name","Produktname",v.name,"text")}<div class="eyebrow">Nährwerte pro 100 g (steht auf der Packung)</div>
   <div class="grid2">${fld("kcal","Kalorien (kcal)",v.kcal)}${fld("p","Protein (g)",v.p)}${fld("c","Kohlenhydrate (g)",v.c)}${fld("sug","davon Zucker (g)",v.sug)}${fld("f","Fett (g)",v.f)}${fld("sat","davon gesättigt (g)",v.sat)}${fld("fib","Ballaststoffe (g)",v.fib)}${fld("salt","Salz (g)",v.salt)}</div>
-  ${fld("por","Portionsgröße in g (optional)",v.portion)}
+  ${fld("por","Portionsgrösse in g (optional)",v.portion)}
   <button class="btn block" data-a="scanSave">Speichern und weiter</button>
   <p class="small muted" style="margin:0">Du erfasst jedes Produkt nur einmal. Beim nächsten Scan ist es sofort da.</p>`}
  const n=Object.keys(S.products||{}).length;
@@ -1206,7 +1208,7 @@ async function startCam(){
  if(!det&&!rd)return fail("Der Scanner braucht beim ersten Start einmal Internet. Verbinde dich kurz und versuch es nochmal.");
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return fail("Die Kamera ist hier nicht verfügbar. Fotografiere den Strichcode oder tipp die Nummer ein.");
  try{CAM.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false})}
- catch(e){return fail(e&&e.name==="NotAllowedError"?"Kein Zugriff auf die Kamera. Erlaube ihn unter Einstellungen > Safari > Kamera, oder fotografiere den Strichcode.":"Die Kamera ließ sich nicht starten. Fotografiere den Strichcode oder tipp die Nummer ein.")}
+ catch(e){return fail(e&&e.name==="NotAllowedError"?"Kein Zugriff auf die Kamera. Erlaube ihn unter Einstellungen > Safari > Kamera, oder fotografiere den Strichcode.":"Die Kamera liess sich nicht starten. Fotografiere den Strichcode oder tipp die Nummer ein.")}
  if(!SHEET||SHEET.scan!==sc){stopCam();return}
  const v=document.getElementById("camv");if(!v){stopCam();return}
  v.srcObject=CAM.stream;try{await v.play()}catch(e){}
@@ -1280,7 +1282,7 @@ const OWN_NAMES=["Oberkörper","Unterkörper","Brust & Trizeps","Rücken & Bizep
 function drawOwn(){
  const o=OWN,tpls=Object.keys(TEMPLATES);
  document.getElementById("overlay").innerHTML=`<div class="scrim" data-a="sScrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Eigenes Training"><div class="grab"></div>
- <div class="row between"><h2>Eigenes Training</h2><button class="icon-btn" aria-label="Schließen" data-a="sClose">${I.x}</button></div>
+ <div class="row between"><h2>Eigenes Training</h2><button class="icon-btn" aria-label="Schliessen" data-a="sClose">${I.x}</button></div>
  <label class="f">Name<input id="own-name" value="${esc(o.name)}" placeholder="z. B. Oberkörper" autocomplete="off"></label>
  <div class="row wrap" style="gap:6px">${OWN_NAMES.map(n=>`<button class="chip" data-a="ownName" data-v="${esc(n)}" aria-pressed="${o.name===n}">${esc(n)}</button>`).join("")}</div>
  <div class="grid2"><label class="f">Datum<input type="date" id="own-date" value="${o.date}" max="${TODAY()}"></label><label class="f">Dauer (Min.)<input id="own-min" inputmode="numeric" value="${esc(o.min)}" placeholder="${o.date!==TODAY()?"60":"automatisch"}"></label></div>
@@ -1296,7 +1298,7 @@ function drawOwn(){
 function drawAct(){
  const a=ACT,est=actKcal({type:a.type,min:num(a.min)||0,int:a.int,kcal:num(a.kcal)||0});
  document.getElementById("overlay").innerHTML=`<div class="scrim" data-a="sScrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Aktivität eintragen"><div class="grab"></div>
- <div class="row between"><h2>Aktivität eintragen</h2><button class="icon-btn" aria-label="Schließen" data-a="sClose">${I.x}</button></div>
+ <div class="row between"><h2>Aktivität eintragen</h2><button class="icon-btn" aria-label="Schliessen" data-a="sClose">${I.x}</button></div>
  <label class="f">Sportart<select id="act-type">${ACT_TYPES.map(([k,l])=>`<option value="${k}" ${k===a.type?"selected":""}>${l}</option>`).join("")}</select></label>
  <div class="grid2"><label class="f">Dauer (Minuten)<input id="act-min" inputmode="numeric" value="${esc(a.min)}" placeholder="45"></label><label class="f">Datum<input id="act-date" type="date" value="${a.date}"></label></div>
  <div class="stack" style="gap:6px"><div class="small" style="font-weight:600">Intensität</div><div class="grid3">${INTS.map(([k,l])=>`<button class="chip" data-a="actInt" data-v="${k}" aria-pressed="${a.int===k}">${l}</button>`).join("")}</div>
@@ -1324,7 +1326,7 @@ function drawSheet(){
   <div class="card" style="padding:12px;gap:6px"><div class="kv"><span>Energie</span><b id="pk">${r0(f.kcal*k)} kcal</b></div><div class="kv"><span style="color:var(--prot)">Protein</span><b id="pp">${r1(f.p*k)} g</b></div><div class="kv"><span style="color:var(--carb)">Kohlenhydrate</span><b id="pc">${r1(f.c*k)} g</b></div><div class="kv"><span style="color:var(--fat)">Fett</span><b id="pf">${r1(f.f*k)} g</b></div><div class="kv muted"><span>Ballaststoffe · Zucker</span><b id="px">${r1(f.fib*k)} · ${r1(f.sug*k)} g</b></div>${f.sat!=null||f.salt!=null?`<div class="kv muted"><span>Ges. Fett · unges. · Salz</span><b id="pz">${fz(f,k)}</b></div>`:""}</div>
   ${mealSel}<button class="btn block" data-a="sAdd">Zu ${s.meal} hinzufügen</button>`}
  else{const res=searchFoods(s.q),qq=s.q.trim();
-  body=`<div class="row between"><h2>Lebensmittel suchen</h2><button class="icon-btn" aria-label="Schließen" data-a="sClose">${I.x}</button></div>
+  body=`<div class="row between"><h2>Lebensmittel suchen</h2><button class="icon-btn" aria-label="Schliessen" data-a="sClose">${I.x}</button></div>
   <input id="sq" placeholder="Suchen, z. B. Quark, Rösti, Banane" value="${esc(s.q)}" autocomplete="off">
   <div class="grid2"><button class="btn ghost" data-a="scan">Barcode</button><button class="btn" data-a="aiPhoto">Foto vom Essen</button></div>
   ${!qq&&res.length?'<div class="eyebrow">Zuletzt & eigene</div>':""}
@@ -1370,7 +1372,7 @@ document.addEventListener("click",ev=>{
    save();closeSheet();render(true);toast(actType(x.type)[1]+": +"+de(r0(actKcal(x)))+" kcal");break}
   case"delAct":S.acts=(S.acts||[]).filter(x=>x.id!==d.id);save();render(true);break;
   case"wkInt":if(CUR){CUR.int=d.v;render(true)}break;
-  case"exSwap":case"exAdd":case"tplEdit":if(!window.guideEx2){toast("Bitte App einmal schließen und neu öffnen, damit das Update geladen wird")}break;
+  case"exSwap":case"exAdd":case"tplEdit":if(!window.guideEx2){toast("Bitte App einmal schliessen und neu öffnen, damit das Update geladen wird")}break;
   case"sPick":{const f=allFoods().find(x=>x.key===d.k);if(!f)break;
    if(f.online&&f.ean){S.products=S.products||{};S.products[f.ean]={name:f.name,kcal:f.kcal,p:f.p,c:f.c,sug:f.sug,f:f.f,sat:f.sat,salt:f.salt,fib:f.fib,portion:f.portion,ean:f.ean,src:"off"};save()}
    SHEET.pick=f;SHEET.g=f.portion||100;drawSheet();break}
@@ -1438,7 +1440,7 @@ document.addEventListener("click",ev=>{
   case"svSync":svSync(true);break;
   case"svOff":{const tok=SV.access;if(tok)fetch("https://www.strava.com/oauth/deauthorize",{method:"POST",headers:{Authorization:"Bearer "+tok}}).catch(()=>{});
    SV={cid:SV.cid,secret:SV.secret};svSave();SVUI={setup:false,busy:false,msg:""};paintStrava();toast("Strava getrennt. Deine Läufe bleiben gespeichert.");break}
-  case"copyCode":{const t=HANDOFF||"";const ok=()=>toast("Code kopiert. Jetzt Formwerk vom Homescreen öffnen.");
+  case"copyCode":{const t=HANDOFF||"";const ok=()=>toast("Code kopiert. Jetzt die Formwerk-App öffnen.");
    try{navigator.clipboard.writeText(t).then(ok,()=>{selectCode();toast("Code markiert. Tippe auf Kopieren.")})}catch(e){selectCode()}break}
   case"backup":doBackup();break;
   case"syncCreate":S.syncCode=genSyncCode();CLOUD.msg="";save();clearTimeout(CLOUD.timer);cloudPush(true);toast("Sync-Code erstellt. Notier ihn dir gut!");break;
@@ -1482,18 +1484,18 @@ function stopRest(){clearInterval(REST.iv);REST.left=0}
 
 let LASTPULL=0;
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&W.running)wakeOn();if(document.hidden&&CLOUD.timer){clearTimeout(CLOUD.timer);cloudPush()}if(!document.hidden&&S&&S.syncCode&&!CUR&&!W.running&&!SHEET&&Date.now()-LASTPULL>60000){LASTPULL=Date.now();cloudInit()}if(!document.hidden&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false);if(document.hidden&&SHEET&&SHEET.scan&&SHEET.scan.stage==="live"){stopCam();SHEET.scan={stage:"start"};drawSheet()}});
-if("serviceWorker"in navigator)window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})});
+if("serviceWorker"in navigator&&!IS_NATIVE)window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})});
 render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=22"></script>
-<script src="ai.js?v=22"></script>
-<script src="brief.js?v=22"></script>
-<script src="run.js?v=22"></script>
-<script src="week.js?v=22"></script>
-<script src="reminders.js?v=22"></script>
-<script src="strength.js?v=22"></script>
-<script src="smart.js?v=22"></script>
+<script src="guide.js?v=24"></script>
+<script src="ai.js?v=24"></script>
+<script src="brief.js?v=24"></script>
+<script src="run.js?v=24"></script>
+<script src="week.js?v=24"></script>
+<script src="reminders.js?v=24"></script>
+<script src="strength.js?v=24"></script>
+<script src="smart.js?v=24"></script>
 </body>
 </html>
