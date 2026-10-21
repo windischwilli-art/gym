@@ -381,7 +381,8 @@ try{const x=JSON.parse(localStorage.getItem("formwerk-v2"));if(x&&x.v===2)S=x}ca
 // ---------- Speicherung auf dem Gerät + Sicherung als Datei ----------
 // ---------- Speicherung: Gerät + Cloud-Sync per Sync-Code (wie Español con Willi) ----------
 // Gleiches Firebase-Projekt wie die Spanisch-App. Firestore-Regel erlaubt syncStates/{code}.
-const FIREBASE_CONFIG={
+// Früheres Projekt (geteilt mit der Spanisch-App): nur noch zum einmaligen Umzug bestehender Sync-Daten
+const LEGACY_FIREBASE_CONFIG={
  apiKey:"AIzaSyAVFyFnfbTtGI4qDhKVW2y3XZEXWa6BP-M",
  authDomain:"spanischapp-75a3f.firebaseapp.com",
  projectId:"spanischapp-75a3f",
@@ -389,6 +390,9 @@ const FIREBASE_CONFIG={
  messagingSenderId:"733643089029",
  appId:"1:733643089029:web:27e28ba9638e34a338f5ec"
 };
+// Eigenes Firebase-Projekt von Formwerk (Datenbank in Zürich)
+// Solange das eigene Projekt noch nicht eingetragen ist, läuft der Sync wie bisher
+const FIREBASE_CONFIG=/*FW_CONFIG*/null/*END*/||LEGACY_FIREBASE_CONFIG;
 const CLOUD={status:"local",msg:"",timer:null,busy:false,again:false,db:null,sentFood:{},confirm:null};
 let PENDINGRESTORE=null;
 const SYNC_ALPHA="0123456789ABCDEFGHJKMNPQRSTVWXYZ";
@@ -396,6 +400,11 @@ function genSyncCode(){const r=new Uint32Array(16);try{crypto.getRandomValues(r)
  let s="";for(let i=0;i<16;i++)s+=SYNC_ALPHA[r[i]%32];return s.match(/.{4}/g).join("-")}
 const normCode=c=>((String(c||"").toUpperCase().replace(/[^0-9A-Z]/g,"").match(/.{1,4}/g))||[]).join("-");
 const docId=(code,suffix)=>"formwerk_"+code.replace(/-/g,"")+(suffix?"_"+suffix:"");
+let LEGACY_DB=null;
+function legacyDb(){
+ if(LEGACY_DB)return LEGACY_DB;
+ try{if(typeof firebase==="undefined")return null;const app=firebase.apps.find(a=>a.name==="legacy")||firebase.initializeApp(LEGACY_FIREBASE_CONFIG,"legacy");LEGACY_DB=app.firestore();return LEGACY_DB}catch(e){return null}
+}
 function cloudDb(){
  if(CLOUD.db)return CLOUD.db;
  try{if(typeof firebase==="undefined")return null;if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);CLOUD.db=firebase.firestore();return CLOUD.db}catch(e){return null}
@@ -422,13 +431,18 @@ async function cloudPush(force){
  CLOUD.busy=false;paintCloud();
  if(CLOUD.again){CLOUD.again=false;cloudPush()}
 }
-async function cloudFetch(code){
- const db=cloudDb();if(!db)throw new Error("offline");
+async function cloudFetch(code,dbOverride){
+ const db=dbOverride||cloudDb();if(!db)throw new Error("offline");
  const col=db.collection("syncStates"),main=await col.doc(docId(code)).get();
  if(!main.exists)return null;
  const m=main.data(),foods=[];
  for(const y of(m.foodYears||[])){const d=await col.doc(docId(code,"food"+y)).get();if(d.exists){const f=d.data().foods||[];foods.push(...f);CLOUD.sentFood[y]=JSON.stringify(f)}}
  return{savedAt:m.savedAt||0,state:{...m.data,foods,syncCode:code,v:2}};
+}
+// Erst im eigenen Projekt suchen, sonst im früheren Projekt (Umzug)
+async function cloudFetchAny(code){
+ const r=await cloudFetch(code);if(r)return r;
+ try{const l=legacyDb();if(!l)return null;const o=await cloudFetch(code,l);if(o)o.legacy=true;return o}catch(e){return null}
 }
 function applyCloud(st){
  st.weights=st.weights||[];st.workouts=st.workouts||[];st.runs=st.runs||[];st.products=st.products||{};st.acts=st.acts||[];
@@ -439,7 +453,8 @@ async function cloudInit(){
  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}
  if(!S||!S.syncCode){paintCloud();return}
  // leise prüfen, ob auf einem anderen Gerät Neueres gespeichert wurde
- try{const r=await cloudFetch(S.syncCode);
+ try{const r=await cloudFetchAny(S.syncCode);
+  if(r&&r.legacy){if(r.savedAt>(S.updated||0)){r.state.savedAt=r.savedAt;applyCloud(r.state);render(true)}cloudPush(true);return}
   if(r&&r.savedAt>(S.lastSynced||0)&&r.savedAt>(S.updated||0)){r.state.savedAt=r.savedAt;applyCloud(r.state);render(true);toast("Neuester Stand geladen")}
   else if(S.updated>(S.lastSynced||0))cloudPush();
   else{CLOUD.status="saved";paintCloud()}
@@ -448,9 +463,9 @@ async function cloudInit(){
 async function cloudLoad(code){
  code=normCode(code);if(code.replace(/-/g,"").length!==16){CLOUD.msg="Der Code hat 16 Zeichen, z. B. AB3K-9F2Q-XX7M-2QRT.";CLOUD.status="error";paintCloud();render(true);return}
  CLOUD.status="loading";CLOUD.msg="";paintCloud();if(!S)render(true);
- try{const r=await cloudFetch(code);
+ try{const r=await cloudFetchAny(code);
   if(!r){CLOUD.status="error";CLOUD.msg="Zu diesem Code wurde nichts gefunden. Prüfe die Schreibweise.";paintCloud();if(!S)render(true);return}
-  r.state.savedAt=r.savedAt;applyCloud(r.state);CLOUD.confirm=null;CLOUD.status="saved";
+  r.state.savedAt=r.savedAt;applyCloud(r.state);CLOUD.confirm=null;CLOUD.status="saved";if(r.legacy)cloudPush(true);
   tab="heute";render();window.scrollTo(0,0);toast("Fortschritt geladen"+(S.profile&&S.profile.name?". Hallo "+S.profile.name+"!":""));
  }catch(e){CLOUD.status="error";CLOUD.msg="Keine Verbindung. Prüfe dein Internet und versuch es nochmal.";paintCloud();if(!S)render(true)}
 }
@@ -461,6 +476,8 @@ async function deleteEverything(){
  if(code){try{const db=cloudDb();if(!db)throw 0;const col=db.collection("syncStates"),main=await col.doc(docId(code)).get();
    const years=main.exists?(main.data().foodYears||[]):Object.keys(foodYears());
    for(const y of years)await col.doc(docId(code,"food"+y)).delete();await col.doc(docId(code)).delete()}catch(e){cloudOk=false}}
+ // auch eine allfällige Kopie im früheren Projekt entfernen
+ if(code){try{const l=legacyDb();if(l){const c=l.collection("syncStates"),m=await c.doc(docId(code)).get();if(m.exists){for(const y of(m.data().foodYears||[]))await c.doc(docId(code,"food"+y)).delete();await c.doc(docId(code)).delete()}}}catch(e){}}
  clearTimeout(CLOUD.timer);
  for(const k of["formwerk-v2","formwerk-ai","formwerk-strava"])try{localStorage.removeItem(k)}catch(e){}
  S=null;OB=null;CUR=null;tab="heute";DELARM=false;render();window.scrollTo(0,0);
@@ -1492,13 +1509,13 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=25"></script>
-<script src="ai.js?v=25"></script>
-<script src="brief.js?v=25"></script>
-<script src="run.js?v=25"></script>
-<script src="week.js?v=25"></script>
-<script src="reminders.js?v=25"></script>
-<script src="strength.js?v=25"></script>
-<script src="smart.js?v=25"></script>
+<script src="guide.js?v=26"></script>
+<script src="ai.js?v=26"></script>
+<script src="brief.js?v=26"></script>
+<script src="run.js?v=26"></script>
+<script src="week.js?v=26"></script>
+<script src="reminders.js?v=26"></script>
+<script src="strength.js?v=26"></script>
+<script src="smart.js?v=26"></script>
 </body>
 </html>
