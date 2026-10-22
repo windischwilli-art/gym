@@ -391,8 +391,14 @@ const LEGACY_FIREBASE_CONFIG={
  appId:"1:733643089029:web:27e28ba9638e34a338f5ec"
 };
 // Eigenes Firebase-Projekt von Formwerk (Datenbank in Zürich)
-// Solange das eigene Projekt noch nicht eingetragen ist, läuft der Sync wie bisher
-const FIREBASE_CONFIG=/*FW_CONFIG*/null/*END*/||LEGACY_FIREBASE_CONFIG;
+const FIREBASE_CONFIG={
+ apiKey:"AIzaSyDEk8ZQTIX-7BAV0-bHZVDtrtPFHGQoA98",
+ authDomain:"formwerk-bda53.firebaseapp.com",
+ projectId:"formwerk-bda53",
+ storageBucket:"formwerk-bda53.firebasestorage.app",
+ messagingSenderId:"843102013903",
+ appId:"1:843102013903:web:76c1f0bb3261bbbcabaaba"
+};
 const CLOUD={status:"local",msg:"",timer:null,busy:false,again:false,db:null,sentFood:{},confirm:null};
 let PENDINGRESTORE=null;
 const SYNC_ALPHA="0123456789ABCDEFGHJKMNPQRSTVWXYZ";
@@ -1509,13 +1515,13 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=28"></script>
-<script src="ai.js?v=28"></script>
-<script src="brief.js?v=28"></script>
-<script src="run.js?v=28"></script>
-<script src="week.js?v=28"></script>
-<script src="reminders.js?v=28"></script>
-<script src="strength.js?v=28"></script>
-<script src="smart.js?v=28"></script>
+<script src="guide.js?v=29"></script>
+<script src="ai.js?v=29"></script>
+<script src="brief.js?v=29"></script>
+<script src="run.js?v=29"></script>
+<script src="week.js?v=29"></script>
+<script src="reminders.js?v=29"></script>
+<script src="strength.js?v=29"></script>
+<script src="smart.js?v=29"></script>
 </body>
 </html>
