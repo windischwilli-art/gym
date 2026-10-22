@@ -3,7 +3,7 @@
 "use strict";
 const E=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const WD=["Mo","Di","Mi","Do","Fr","Sa","So"],WDL=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
-const TYPES={iv:{name:"Intervalle",short:"INT",save:"Intervalle",color:"var(--hot,#E6407A)"},easy:{name:"Easy Run",short:"EASY",save:"Locker",color:"var(--c-coach)"},long:{name:"Long Run",short:"LONG",save:"Langer Lauf",color:"var(--c-run)"},race:{name:"Wettkampf",short:"RACE",save:"Wettkampf",color:"#F59E0B"}};
+const TYPES={iv:{name:"Intervalle",short:"INT",save:"Intervalle",color:"var(--hot,#E6407A)"},easy:{name:"Easy Run",short:"EASY",save:"Locker",color:"var(--c-coach)"},long:{name:"Long Run",short:"LONG",save:"Langer Lauf",color:"var(--c-run)"},race:{name:"Wettkampf",short:"RACE",save:"Wettkampf",color:"#F59E0B"},test:{name:"5-km-Test",short:"TEST",save:"Tempo",color:"#0EA5E9"}};
 const cfg=()=>(typeof S!=="undefined"&&S&&S.profile&&S.profile.runCfg)||null;
 const lvl=()=>(S.profile.level||"mid");
 const fmtP=s=>{s=Math.round(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
@@ -82,8 +82,32 @@ function qualSes(reps,m,rec,pk,z,dl,wuMin){
  const title=reps===1?(pk==="rp"?`${kmTxt(m)} im Renntempo`:`Tempolauf ${kmTxt(m)}`):`${pk==="iv"?"Intervalle":pk==="rp"?"Renntempo":"Schwelle"} ${reps} × ${kmTxt(m)}`;
  return{type:"iv",title,sub:`${rec&&reps>1?"Pause "+recTxt(rec)+" Trab · ":""}Ziel ${zTxt(pace)}`,segs,km,sec:segs.reduce((a,s)=>a+s.sec,0),dl};
 }
+// ---------- 5-km-Test & Einsteiger (Laufen/Gehen) ----------
+const fmtMin=sec=>{const m=sec/60;return(m%1?String(Math.round(m*10)/10).replace(".",","):m)+" Min."};
+function testSession(){
+ const z=zones(),est=Math.round(zMid(z.iv)*5*1.05);
+ const segs=[{k:"wu",name:"Einlaufen",sec:300,pace:z.trab,info:"Zügig gehen oder ganz locker traben"},
+  {k:"test",name:"5-km-Test",km:5,sec:est,pace:null,info:"So schnell, wie du 5 km gleichmässig durchhältst. Gehpausen sind erlaubt."},
+  {k:"cd",name:"Auslaufen",sec:300,pace:z.trab,info:"Locker gehen oder traben"}];
+ return{type:"test",title:"5-km-Test",sub:"Startpunkt für deinen Plan",segs,km:5+600/zMid(z.trab),sec:segs.reduce((a,x)=>a+x.sec,0),dl:false};
+}
+// Lauf-Geh-Stufen: [Minuten laufen, Minuten gehen, Wiederholungen]
+const RW=[[1,1.5,8],[2,1,7],[3,1,6],[4,1,5],[5,1,5],[6,1,4],[8,1,3],[10,1,3],[12,1,2],[15,1,2]];
+function rwSession(type,w,z,dl){
+ let st=Math.min(w,RW.length-1);if(dl||type==="iv")st=Math.max(0,st-1);
+ let[run,walk,reps]=RW[st];if(type==="long")reps+=2;
+ const segs=[{k:"wu",name:"Einlaufen",sec:300,pace:null,info:"5 Minuten zügig gehen"}];
+ for(let i=0;i<reps;i++){segs.push({k:"work",name:`Laufen ${i+1} von ${reps}`,sec:run*60,pace:z.easy,info:"Ganz locker, du kannst dich unterhalten"});if(i<reps-1)segs.push({k:"rec",name:"Gehen",sec:walk*60,pace:null,info:"Zügig gehen und durchatmen"})}
+ segs.push({k:"cd",name:"Auslaufen",sec:300,pace:null,info:"5 Minuten locker gehen"});
+ const sec=segs.reduce((a,x)=>a+x.sec,0),runSec=reps*run*60;
+ const title=(type==="long"?"Langer Lauf-Geh-Mix ":type==="iv"?"Lockerer Lauf-Geh-Mix ":"Laufen & Gehen ")+`${reps} × ${fmtMin(run*60)}`;
+ return{type,title,sub:`${fmtMin(walk*60)} Gehpause dazwischen · ${Math.round(runSec/60)} Min. laufen insgesamt`,segs,km:runSec/zMid(z.easy)+(sec-runSec)/600,sec,dl,rw:true};
+}
+const rwActive=w=>{const c=cfg();return !!(c&&c.rw&&w<RW.length)};
 function session(type,w){
+ if(type==="test")return testSession();
  const z=zones(),L=lvl(),dl=isDeload(w),c=cfg()||{};
+ if(rwActive(w))return rwSession(type,w,z,dl);
  if(type==="iv"){let[reps,m,rec]=IVS[w%IVS.length];if(L==="easy")reps=Math.max(3,reps-1);if(L==="pro")reps+=1;return qualSes(reps,m,rec,"iv",z,dl)}
  if(type==="easy"){const base={easy:30,mid:40,pro:50}[L]||40,min=dl?base-5:base+Math.min(15,(w%4)*5);
   const segs=[{k:"run",name:"Easy Run",sec:min*60,pace:z.easy,info:"Locker, du kannst dich unterhalten"}];
@@ -161,7 +185,7 @@ window.runPlanOverlay=function(out){
 
 // ---------- Karte im Lauf-Tab ----------
 function doneOn(d){return S.runs.some(r=>r.date===d)}
-function segListHTML(s){const g=[];let i=0;while(i<s.segs.length){const x=s.segs[i];if(x.k==="work"&&s.segs.filter(y=>y.k==="work").length>1){let n=0;while(i<s.segs.length&&(s.segs[i].k==="work"||s.segs[i].k==="rec")){if(s.segs[i].k==="work")n++;i++}const r=s.segs.find(y=>y.k==="rec");g.push(`<li><b>${n} × ${kmTxt(x.m)}</b> in ${zTxt(x.pace)}${r?`, dazwischen ${recTxt(r.sec)} traben`:""}</li>`)}else{g.push(`<li><b>${E(x.name)}</b> ${x.m?kmTxt(x.m):x.km?de(x.km)+" km":Math.round(x.sec/60)+" Min."} in ${zTxt(x.pace)}</li>`);i++}}return g.join("")}
+function segListHTML(s){const g=[];let i=0;while(i<s.segs.length){const x=s.segs[i];if(x.k==="work"&&s.segs.filter(y=>y.k==="work").length>1){let n=0;while(i<s.segs.length&&(s.segs[i].k==="work"||s.segs[i].k==="rec")){if(s.segs[i].k==="work")n++;i++}const r=s.segs.find(y=>y.k==="rec");g.push(`<li><b>${n} × ${x.m?kmTxt(x.m):fmtMin(x.sec)}</b>${x.m?" in "+zTxt(x.pace):" locker laufen"}${r?`, dazwischen ${recTxt(r.sec)} ${r.pace?"traben":"gehen"}`:""}</li>`)}else{g.push(`<li><b>${E(x.name)}</b> ${x.m?kmTxt(x.m):x.km?de(x.km)+" km":Math.round(x.sec/60)+" Min."}${x.pace?" in "+zTxt(x.pace):x.k==="test"?" in deinem Tempo":" gehen"}</li>`);i++}}return g.join("")}
 function raceHead(p){
  const inf=p.inf,r=inf.r,pred=prediction(r),days=Math.round((new Date(r.date+"T12:00")-new Date(TODAY()+"T12:00"))/DAY);
  const ratio=pred?r.goal/pred:0,real=!pred?"":ratio>=1?["good","Realistisch, deine aktuelle Form reicht schon"]:ratio>=.97?["acc","Ambitioniert, aber gut machbar"]:ratio>=.93?["warn","Sehr ambitioniert, braucht konsequentes Training"]:["bad","Kaum realistisch bis dahin. Die Trainingstempos sind auf höchstens 7 % Verbesserung begrenzt."];
@@ -178,7 +202,8 @@ window.runCardHTML=function(){
  const c=cfg();
  if(!c)return`<section class="card rcard"><div class="row between"><h2>Lauftrainer</h2><span class="pill">neu</span></div>
   <p class="small muted" style="margin:0">Dein Wochenplan mit <b>Intervallen</b>, <b>Easy Run</b> und <b>Long Run</b> am Wochenende. Optional mit einem <b>Wettkampf-Ziel</b> (10 km, Halbmarathon, Marathon) und Zielzeit.</p>
-  <button class="btn block" data-r="setup">Lauftrainer einrichten</button></section>`;
+  <div class="tip"><i></i><div class="small"><b>Neu im Laufen oder keine aktuelle Bestzeit?</b> Starte mit dem 5-km-Test. Daraus erstellt die App einen Plan, der genau zu dir passt, auf Wunsch mit Gehpausen.</div></div>
+  <div class="grid2"><button class="btn" data-r="testinfo">5-km-Test starten</button><button class="btn ghost" data-r="setup">Ohne Test einrichten</button></div></section>`;
  const p=weekPlan(),today=TODAY(),ti=(new Date().getDay()+6)%7,ws=weekStart();ZW=ws;const z=zones();ZW=null;
  const dates=Array.from({length:7},(_,i)=>addD(ws,i));
  let ni=-1;for(let k=0;k<7;k++){const i=(ti+k)%7;if(p.days[i]&&(k>0||!doneOn(today))){ni=i;break}}
@@ -187,6 +212,10 @@ window.runCardHTML=function(){
  const past=racePast();
  return`<section class="card rcard"><div class="row between"><h2>Lauftrainer</h2><span class="pill ${p.deload?"warn":"acc"}">${p.inf?`Woche ${p.inf.i+1} von ${p.inf.T}`:`Woche ${p.w+1}`}${p.deload?" · Entlastung":""}</span></div>
  ${p.inf?raceHead(p):past?`<div class="rrace"><div class="eyebrow" style="color:#F59E0B">Wettkampf vorbei</div><div class="rtitle" style="font-size:22px">${E(past.name||RD[past.key].name)}</div>${(()=>{const res=S.runs.find(x=>x.date===past.date&&x.type==="Wettkampf");return res?`<div class="small">Deine Zeit: <b>${fmtH(res.sec)}</b>${res.sec<=past.goal?" · Ziel erreicht, Gratulation!":" · Ziel war "+fmtH(past.goal)}</div>`:`<div class="small muted">Trag deine Zeit unten bei „Lauf speichern“ mit der Art „Wettkampf“ ein.</div>`})()}<div class="grid2"><button class="btn ghost" data-r="raceend">Zurück zum Wochenplan</button><button class="btn" data-r="setup">Neues Ziel</button></div></div>`:""}
+ ${(()=>{if(p.inf)return"";const td=c.testDate,age=td?Math.round((new Date(TODAY()+"T12:00")-new Date(td+"T12:00"))/DAY):999;
+  if(!c.refSec&&!c.ref5&&!td)return`<div class="tip"><i></i><div class="small grow">Noch keine 5-km-Zeit. Mit dem Test werden deine Tempo-Zonen genau. <button class="link small" data-r="testinfo">5-km-Test starten</button></div></div>`;
+  if(td&&age>=56)return`<div class="tip"><i></i><div class="small grow">Dein letzter 5-km-Test ist ${Math.round(age/7)} Wochen her. Zeit für einen neuen, dann siehst du deinen Fortschritt. <button class="link small" data-r="testinfo">Test starten</button></div></div>`;
+  if(c.rw&&p.w<RW.length)return`<div class="small muted">Einsteiger-Plan: Laufen und Gehen, Woche ${p.w+1} von ${RW.length}. Danach läufst du 30 Minuten am Stück.</div>`;return""})()}
  <div class="rstrip">${strip}</div>
  ${s?`<div class="rses" style="--rc:${TYPES[s.type].color}"><div class="eyebrow" style="color:var(--rc)">${isToday?"Heute":WDL[ni]}</div><div class="rtitle">${E(s.title)}</div><div class="small muted">${E(s.sub)}</div>
   <ul class="rsegs">${segListHTML(s)}</ul><div class="small">ca. <b>${de(r1(s.km))} km</b> · <b>${fmtH(s.sec).replace(/:\d\d$/,"")} ${s.sec>=3600?"Std.":"Min."}</b></div>
@@ -239,7 +268,7 @@ function drawSetup(){
    <label class="f">Name des Laufs (optional)<input id="r-name" placeholder="z. B. Zürich Marathon" value="${E(c.name||"")}"></label>
    ${pred?`<div class="small">Mit deiner aktuellen Form schaffst du ca. <b>${fmtH(pred)}</b>.${c.goal?` Dein Ziel ist ${c.goal<pred?Math.round((1-c.goal/pred)*1000)/10+" % schneller":"machbar"}.`:` <button class="link small" data-r="usepred">Als Zielzeit übernehmen</button>`}</div>`:`<div class="small muted">Trag unten deine aktuelle 5- oder 10-km-Zeit ein, dann siehst du eine Prognose.</div>`}`:`<div class="small muted">Ohne Ziel läuft ein fortlaufender Wochenplan. Mit Ziel bekommst du einen Plan in Phasen bis zum Renntag.</div>`}
  </div>
- <div><div class="small" style="font-weight:700;margin-bottom:6px">Aktuelle Bestzeit (für deine Tempos)</div>
+ <div><div class="row between" style="margin-bottom:6px"><span class="small" style="font-weight:700">Aktuelle Bestzeit (für deine Tempos)</span><button class="link small" data-r="testinfo">Keine Zeit? 5-km-Test</button></div>
   <div class="row" style="gap:8px;align-items:stretch"><div class="seg2">${[5,10].map(k=>`<button class="chip" data-r="refkm" data-v="${k}" aria-pressed="${c.refKm===k}">${k} km</button>`).join("")}</div>
   <input id="r-ref" class="grow" inputmode="numeric" data-time placeholder="${c.refKm===10?"z. B. 52:30":"z. B. 25:30"}" value="${c.refSec?fmtH(c.refSec):""}" aria-label="Zeit"></div></div>
  <p class="small muted" style="margin:0">Wähle die Tage für deine drei Läufe. Zwischen Intervallen und Long Run sollte mindestens ein Tag liegen.${bl.size?" Gestrichelte Tage sind unter „Meine Woche“ belegt. Läufe dort werden automatisch verschoben.":""}</p>
@@ -251,6 +280,30 @@ function drawSetup(){
  <label class="f">Dein Level<select id="r-lvl"><option value="easy" ${L==="easy"?"selected":""}>Einsteiger</option><option value="mid" ${L==="mid"?"selected":""}>Fortgeschritten</option><option value="pro" ${L==="pro"?"selected":""}>Ambitioniert</option></select></label></div>
  <button class="btn block" data-r="save">${rk?"Wettkampfplan erstellen":"Plan speichern"}</button>
  ${cfg()&&!rk?`<button class="glink" style="align-self:center;color:var(--muted)" data-r="restart">Plan neu bei Woche 1 beginnen</button>`:""}</div></div>`;
+}
+let TESTRES=null;
+const LVLN={easy:"Einsteiger",mid:"Fortgeschritten",pro:"Ambitioniert"};
+function showTestResult(t5,L,rw,existing){
+ const b=t5/5,z={easy:[b*1.22,b*1.32],long:[b*1.25,b*1.35],tempo:[b*1.06,b*1.10],iv:[b*.97,b*1.01]};
+ host("rres").innerHTML=`<div class="scrim" data-r="rscrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Testergebnis"><div class="grab"></div>
+ <div class="eyebrow" style="color:${TYPES.test.color}">Dein Startpunkt</div><h2>5 km in ${fmtH(t5)}</h2>
+ <div class="grid2"><div><div class="eyebrow">Tempo</div><div class="num" style="font-size:26px;font-weight:700">${fmtP(b)} <span class="muted" style="font-size:14px">/km</span></div></div><div><div class="eyebrow">Level</div><div class="num" style="font-size:26px;font-weight:700">${LVLN[L]}</div></div></div>
+ ${rw?`<div class="tip good"><i></i><div class="small"><b>Dein Plan startet mit Laufen und Gehen.</b> Zum Beispiel 8 × 1 Minute laufen, dazwischen gehen. Die Laufabschnitte werden jede Woche länger, nach rund 10 Wochen läufst du 30 Minuten am Stück.</div></div>`
+  :`<div class="tip good"><i></i><div class="small">Aus deiner Zeit berechnet die App die Tempo-Zonen für jede Einheit. In 8 Wochen schlage ich dir einen neuen Test vor, dann siehst du deinen Fortschritt.</div></div>`}
+ <div class="list"><div class="li"><div class="grow">Easy Run</div><b class="num">${zTxt(z.easy)}</b></div><div class="li"><div class="grow">Long Run</div><b class="num">${zTxt(z.long)}</b></div><div class="li"><div class="grow">Tempo</div><b class="num">${zTxt(z.tempo)}</b></div><div class="li"><div class="grow">Intervalle</div><b class="num">${zTxt(z.iv)}</b></div></div>
+ ${existing?`<button class="btn block" data-r="testclose">Plan ist aktualisiert</button>`:`<button class="btn block" data-r="testplan">Jetzt Plan erstellen</button><div class="small muted" style="text-align:center">Im nächsten Schritt wählst du deine drei Lauftage.</div>`}</div></div>`;
+}
+function drawTestInfo(){
+ host("rres").innerHTML=`<div class="scrim" data-r="rscrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="5-km-Test"><div class="grab"></div>
+ <div class="row between"><h2>5-km-Test</h2><button class="icon-btn" data-r="testclose" aria-label="Schliessen">${I.x}</button></div>
+ <p class="small muted" style="margin:0">Einmal 5 km, damit dein Plan genau zu dir passt. Daraus bestimmt die App dein Level, deine Tempo-Zonen und wie viel du am Anfang laufen solltest.</p>
+ <ol class="small" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px">
+  <li><b>5 Minuten einlaufen</b>, zügig gehen oder ganz locker traben.</li>
+  <li><b>5 km so schnell, wie du gleichmässig durchhältst.</b> Lieber ruhig starten. Gehpausen sind völlig in Ordnung.</li>
+  <li>Bei 5,0 km stoppt die Zeit automatisch (GPS). Ohne GPS tippst du auf „5 km geschafft“.</li>
+  <li><b>5 Minuten auslaufen.</b></li></ol>
+ <div class="tip"><i></i><div class="small">Am besten auf einer flachen Strecke, ausgeruht und nicht direkt nach dem Essen. Lass die App offen und den Bildschirm an.</div></div>
+ <button class="btn block" data-r="start" data-t="test">Test starten</button></div></div>`;
 }
 function host(id){let h=document.getElementById(id);if(!h){h=document.createElement("div");h.id=id;document.body.appendChild(h)}return h}
 function sesFor(type){const p=weekPlan();if(p)for(const k in p.days)if(p.days[k].type===type)return p.days[k];return type==="race"?null:session(type,weekIdx())}
@@ -270,7 +323,9 @@ function startRun(type){
 const elapsedAll=()=>RUN?((RUN.paused?RUN.pausedAt:Date.now())-RUN.t0-RUN.pausedMs)/1000:0;
 const segElapsed=()=>RUN?((RUN.paused?RUN.pausedAt:Date.now())-RUN.segStart)/1000:0;
 function nextSeg(auto){
- if(!RUN)return;RUN.i++;
+ if(!RUN)return;
+ const cur=RUN.ses.segs[RUN.i];if(cur&&cur.k==="test"){const dm=G.m-RUN.segM;RUN.test={sec:Math.round(segElapsed()),km:dm>=300?Math.min(5,r1(dm/1000)):5,gps:dm>=300};beep(990,.3,3)}
+ RUN.i++;
  if(RUN.i>=RUN.ses.segs.length){finishRun();return}
  RUN.segStart=Date.now();RUN.segM=G.m;RUN.warned=false;
  const s=RUN.ses.segs[RUN.i];beep(s.k==="work"||s.name==="Renntempo"?990:660,.2,s.k==="work"?2:1);drawRun();
@@ -278,15 +333,17 @@ function nextSeg(auto){
 function tickRun(){
  if(!RUN||RUN.paused)return;const s=RUN.ses.segs[RUN.i],left=s.sec-segElapsed();
  if(left<=3.2&&left>0&&!RUN.warned){RUN.warned=true;beep(520,.08)}
- if(left<=0&&s.k!=="run"){nextSeg(true);return}
+ if(left<=0&&s.k!=="run"&&s.k!=="test"){nextSeg(true);return}
+ if(s.k==="test"&&G.m-RUN.segM>=5000){nextSeg(true);return}
  const el=document.getElementById("rtime"),pc=document.getElementById("rpace2"),km=document.getElementById("rkm2"),tot=document.getElementById("rtot"),bar=document.getElementById("rbar");
- if(el)el.textContent=s.k==="run"?fmtH(segElapsed()):fmtP(Math.max(0,left));
+ if(el)el.textContent=s.k==="run"||s.k==="test"?fmtH(segElapsed()):fmtP(Math.max(0,left));
+ if(s.k==="test"){const rest=document.getElementById("rrest"),dm0=G.m-RUN.segM;if(rest)rest.textContent=dm0>30?"noch "+de(r1(Math.max(0,5-dm0/1000)))+" km":"Ziel 5 km"}
  const dm=G.m-RUN.segM,se=segElapsed();
  if(pc)pc.textContent=dm>60?fmtP(se/(dm/1000)):"–";
  if(km)km.textContent=de(r1(G.m/1000));if(tot)tot.textContent=fmtH(elapsedAll());
  if(bar)bar.style.width=Math.min(100,s.k==="run"&&s.km?(dm/1000)/s.km*100:se/s.sec*100)+"%";
  const pace=dm>60?se/(dm/1000):0,hint=document.getElementById("rhint");
- if(hint&&pace){hint.textContent=pace<s.pace[0]-5?"Etwas langsamer":pace>s.pace[1]+5?"Etwas schneller":"Perfektes Tempo";hint.className="rhint "+(pace<s.pace[0]-5||pace>s.pace[1]+5?"warn":"good")}
+ if(hint&&pace&&s.pace){hint.textContent=pace<s.pace[0]-5?"Etwas langsamer":pace>s.pace[1]+5?"Etwas schneller":"Perfektes Tempo";hint.className="rhint "+(pace<s.pace[0]-5||pace>s.pace[1]+5?"warn":"good")}
 }
 function drawRun(){
  const h=host("rrun"),s=RUN.ses.segs[RUN.i],n=RUN.ses.segs.length,col=TYPES[RUN.type].color,nx=RUN.ses.segs[RUN.i+1];
@@ -294,17 +351,24 @@ function drawRun(){
  <div class="rptop"><button class="icon-btn" data-r="stop" aria-label="Beenden">${I.x}</button><div class="eyebrow" style="color:#fff;opacity:.85">${E(RUN.ses.title)}</div><span class="small" style="opacity:.8">${RUN.i+1}/${n}</span></div>
  <div class="rpbar"><i id="rbar"></i></div>
  <div class="rpname">${E(s.name)}</div><div class="rpinfo">${E(s.info)}</div>
- <div class="rpbig num ${s.sec>=3600&&s.k==="run"?"long":""}" id="rtime">${s.k==="run"?"0:00":fmtP(s.sec)}</div>
- <div class="rpsub">${s.k==="run"?(s.km?"Ziel "+de(s.km)+" km":"Ziel "+Math.round(s.sec/60)+" Min."):"verbleibend"}</div>
- <div class="rpgrid"><div><span>Ziel-Pace</span><b class="num">${zTxt(s.pace).replace(" /km","")}</b></div><div><span>Deine Pace</span><b class="num" id="rpace2">–</b></div><div><span>Distanz</span><b class="num"><span id="rkm2">0</span> km</b></div><div><span>Gesamt</span><b class="num" id="rtot">0:00</b></div></div>
+ <div class="rpbig num ${s.sec>=3600&&s.k==="run"?"long":""}" id="rtime">${s.k==="run"||s.k==="test"?"0:00":fmtP(s.sec)}</div>
+ <div class="rpsub" id="rrest">${s.k==="test"?"Ziel 5 km":s.k==="run"?(s.km?"Ziel "+de(s.km)+" km":"Ziel "+Math.round(s.sec/60)+" Min."):"verbleibend"}</div>
+ <div class="rpgrid"><div><span>Ziel-Pace</span><b class="num">${s.pace?zTxt(s.pace).replace(" /km",""):s.k==="test"?"dein Tempo":"gehen"}</b></div><div><span>Deine Pace</span><b class="num" id="rpace2">–</b></div><div><span>Distanz</span><b class="num"><span id="rkm2">0</span> km</b></div><div><span>Gesamt</span><b class="num" id="rtot">0:00</b></div></div>
  <div id="rhint" class="rhint"></div>
  ${nx?`<div class="rpnext">Danach: <b>${E(nx.name)}</b> · ${nx.km?de(nx.km)+" km":fmtP(nx.sec)}</div>`:""}
- <div class="rpbtns"><button class="btn ghost" data-r="pause">${RUN.paused?"Weiter":"Pause"}</button><button class="btn" data-r="next">${RUN.i<n-1?"Nächster Abschnitt":"Lauf beenden"}</button></div>
+ <div class="rpbtns"><button class="btn ghost" data-r="pause">${RUN.paused?"Weiter":"Pause"}</button><button class="btn" data-r="next">${s.k==="test"?"5 km geschafft":RUN.i<n-1?"Nächster Abschnitt":"Lauf beenden"}</button></div>
  <div class="small" style="text-align:center;opacity:.75">Lass die App geöffnet. Bei gesperrtem Bildschirm pausiert GPS.</div></div>`;
  tickRun();
 }
 function finishRun(){
  clearInterval(RUN.iv);if(typeof gpsStop==="function")gpsStop();W.running=false;
+ if(RUN.type==="test"){const t=RUN.test||{sec:Math.round(elapsedAll()),km:5,gps:false};RUN.result={sec:t.sec,km:t.km,gps:t.gps};
+  host("rrun").innerHTML=`<div class="rp done" style="--rc:${TYPES.test.color}"><div class="rptop"><span></span><div class="eyebrow" style="color:#fff">Test geschafft</div><span></span></div>
+  <div class="rpname" style="margin-top:24px">Deine 5-km-Zeit</div><div class="rpinfo">${t.gps?"Zeit und Distanz per GPS gemessen. Prüfe sie kurz.":"Ohne GPS: Trag die Zeit für deine Strecke ein."}</div>
+  <div class="grid2" style="width:100%;max-width:360px"><label class="f" style="color:#fff">Distanz (km)<input id="rt-km" inputmode="decimal" value="${String(t.km).replace(".",",")}"></label><label class="f" style="color:#fff">Zeit<input id="rt-t" inputmode="numeric" data-time value="${fmtH(t.sec)}"></label></div>
+  <label class="rtwalk"><input type="checkbox" id="rt-walk"> Ich habe Gehpausen gemacht</label>
+  <div class="rpbtns"><button class="btn ghost" data-r="discard">Verwerfen</button><button class="btn" data-r="testsave">Auswerten</button></div></div>`;
+  beep(990,.25,2);return}
  const sec=Math.round(elapsedAll()),gkm=G.m/1000,km=gkm>=.3?r1(gkm):r1(RUN.ses.km*(sec/RUN.ses.sec));
  RUN.result={sec,km,gps:gkm>=.3};
  const h=host("rrun");
@@ -341,10 +405,23 @@ document.addEventListener("click",ev=>{
     const old=cfg()&&cfg().race;if(old&&old.key===rc.key&&old.date===rc.date&&k!=="restart")rc.start=old.start;
    }
    const old=cfg();S.profile.level=SET.lvl||document.getElementById("r-lvl").value;
-   S.profile.runCfg={...(old||{}),iv:SET.iv,easy:SET.easy,long:SET.long,refKm:km,refSec:ref||0,ref5:ref?Math.round(riegel(ref,km,5)):0,longKm:SET.longKm>0?SET.longKm:0,start:k==="restart"||!old?weekStart():old.start,race:rc};
+   S.profile.runCfg={...(old||{}),iv:SET.iv,easy:SET.easy,long:SET.long,refKm:km,refSec:ref||0,ref5:ref?Math.round(riegel(ref,km,5)):0,longKm:SET.longKm>0?SET.longKm:0,start:k==="restart"||!old?weekStart():old.start,race:rc,...(SET.rw!=null?{rw:SET.rw,testDate:TODAY()}:{})};
    if(S.profile.train==="strength"||S.profile.train==="none")S.profile.train=S.profile.train==="strength"?"both":"run";
    save();host("rsetup").innerHTML="";SET=null;if(typeof render==="function")render(true);toast(rc?"Wettkampfplan erstellt":"Lauftrainer gespeichert");break}
-  case"start":startRun(b.dataset.t);break;
+  case"start":host("rres").innerHTML="";startRun(b.dataset.t);break;
+  case"testinfo":host("rsetup").innerHTML="";SET=null;drawTestInfo();break;
+  case"rscrim":if(ev.target===b){host("rres").innerHTML=""}break;
+  case"testsave":{const km=parseFloat(String(document.getElementById("rt-km").value).replace(",",".")),sec=parseT(document.getElementById("rt-t").value),walk=document.getElementById("rt-walk").checked;
+   if(!(km>=3&&km<=7)||!(sec>km*150&&sec<km*900)){toast("Bitte Distanz (3–7 km) und Zeit prüfen, z. B. 3200 für 32:00");break}
+   const t5=Math.round(riegel(sec,km,5)),L=walk||t5>40*60?"easy":t5>30*60?"easy":t5>23*60?"mid":"pro",rw=walk||t5>40*60;
+   S.runs.push({id:uid(),date:TODAY(),km:r1(km),sec,type:"Tempo",via:"Lauftrainer",title:"5-km-Test"+(walk?" (mit Gehpausen)":"")});
+   const old=cfg(),longKm={easy:rw?5:6,mid:10,pro:14}[L];
+   S.profile.level=L;
+   if(old){Object.assign(old,{refKm:5,refSec:t5,ref5:t5,testDate:TODAY(),rw:rw&&(old.rw||weekIdx()<2)});save();closeRun();showTestResult(t5,L,rw,true)}
+   else{save();closeRun();TESTRES={t5,L,rw,longKm};showTestResult(t5,L,rw,false)}
+   break}
+  case"testplan":{const r=TESTRES||{};host("rres").innerHTML="";SET={iv:1,easy:3,long:6,refKm:5,refSec:r.t5||0,longKm:r.longKm||"",key:"",date:"",goal:0,name:"",lvl:r.L,rw:r.rw};drawSetup();break}
+  case"testclose":host("rres").innerHTML="";render(true);break;
   case"pause":if(!RUN)break;if(RUN.paused){const d=Date.now()-RUN.pausedAt;RUN.pausedMs+=d;RUN.segStart+=d;RUN.paused=false;W.running=true;if(typeof gpsStart==="function")gpsStart()}else{RUN.paused=true;RUN.pausedAt=Date.now();W.running=false;if(typeof gpsStop==="function")gpsStop()}drawRun();break;
   case"next":nextSeg(false);break;
   case"stop":if(RUN&&RUN.iv){finishRun()}break;
@@ -369,6 +446,8 @@ css.textContent=`
 .rsegs{margin:4px 0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:14px}
 .rchips{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px}.rchips .chip{padding:8px 0;text-align:center}.rchips .chip:disabled{opacity:.3}
 .rchips .chip.blk{border:1.5px dashed var(--muted);background:transparent}
+.rtwalk{display:flex;gap:8px;align-items:center;font-weight:600;font-size:15px}.rtwalk input{width:20px;height:20px}
+#rres .sheet{z-index:30}
 .rlab{font-weight:700;display:flex;align-items:center;gap:8px}.rlab::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--rc)}
 .rp{position:fixed;inset:0;z-index:48;background:linear-gradient(170deg,var(--rc),color-mix(in srgb,var(--rc) 55%,#0b0f1a));color:#fff;display:flex;flex-direction:column;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 12px) 18px calc(env(safe-area-inset-bottom,0px) + 18px);overflow:auto;transition:background .4s}
 .rptop{width:100%;max-width:440px;display:grid;grid-template-columns:36px 1fr 36px;align-items:center;text-align:center}.rptop .icon-btn{color:#fff}
