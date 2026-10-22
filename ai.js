@@ -28,27 +28,46 @@ Wenn kein Essen zu sehen ist: {"erkannt":false}`;
 // fetch mit Zeitlimit, damit nichts endlos „analysiert“
 async function tfetch(url,opt,ms){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),ms||60000);
  try{return await fetch(url,{...opt,signal:ac.signal})}catch(e){throw{code:e&&e.name==="AbortError"?"timeout":"net"}}finally{clearTimeout(t)}}
-const GEM_MODELS=["gemini-flash-latest","gemini-2.5-flash","gemini-2.0-flash"];
+// Google benennt Modelle immer wieder um und schaltet alte ab. Darum fragt die App selbst nach,
+// welche Modelle der Schlüssel nutzen darf, nimmt das neueste passende Flash-Modell und merkt sich, was funktioniert.
+const GEM_FALLBACK=["gemini-flash-latest","gemini-3.8-flash","gemini-3.6-flash","gemini-3-flash-preview","gemini-2.5-flash"];
+const gemVer=n=>{const m=n.match(/gemini-(\d+(?:\.\d+)?)/);return m?parseFloat(m[1]):0};
+async function gemModels(key){
+ try{
+  if(CFG.gemList&&CFG.gemListKey===key.slice(-6)&&Date.now()-(CFG.gemListAt||0)<7*864e5)return CFG.gemList;
+  const r=await tfetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000",{headers:{"x-goog-api-key":key}},20000);
+  if(!r.ok)return[];
+  const j=await r.json(),list=(j.models||[])
+   .filter(m=>(m.supportedGenerationMethods||[]).includes("generateContent"))
+   .map(m=>String(m.name||"").replace(/^models\//,""))
+   .filter(n=>/^gemini-/.test(n)&&/flash/.test(n)&&!/lite|tts|image|live|audio|embed|thinking|exp|learnlm/.test(n));
+  // stabile vor Vorschau, neuere Version zuerst
+  list.sort((a,b)=>(/preview/.test(a)-/preview/.test(b))||(gemVer(b)-gemVer(a))||(a.length-b.length));
+  const top=list.slice(0,6);if(CFG.key===key){CFG.gemList=top;CFG.gemListKey=key.slice(-6);CFG.gemListAt=Date.now();saveCfg()}return top;
+ }catch(e){return[]}
+}
 async function callAI(prov,key,b64,text){
  if(prov==="gemini"){
   const parts=b64?[{inline_data:{mime_type:"image/jpeg",data:b64}},{text}]:[{text}];
+  const found=await gemModels(key);
+  const models=[...new Set([CFG.prov==="gemini"&&CFG.key===key?CFG.gemModel:null,...found,...GEM_FALLBACK].filter(Boolean))];
   let last=null;
-  for(const model of GEM_MODELS){
+  for(const model of models){
    const r=await tfetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{method:"POST",
     headers:{"Content-Type":"application/json","x-goog-api-key":key},
-    body:JSON.stringify({contents:[{parts}],generationConfig:{temperature:.2,maxOutputTokens:4096,...(b64?{responseMimeType:"application/json"}:{})}})});
+    body:JSON.stringify({contents:[{parts}],generationConfig:{temperature:.2,maxOutputTokens:8192,...(b64?{responseMimeType:"application/json"}:{})}})});
    const j=await r.json().catch(()=>({}));
    if(r.ok){
     const c=j.candidates&&j.candidates[0];
     const out=((c&&c.content&&c.content.parts)||[]).filter(p=>!p.thought).map(p=>p.text||"").join("");
-    if(out.trim())return out;
-    last={code:"api",msg:"Leere Antwort"+(c&&c.finishReason?" ("+c.finishReason+")":"")+(j.promptFeedback&&j.promptFeedback.blockReason?" ("+j.promptFeedback.blockReason+")":"")};continue;
+    if(out.trim()){if(CFG.prov==="gemini"&&CFG.key===key&&CFG.gemModel!==model){CFG.gemModel=model;saveCfg()}return out}
+    last={code:"api",msg:"Leere Antwort von "+model+(c&&c.finishReason?" ("+c.finishReason+")":"")+(j.promptFeedback&&j.promptFeedback.blockReason?" ("+j.promptFeedback.blockReason+")":"")};continue;
    }
    const m=(j.error&&j.error.message)||"HTTP "+r.status;
-   if(r.status===400&&/API key|API_KEY/i.test(m)||r.status===401||r.status===403)throw{code:"key",msg:m};
-   last={code:r.status===429?"quota":"api",msg:m};
-   // anderes Modell probieren, wenn dieses fehlt, überlastet oder ausgeschöpft ist
-   if(![404,429,500,503].includes(r.status)&&!/not found|not supported/i.test(m))break;
+   // nur ein wirklich falscher Schlüssel bricht ab, alles andere: nächstes Modell versuchen
+   if(/API key not valid|API_KEY_INVALID|API key expired|invalid api key/i.test(m)||r.status===401)throw{code:"key",msg:m};
+   last={code:r.status===429?"quota":r.status===403?"key":"api",msg:model+": "+m};
+   if(CFG.gemModel===model){delete CFG.gemModel;saveCfg()}
   }
   throw last||{code:"api"};
  }
@@ -63,7 +82,7 @@ async function callAI(prov,key,b64,text){
 function parseJSON(t){const a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0||b<a)throw{code:"parse"};try{return JSON.parse(t.slice(a,b+1))}catch(e){throw{code:"parse"}}}
 function errText(e){
  const c=e&&e.code;
- if(c==="key")return"Der API-Schlüssel wird nicht akzeptiert. Prüfe ihn in den Einstellungen (Coach → Daten & Verbindungen).";
+ if(c==="key")return"Der API-Schlüssel wird nicht akzeptiert. Prüfe ihn in den Einstellungen (Coach → Daten & Verbindungen)."+(e.msg?" Meldung von Google/Anthropic: "+e.msg:"");
  if(c==="quota")return"Das Limit ist für den Moment erreicht. Versuch es in ein paar Minuten nochmal.";
  if(c==="credit")return"Dein Anthropic-Guthaben ist aufgebraucht. Lade unter console.anthropic.com → Billing etwas auf.";
  if(c==="parse")return"Die Antwort der KI war unvollständig. Versuch es nochmal.";
