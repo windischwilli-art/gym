@@ -83,7 +83,7 @@ function fwCount(){const d=new Date().toISOString().slice(0,10);if(!CFG.fwDay||C
 async function callFW(b64,text){
  const day=fwCount();if(day.n>=FW.perDay)throw{code:"daylimit"};
  let fw;try{fw=await fwInit()}catch(e){throw e&&e.code?e:{code:"net",message:String(e&&e.message||e)}}
- const models=[...new Set([CFG.fwModel,...FW.models].filter(Boolean))];let last=null;
+ const models=[...new Set([CFG.fwModel,...FW.models].filter(Boolean))];let last=null;let busyRetried=false;
  for(const model of models){
   try{
    const gm=fw.M.getGenerativeModel(fw.ai,{model,generationConfig:{temperature:.2,maxOutputTokens:8192,...(b64?{responseMimeType:"application/json"}:{})}});
@@ -97,7 +97,8 @@ async function callFW(b64,text){
    const m=String((e&&e.message)||e||""),st=e&&e.customErrorData&&e.customErrorData.status;
    if(st===429||/429|RESOURCE_EXHAUSTED|quota/i.test(m))throw{code:"fwquota",msg:m};
    if(/app.?check|attestation|unauthenticated|401/i.test(m))throw{code:"fwcheck",msg:m};
-   if(/firebasevertexai|AI Logic|API has not been used|is disabled|SERVICE_DISABLED|PERMISSION_DENIED|api-not-enabled/i.test(m))throw{code:"fwoff",msg:m};
+   if(/high demand|overloaded|UNAVAILABLE|\[50[0-4]/i.test(m)){last={code:"fwquota",msg:m};if(!busyRetried){busyRetried=true;await new Promise(r=>setTimeout(r,1500));models.splice(models.indexOf(model)+1,0,model)}continue}
+   if(/API has not been used|is disabled|SERVICE_DISABLED|PERMISSION_DENIED|api-not-enabled/i.test(m))throw{code:"fwoff",msg:m};
    if(/Failed to fetch|NetworkError|network/i.test(m))throw{code:"net",message:m};
    last={code:"api",msg:model+": "+m};if(CFG.fwModel===model){delete CFG.fwModel;saveCfg()}
   }
