@@ -5,6 +5,7 @@ const KEY="formwerk-ai";
 let CFG={};try{CFG=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
 const saveCfg=()=>{try{localStorage.setItem(KEY,JSON.stringify(CFG))}catch(e){}};
 const PROV={
+ formwerk:{name:"Formwerk-KI",cost:"gratis, kein Schlüssel nötig"},
  gemini:{name:"Google Gemini",cost:"kostenlos (mit Tageslimit)",model:"gemini-flash-latest",
   steps:['<b>aistudio.google.com/apikey</b> öffnen und mit deinem Google-Konto anmelden','Auf <b>„API-Schlüssel erstellen“</b> tippen','Den Schlüssel kopieren und hier einfügen']},
  claude:{name:"Claude (Anthropic)",cost:"ca. 1 Rappen pro Foto",model:"claude-haiku-5-5",
@@ -12,7 +13,15 @@ const PROV={
 };
 const E=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const N=v=>{const n=parseFloat(String(v).replace(",","."));return isFinite(n)?n:0};
-const ready=()=>!!(CFG.prov&&CFG.key);
+// Eingebaute KI: läuft über das Firebase-Projekt der App (Firebase AI Logic, Gemini). Niemand braucht einen eigenen Schlüssel.
+// Geschützt mit App Check (reCAPTCHA im Web, App Attest / Play Integrity in der Store-App).
+const FW={sdk:"https://www.gstatic.com/firebasejs/12.19.0/",
+ recaptcha:{type:"enterprise",key:"6LdT6f8tAAAAAEkRKT598iZhDSJXdOptC1WeY-s6"}, // Website-Schlüssel aus der reCAPTCHA-Verwaltung
+ models:["gemini-3.8-flash","gemini-3.6-flash","gemini-3-flash","gemini-2.5-flash"],
+ perDay:25}; // Fotos/Berichte pro Gerät und Tag, damit das gemeinsame Kontingent für alle reicht
+const ownKey=()=>!!(CFG.prov&&CFG.prov!=="formwerk"&&CFG.key);
+const prov=()=>ownKey()?CFG.prov:"formwerk";
+const ready=()=>true;
 let UI={setup:false,prov:"gemini",msg:"",busy:false};
 
 // ---------- API ----------
@@ -46,7 +55,57 @@ async function gemModels(key){
   const top=list.slice(0,6);if(CFG.key===key){CFG.gemList=top;CFG.gemListKey=key.slice(-6);CFG.gemListAt=Date.now();saveCfg()}return top;
  }catch(e){return[]}
 }
+let FWP=null; // Promise auf {getGenerativeModel, ai}
+function fwInit(){
+ if(FWP)return FWP;
+ FWP=(async()=>{
+  if(typeof FIREBASE_CONFIG==="undefined")throw{code:"api",msg:"Firebase ist nicht eingerichtet"};
+  const[A,C,M]=await Promise.all([import(FW.sdk+"firebase-app.js"),import(FW.sdk+"firebase-app-check.js"),import(FW.sdk+"firebase-ai.js")]);
+  const app=A.getApps().find(a=>a.name==="fw-ai")||A.initializeApp(FIREBASE_CONFIG,"fw-ai");
+  let check=false;
+  const cap=window.Capacitor&&window.Capacitor.Plugins,nat=cap&&cap.FirebaseAppCheck;
+  try{
+   if(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform()){
+    // Store-App: Token kommt vom Gerät (App Attest bzw. Play Integrity), sobald das Plugin eingebaut ist
+    if(nat){C.initializeAppCheck(app,{provider:new C.CustomProvider({getToken:async()=>{const r=await nat.getToken({forceRefresh:false});return{token:r.token,expireTimeMillis:r.expireTimeMillis||Date.now()+30*60000}}}),isTokenAutoRefreshEnabled:true});check=true}
+   }else if(FW.recaptcha.key){
+    const P=FW.recaptcha.type==="enterprise"?C.ReCaptchaEnterpriseProvider:C.ReCaptchaV3Provider;
+    C.initializeAppCheck(app,{provider:new P(FW.recaptcha.key),isTokenAutoRefreshEnabled:true});check=true;
+   }
+  }catch(e){}
+  const ai=M.getAI(app,{backend:new M.GoogleAIBackend(),...(check?{useLimitedUseAppCheckTokens:true}:{})});
+  return{M,ai};
+ })();
+ FWP.catch(()=>{FWP=null});
+ return FWP;
+}
+function fwCount(){const d=new Date().toISOString().slice(0,10);if(!CFG.fwDay||CFG.fwDay.d!==d)CFG.fwDay={d,n:0};return CFG.fwDay}
+async function callFW(b64,text){
+ const day=fwCount();if(day.n>=FW.perDay)throw{code:"daylimit"};
+ let fw;try{fw=await fwInit()}catch(e){throw e&&e.code?e:{code:"net",message:String(e&&e.message||e)}}
+ const models=[...new Set([CFG.fwModel,...FW.models].filter(Boolean))];let last=null;
+ for(const model of models){
+  try{
+   const gm=fw.M.getGenerativeModel(fw.ai,{model,generationConfig:{temperature:.2,maxOutputTokens:8192,...(b64?{responseMimeType:"application/json"}:{})}});
+   const parts=b64?[{inlineData:{mimeType:"image/jpeg",data:b64}},{text}]:[{text}];
+   const res=await Promise.race([gm.generateContent(parts),new Promise((_,rej)=>setTimeout(()=>rej({code:"timeout"}),60000))]);
+   const out=res.response.text();
+   if(out&&out.trim()){if(CFG.fwModel!==model)CFG.fwModel=model;day.n++;saveCfg();return out}
+   last={code:"api",msg:"Leere Antwort"};continue;
+  }catch(e){
+   if(e&&e.code==="timeout")throw e;
+   const m=String((e&&e.message)||e||""),st=e&&e.customErrorData&&e.customErrorData.status;
+   if(st===429||/429|RESOURCE_EXHAUSTED|quota/i.test(m))throw{code:"fwquota",msg:m};
+   if(/app.?check|attestation|unauthenticated|401/i.test(m))throw{code:"fwcheck",msg:m};
+   if(/firebasevertexai|AI Logic|API has not been used|is disabled|SERVICE_DISABLED|PERMISSION_DENIED|api-not-enabled/i.test(m))throw{code:"fwoff",msg:m};
+   if(/Failed to fetch|NetworkError|network/i.test(m))throw{code:"net",message:m};
+   last={code:"api",msg:model+": "+m};if(CFG.fwModel===model){delete CFG.fwModel;saveCfg()}
+  }
+ }
+ throw last||{code:"api"};
+}
 async function callAI(prov,key,b64,text){
+ if(prov==="formwerk")return callFW(b64,text);
  if(prov==="gemini"){
   const parts=b64?[{inline_data:{mime_type:"image/jpeg",data:b64}},{text}]:[{text}];
   const found=await gemModels(key);
@@ -82,6 +141,10 @@ async function callAI(prov,key,b64,text){
 function parseJSON(t){const a=t.indexOf("{"),b=t.lastIndexOf("}");if(a<0||b<a)throw{code:"parse"};try{return JSON.parse(t.slice(a,b+1))}catch(e){throw{code:"parse"}}}
 function errText(e){
  const c=e&&e.code;
+ if(c==="daylimit")return"Du hast heute schon "+FW.perDay+" Fotos analysieren lassen, das ist das Tageslimit der eingebauten KI. Morgen geht es weiter, oder trag das Essen über die Suche ein. Wer mehr braucht, kann in Coach → Daten & Verbindungen einen eigenen Schlüssel hinterlegen.";
+ if(c==="fwquota")return"Die eingebaute KI ist gerade ausgelastet. Versuch es in ein paar Minuten nochmal.";
+ if(c==="fwcheck")return"Die App konnte sich bei der KI nicht ausweisen. Lade die App einmal neu und versuch es nochmal.";
+ if(c==="fwoff")return"Die eingebaute KI ist im Moment nicht verfügbar. Versuch es später nochmal.";
  if(c==="key")return"Der API-Schlüssel wird nicht akzeptiert. Prüfe ihn in den Einstellungen (Coach → Daten & Verbindungen)."+(e.msg?" Meldung von Google/Anthropic: "+e.msg:"");
  if(c==="quota")return"Das Limit ist für den Moment erreicht. Versuch es in ein paar Minuten nochmal.";
  if(c==="credit")return"Dein Anthropic-Guthaben ist aufgebraucht. Lade unter console.anthropic.com → Billing etwas auf.";
@@ -95,12 +158,12 @@ function errText(e){
 window.aiCardHTML=function(){
  const head=(pill,cls)=>`<div class="row between"><span style="font-weight:700;font-size:16px">KI-Foto-Analyse</span><span class="pill ${cls}">${pill}</span></div>`;
  const msg=UI.msg?`<div class="small" role="alert" style="color:${UI.ok?"var(--good)":"var(--bad)"};font-weight:600">${E(UI.msg)}</div>`:"";
- if(ready()&&!UI.setup)return head("bereit","good")+`<div class="small muted">Fotografiere dein Essen, die KI schätzt Lebensmittel, Mengen und Kalorien. Anbieter: ${E(PROV[CFG.prov].name)} (${E(PROV[CFG.prov].cost)}).</div>
-  ${msg}<div class="grid2"><button class="btn ghost" data-ai="setup">Ändern</button><button class="btn ghost" data-ai="remove">Entfernen</button></div>`;
- if(!UI.setup)return head("nicht eingerichtet","")+`<div class="small muted">Mach ein Foto von deinem Teller und die KI schätzt, wie viele Kalorien drin sind. Dafür brauchst du einmalig einen eigenen Schlüssel, bei Google sogar kostenlos.</div>
-  <button class="btn block" data-ai="setup">KI-Foto-Analyse einrichten</button>`;
+ if(ownKey()&&!UI.setup)return head("eigener Schlüssel","good")+`<div class="small muted">Fotografiere dein Essen, die KI schätzt Lebensmittel, Mengen und Kalorien. Anbieter: ${E(PROV[CFG.prov].name)} (${E(PROV[CFG.prov].cost)}), ohne Tageslimit der App.</div>
+  ${msg}<div class="grid2"><button class="btn ghost" data-ai="setup">Ändern</button><button class="btn ghost" data-ai="remove">Eingebaute KI nutzen</button></div>`;
+ if(!UI.setup){const n=fwCount().n;return head("bereit","good")+`<div class="small muted">Fotografiere dein Essen, die KI schätzt Lebensmittel, Mengen und Kalorien. Eingebaut und gratis, du brauchst nichts einzurichten. Bis zu ${FW.perDay} Analysen pro Tag${n?`, heute ${n} genutzt`:""}.</div>
+  ${msg}<button class="link small" style="align-self:flex-start" data-ai="setup">Eigenen Schlüssel verwenden (optional, ohne Tageslimit)</button>`}
  const p=UI.prov;
- return head("einrichten","")+`<div class="grid2">${Object.entries(PROV).map(([k,v])=>`<button class="choice" data-ai="prov" data-v="${k}" aria-pressed="${p===k}"><span style="font-weight:700">${v.name}</span><span class="small muted">${v.cost}</span></button>`).join("")}</div>
+ return head("einrichten","")+`<div class="grid2">${Object.entries(PROV).filter(([k])=>k!=="formwerk").map(([k,v])=>`<button class="choice" data-ai="prov" data-v="${k}" aria-pressed="${p===k}"><span style="font-weight:700">${v.name}</span><span class="small muted">${v.cost}</span></button>`).join("")}</div>
   <ol class="small steps">${PROV[p].steps.map(x=>`<li>${x}</li>`).join("")}</ol>
   <label class="f">API-Schlüssel<input id="aikey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${p==="gemini"?"AIza…":"sk-ant-…"}" value="${CFG.prov===p?E(CFG.key||""):""}"></label>
   ${msg}<div class="grid2"><button class="btn ghost" data-ai="cancel">Abbrechen</button><button class="btn" data-ai="savekey" ${UI.busy?"disabled":""}>${UI.busy?"Prüfe …":"Speichern & testen"}</button></div>
@@ -130,7 +193,7 @@ function draw(){
   ${AV.img?`<label class="f">Was sollte die KI wissen? (optional)<input id="ainote" value="${E(AV.note)}" placeholder="z. B. mit Butter gebraten, grosse Portion"></label>
   <button class="btn block gbig" data-ai="analyze">Kalorien schätzen</button>`:""}
   ${AV.err?`<div class="small" role="alert" style="color:var(--bad);font-weight:600">${E(AV.err)}</div>`:""}
-  <div class="small muted">Analyse mit ${E(PROV[CFG.prov].name)}. Die Werte sind Schätzungen, du kannst sie danach anpassen.</div>`;
+  <div class="small muted">Analyse mit ${E(PROV[prov()].name)}. Die Werte sind Schätzungen, du kannst sie danach anpassen.</div>`;
  else if(AV.stage==="busy")b=top("Foto vom Essen")+`<div class="aiwrap"><img class="aiimg" src="${AV.img}" alt=""><div class="aiscan"><div class="spin"></div><b>KI analysiert dein Essen …</b></div></div><button class="btn ghost block" data-ai="abort">Abbrechen</button>`;
  else if(AV.stage==="result"){
   const t=itemsTotal(),r=AV.res||{},MEALS_=typeof MEALS!=="undefined"?MEALS:["Frühstück","Mittagessen","Abendessen","Snacks"];
@@ -163,7 +226,7 @@ async function analyze(){
  const note=(document.getElementById("ainote")||{}).value||"";AV.note=note;AV.stage="busy";AV.err="";draw();
  const run=AV.run={};
  try{
-  const txt=await callAI(CFG.prov,CFG.key,AV.b64,PROMPT(note.trim()));
+  const txt=await callAI(prov(),CFG.key,AV.b64,PROMPT(note.trim()));
   if(!AV||AV.run!==run)return;
   const r=parseJSON(txt);
   if(r.erkannt===false||!Array.isArray(r.komponenten)||!r.komponenten.length){AV.stage="pick";AV.err="Auf dem Foto konnte ich kein Essen erkennen. Versuch es mit einem näheren Foto.";draw();return}
@@ -189,13 +252,13 @@ document.addEventListener("click",async ev=>{
  if(k==="scrim"&&ev.target!==b)return;
  switch(k){
   case"close":case"scrim":close();break;
-  case"setup":UI.setup=true;UI.prov=CFG.prov||"gemini";UI.msg="";paintCard();break;
+  case"setup":UI.setup=true;UI.prov=ownKey()?CFG.prov:"gemini";UI.msg="";paintCard();break;
   case"cancel":UI.setup=false;UI.msg="";paintCard();if(AV&&AV.stage==="setup")close();break;
   case"prov":UI.prov=b.dataset.v;UI.msg="";paintCard();break;
-  case"remove":CFG={};saveCfg();UI.msg="";paintCard();break;
+  case"remove":{const keep=CFG.fwDay;CFG=keep?{fwDay:keep}:{};saveCfg();UI.msg="Die App nutzt wieder die eingebaute KI.";UI.ok=true;paintCard();break}
   case"savekey":{const key=(document.getElementById("aikey").value||"").trim();if(key.length<20){UI.msg="Bitte den vollständigen Schlüssel einfügen.";UI.ok=false;paintCard();break}
    UI.busy=true;UI.msg="";paintCard();
-   try{await callAI(UI.prov,key,null,"Antworte nur mit OK.");CFG={prov:UI.prov,key};saveCfg();UI.setup=false;UI.busy=false;UI.msg="Schlüssel funktioniert.";UI.ok=true;
+   try{await callAI(UI.prov,key,null,"Antworte nur mit OK.");CFG={prov:UI.prov,key,...(CFG.fwDay?{fwDay:CFG.fwDay}:{})};saveCfg();UI.setup=false;UI.busy=false;UI.msg="Schlüssel funktioniert.";UI.ok=true;
     if(AV&&AV.stage==="setup"){AV.stage="pick";draw()}else paintCard();toast("KI-Foto-Analyse ist bereit")}
    catch(e){UI.busy=false;UI.msg=errText(e);UI.ok=false;paintCard()}break}
   case"cam":pickFile(true);break;
@@ -237,7 +300,7 @@ document.head.appendChild(css);
 try{if(typeof S!=="undefined"&&S&&typeof render==="function")render(true)}catch(e){}
 window.aiOpen=open;
 window.aiReady=ready;
-window.aiText=prompt=>callAI(CFG.prov,CFG.key,null,prompt);
+window.aiText=prompt=>callAI(prov(),CFG.key,null,prompt);
 window.aiErr=errText;
-window.aiProvName=()=>CFG.prov?PROV[CFG.prov].name:"KI";
+window.aiProvName=()=>PROV[prov()].name;
 })();

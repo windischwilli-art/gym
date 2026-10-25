@@ -30,7 +30,7 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 <main>
 <a class="back" href="./">← Zurück zur App</a>
 <h1>Datenschutzerklärung</h1>
-<p class="muted">Formwerk, Fitness-, Lauf- und Ernährungs-App · Stand: 22. Oktober 2026</p>
+<p class="muted">Formwerk, Fitness-, Lauf- und Ernährungs-App · Stand: 25. Oktober 2026</p>
 
 <div class="box">
 <p><b>Kurz gesagt:</b> Formwerk ist gratis, ohne Werbung, ohne Tracking und ohne Benutzerkonto. Deine Daten werden <b>nur auf deinem Gerät</b> gespeichert. Sie verlassen dein Gerät nur, wenn du selbst eine Zusatzfunktion einschaltest (Cloud-Sync, KI-Fotoanalyse, Strava, Produktsuche). Ich verkaufe keine Daten und werte nichts aus.</p>
@@ -63,7 +63,9 @@ th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute
 <p>Wenn du einen Barcode scannst oder online nach einem Lebensmittel suchst, werden die Barcode-Nummer bzw. dein Suchbegriff an die freie Datenbank <b>Open Food Facts</b> (Open Food Facts, Frankreich) gesendet. Dabei wird technisch bedingt deine IP-Adresse übertragen, aber keine Profil- oder Gesundheitsdaten.</p>
 
 <h3>4.3 KI-Fotoanalyse und KI-Tagesbericht</h3>
-<p>Diese Funktion nutzt du mit deinem <b>eigenen</b> API-Schlüssel bei <b>Google (Gemini)</b> oder <b>Anthropic (Claude)</b>. Der Schlüssel bleibt auf deinem Gerät. Bei der Fotoanalyse werden das Foto deiner Mahlzeit und dein optionaler Hinweis übermittelt. Beim KI-Tagesbericht wird eine Zusammenfassung gesendet (z. B. geplantes Training, Wochenkilometer, durchschnittliche Kalorien und Makronährstoffe, Gewichtstrend). Für diese Übermittlung gelten die Bedingungen und Datenschutzbestimmungen des von dir gewählten Anbieters, mit dem du selbst einen Vertrag hast: Google Ireland Ltd. bzw. Google LLC (USA) oder Anthropic PBC (USA).</p>
+<p>Wenn du ein Essensfoto analysieren lässt oder einen KI-Tagesbericht erstellst, werden das Foto und dein optionaler Hinweis bzw. eine Zusammenfassung (z. B. geplantes Training, Wochenkilometer, durchschnittliche Kalorien und Makronährstoffe, Gewichtstrend) an ein KI-Modell geschickt. Das passiert nur, wenn du die Funktion selbst auslöst. Fotos werden von der App nicht gespeichert.</p>
+<p><b>Eingebaute KI (Standard):</b> Die Anfrage läuft über <b>Firebase AI Logic</b> an das Modell <b>Google Gemini</b> (Google Ireland Ltd. bzw. Google LLC, USA). Es ist kein Konto und kein eigener Schlüssel nötig, die Anfrage wird nicht mit deinem Namen verknüpft. Zum Schutz vor Missbrauch prüft <b>Firebase App Check mit reCAPTCHA</b> (Google), ob die Anfrage wirklich aus der Formwerk-App kommt; dabei wertet Google technische Merkmale deines Browsers bzw. Geräts aus. Pro Gerät sind bis zu 25 Analysen pro Tag möglich. Ich speichere die Fotos und Antworten nicht.</p>
+<p><b>Eigener Schlüssel (optional):</b> Du kannst stattdessen deinen eigenen API-Schlüssel bei Google (Gemini) oder Anthropic (Claude, Anthropic PBC, USA) hinterlegen. Der Schlüssel bleibt auf deinem Gerät, und es gelten die Bedingungen des von dir gewählten Anbieters, mit dem du selbst einen Vertrag hast.</p>
 
 <h3>4.4 Strava</h3>
 <p>Wenn du Strava verbindest, meldest du dich direkt bei <b>Strava</b> (Strava Inc., USA) an und erlaubst der App, deine Aktivitäten zu lesen. Die App lädt deine Läufe (Datum, Distanz, Dauer, Art) und speichert sie lokal. Die Zugangsdaten (Token) bleiben auf deinem Gerät. Du kannst die Verbindung in der App und in deinen Strava-Einstellungen jederzeit trennen.</p>
