@@ -95,7 +95,8 @@ async function callFW(b64,text){
   }catch(e){
    if(e&&e.code==="timeout")throw e;
    const m=String((e&&e.message)||e||""),st=e&&e.customErrorData&&e.customErrorData.status;
-   if(st===429||/429|RESOURCE_EXHAUSTED|quota/i.test(m))throw{code:"fwquota",msg:m};
+   if(st===429||/\[429|RESOURCE_EXHAUSTED|exceeded your current quota/i.test(m)){last={code:/per ?day|PerDay/i.test(m)?"fwday":"fwquota",msg:m};
+    const w=parseFloat((m.match(/retry in ([\d.]+)s/)||[])[1]);if(w>0&&w<6&&!busyRetried){busyRetried=true;await new Promise(r=>setTimeout(r,w*1000+300));models.splice(models.indexOf(model)+1,0,model)}continue}
    if(/app.?check|attestation|unauthenticated|401/i.test(m))throw{code:"fwcheck",msg:m};
    if(/high demand|overloaded|UNAVAILABLE|\[50[0-4]/i.test(m)){last={code:"fwquota",msg:m};if(!busyRetried){busyRetried=true;await new Promise(r=>setTimeout(r,1500));models.splice(models.indexOf(model)+1,0,model)}continue}
    if(/API has not been used|is disabled|SERVICE_DISABLED|PERMISSION_DENIED|api-not-enabled/i.test(m))throw{code:"fwoff",msg:m};
@@ -144,6 +145,7 @@ function errText(e){
  const c=e&&e.code;
  if(c==="daylimit")return"Du hast heute schon "+FW.perDay+" Fotos analysieren lassen, das ist das Tageslimit der eingebauten KI. Morgen geht es weiter, oder trag das Essen über die Suche ein. Wer mehr braucht, kann in Coach → Daten & Verbindungen einen eigenen Schlüssel hinterlegen.";
  if(c==="fwquota")return"Die eingebaute KI ist gerade ausgelastet. Versuch es in ein paar Minuten nochmal.";
+ if(c==="fwday")return"Die eingebaute KI hat ihr Tageskontingent für heute aufgebraucht. Morgen geht es wieder, oder trag das Essen über die Suche ein.";
  if(c==="fwcheck")return"Die App konnte sich bei der KI nicht ausweisen. Lade die App einmal neu und versuch es nochmal.";
  if(c==="fwoff")return"Die eingebaute KI ist im Moment nicht verfügbar. Versuch es später nochmal.";
  if(c==="key")return"Der API-Schlüssel wird nicht akzeptiert. Prüfe ihn in den Einstellungen (Coach → Daten & Verbindungen)."+(e.msg?" Meldung von Google/Anthropic: "+e.msg:"");
