@@ -1434,7 +1434,7 @@ document.addEventListener("click",ev=>{
   case"startWk":startWorkout(d.n);if(window.guideStart)window.guideStart();break;
   case"cancelWk":CUR=null;render();break;
   case"addSet":{const x=CUR.ex[+d.x],l=x.sets[x.sets.length-1];x.sets.push({kg:l.kg,reps:l.reps,done:false});render(true);break}
-  case"doneSet":{const s=CUR.ex[+d.x].sets[+d.s];s.done=!s.done;if(s.done&&(!window.restAuto||window.restAuto()))startRest();render(true);break}
+  case"doneSet":{const s=CUR.ex[+d.x].sets[+d.s];s.done=!s.done;if(s.done&&window.fx)fx.pr(+d.x,+d.s);else if(!s.done&&CUR.prs)CUR.prs=CUR.prs.filter(p=>p.e!==CUR.ex[+d.x].e);if(s.done&&(!window.restAuto||window.restAuto()))startRest();render(true);break}
   case"rest":REST.left?stopRest():startRest();render(true);break;
   case"saveWk":{const sets=[];CUR.ex.forEach(x=>x.sets.forEach(s=>{if(s.done&&num(s.reps)>0)sets.push({e:x.e,kg:num(s.kg)||0,reps:num(s.reps)})}));
    if(!sets.length){toast("Hake mindestens einen Satz ab");break}
@@ -1504,8 +1504,8 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&SHEET)closeSheet();
  if(e.key==="Enter"&&e.target.id==="eanin"){e.preventDefault();document.querySelector('[data-a="scanManual"]').click()}});
 function tick(){const w=document.getElementById("watch");if(w)w.textContent=fmtTime(wElapsed());paintLive()}
 function startRest(){stopRest();REST.left=REST.total=window.restSec?window.restSec():90;REST.iv=setInterval(()=>{REST.left--;const r=document.getElementById("rest");if(r)r.textContent=fmtTime(Math.max(0,REST.left));const p=document.getElementById("restprog");if(p)p.style.width=Math.max(0,REST.left/REST.total*100)+"%";
- if(REST.left>0&&REST.left<=3&&window.stBeep)window.stBeep(520,.08);
- if(REST.left<=0){stopRest();if(window.stBeep)window.stBeep(990,.3,2);toast("Pause vorbei, nächster Satz");if(tab==="kraft")render(true)}},1000)}
+ if(REST.left>0&&REST.left<=3){if(window.fx)fx.count(REST.left);else if(window.stBeep)window.stBeep(520,.08)}
+ if(REST.left<=0){stopRest();if(window.fx)fx.go("Los!");else if(window.stBeep)window.stBeep(990,.3,2);toast("Pause vorbei, nächster Satz");if(tab==="kraft")render(true)}},1000)}
 function stopRest(){clearInterval(REST.iv);REST.left=0}
 
 let LASTPULL=0;
@@ -1515,13 +1515,14 @@ render();animate();
 cloudInit();
 svCallback().then(h=>{if(!h&&S&&svConnected()&&(!SV.last||Date.now()-SV.last>15*60000))svSync(false)});
 </script>
-<script src="guide.js?v=32"></script>
-<script src="ai.js?v=32"></script>
-<script src="brief.js?v=32"></script>
-<script src="run.js?v=32"></script>
-<script src="week.js?v=32"></script>
-<script src="reminders.js?v=32"></script>
-<script src="strength.js?v=32"></script>
-<script src="smart.js?v=32"></script>
+<script src="fx.js?v=33"></script>
+<script src="guide.js?v=33"></script>
+<script src="ai.js?v=33"></script>
+<script src="brief.js?v=33"></script>
+<script src="run.js?v=33"></script>
+<script src="week.js?v=33"></script>
+<script src="reminders.js?v=33"></script>
+<script src="strength.js?v=33"></script>
+<script src="smart.js?v=33"></script>
 </body>
 </html>

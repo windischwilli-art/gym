@@ -185,12 +185,16 @@ function tick(){
  const el=document.getElementById("gtime"),ring=document.getElementById("gring");
  if(el)el.textContent=fmt(Math.ceil(left));
  if(ring){const C=2*Math.PI*54;ring.setAttribute("stroke-dashoffset",String(C*(1-left/G2.total)))}
- if(G2.run&&left<=3.2&&left>0&&!G2.warned){G2.warned=true;beep(660,.1)}
- if(G2.run&&left<=0){G2.run=false;stopTimer();beep(990,.18,2);const f=G2.onEnd;G2.onEnd=null;if(f)f()}
+ // Countdown 3 – 2 – 1 mit Ton, Vibration und grosser Zahl, danach Startsignal
+ const cs=Math.ceil(left);
+ if(G2.run&&left>0&&cs<=3&&G2.cd!==cs&&G2.total>4){G2.cd=cs;if(window.fx)fx.count(cs);else beep(660,.1)}
+ if(G2.run&&left<=0){G2.run=false;stopTimer();const k=(G2.steps[G2.i]||{}).k;
+  if(window.fx)fx.go(k==="rest"?"Los!":k==="set"?"Geschafft!":"Weiter!");else beep(990,.18,2);
+  const f=G2.onEnd;G2.onEnd=null;if(f)f()}
 }
 const fmt=s=>Math.floor(s/60)+":"+String(Math.max(0,s%60)).padStart(2,"0");
-function next(){if(!G2)return;stopTimer();G2.warned=false;G2.i=Math.min(G2.i+1,G2.steps.length-1);show()}
-function prev(){if(!G2||G2.i===0)return;stopTimer();G2.warned=false;G2.i--;if(G2.steps[G2.i].k==="rest"&&G2.i>0)G2.i--;show()}
+function next(){if(!G2)return;stopTimer();G2.warned=false;G2.cd=0;G2.i=Math.min(G2.i+1,G2.steps.length-1);show()}
+function prev(){if(!G2||G2.i===0)return;stopTimer();G2.warned=false;G2.cd=0;G2.i--;if(G2.steps[G2.i].k==="rest"&&G2.i>0)G2.i--;show()}
 
 function ringTimer(sec){const C=2*Math.PI*54;return`<div class="gtimer"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" class="gtr"/><circle id="gring" cx="60" cy="60" r="54" class="gtf" stroke-dasharray="${C}" stroke-dashoffset="0"/></svg><div id="gtime" class="num">${fmt(sec)}</div></div>`}
 
@@ -244,6 +248,7 @@ function show(){
   const sets=CUR.ex.reduce((a,x)=>a+x.sets.filter(s=>s.done).length,0),vol=CUR.ex.reduce((a,x)=>a+x.sets.filter(s=>s.done).reduce((b,s)=>b+(num(s.kg)||0)*(num(s.reps)||0),0),0);
   const min=Math.max(1,Math.round((Date.now()-CUR.start)/60000));
   body=top("Geschafft")+`<div class="gdone"><div class="gbadge">${I.ok}</div><h1>Starkes Training!</h1><p class="muted" style="margin:0">${esc2(CUR.name)} abgeschlossen.</p></div>
+  ${CUR.prs&&CUR.prs.length?`<div class="gprs"><div class="eyebrow">${CUR.prs.length===1?"Neuer Rekord":CUR.prs.length+" neue Rekorde"}</div>${CUR.prs.map(p=>`<div class="row between"><span>${esc2(p.e)}</span><b>${esc2(p.big)}</b></div>`).join("")}</div>`:""}
   <div class="grid3 gstats"><div><div class="eyebrow">Sätze</div><div class="num">${sets}</div></div><div><div class="eyebrow">Volumen</div><div class="num">${Math.round(vol).toLocaleString("de-DE")} kg</div></div><div><div class="eyebrow">Dauer</div><div class="num">${min} Min.</div></div></div>
   <div class="stack" style="gap:8px"><div style="font-weight:700;text-align:center">Wie anstrengend war es?</div>
   <div class="grid3">${[["leicht","Leicht"],["mittel","Mittel"],["hart","Hart"]].map(([k,l])=>`<button class="chip" data-g="int" data-v="${k}" aria-pressed="${(CUR.int||"mittel")===k}">${l}</button>`).join("")}</div>
@@ -270,7 +275,7 @@ function saveWorkout(){
  const sets=[];CUR.ex.forEach(x=>x.sets.forEach(s=>{if(s.done&&num(s.reps)>0)sets.push({e:x.e,kg:num(s.kg)||0,reps:num(s.reps)})}));
  if(!sets.length){toast("Hake mindestens einen Satz ab");return}
  const wd=CUR.date||TODAY(),wm=num(CUR.min)>0?Math.round(num(CUR.min)):wd!==TODAY()?60:Math.max(10,Math.round((Date.now()-CUR.start)/60000));
- S.workouts.push({id:uid(),date:wd,name:CUR.name,min:wm,int:CUR.int||"mittel",sets});
+ S.workouts.push({id:uid(),date:wd,name:CUR.name,min:wm,int:CUR.int||"mittel",sets,...(CUR.prs&&CUR.prs.length?{prs:CUR.prs}:{})});
  CUR=null;save();close();toast("Training gespeichert");
 }
 
@@ -285,10 +290,10 @@ document.addEventListener("click",ev=>{
    case"skipwarm":{const i=G2.steps.findIndex(s=>s.k!=="warm");G2.i=i<0?G2.steps.length-1:i;stopTimer();show();break}
    case"pause":if(G2.run){G2.left=Math.max(0,(G2.tEnd-Date.now())/1000);G2.run=false;b.textContent="Weiter";}else{G2.tEnd=Date.now()+G2.left*1000;G2.run=true;b.textContent="Pause";if(!G2.iv)G2.iv=setInterval(tick,200)}break;
    case"plus":if(G2.run)G2.tEnd+=15000;else G2.left+=15;G2.total+=15;tick();break;
-   case"done":{const s=readSet();if(!(num(s.reps)>0)){toast("Trag ein, wie viele Wiederholungen du geschafft hast");break}s.done=true;G2.firstSet=true;if(typeof save==="function")save();next();break}
+   case"done":{const s=readSet();if(!(num(s.reps)>0)){toast("Trag ein, wie viele Wiederholungen du geschafft hast");break}s.done=true;G2.firstSet=true;const st=G2.steps[G2.i];if(window.fx)fx.pr(st.x,st.s);if(typeof save==="function")save();next();break}
    case"hold":{const s=readSet(),sec=num(s.reps)||holdSec(CUR.ex[G2.steps[G2.i].x].e);b.disabled=true;b.textContent="Halten …";
     const box=document.getElementById("ghold");if(box)box.innerHTML=ringTimer(sec);
-    startTimer(sec,()=>{s.reps=String(sec);s.done=true;next()});break}
+    const st=G2.steps[G2.i];startTimer(sec,()=>{s.reps=String(sec);s.done=true;if(window.fx)fx.pr(st.x,st.s);next()});break}
    case"save":saveWorkout();break;
    case"int":CUR.int=b.dataset.v;show();break;
    case"runstart":close();if(typeof go==="function")go("laufen");setTimeout(()=>{const s=document.querySelector('[data-a="wStart"]');if(s)s.click()},60);break;
@@ -495,6 +500,7 @@ css.textContent=`
 .gdone{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-top:24px}
 .gbadge{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--c-lift),var(--hero3));box-shadow:0 14px 30px -14px var(--c-lift)}
 .gbadge svg{width:42px;height:42px}
+.gprs{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,#FFE27A,#FFB938);color:#1b1400}.gprs .eyebrow{color:#7a4a00}
 .gstats{text-align:center}.gstats .num{font-size:26px;font-weight:700}
 #gswap .scrim{z-index:50}
 .swopt{display:flex;align-items:center;gap:12px;padding:8px;border-radius:14px;background:var(--surface);border:1.5px solid transparent;width:100%;text-align:left}
